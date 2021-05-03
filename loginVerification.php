@@ -3,7 +3,6 @@
 // require vs include (require produces fatal error, include produces warning error)
 require 'functions.php';
 
-session_start();
 establishConnection();
 
 $usernameinput = $_POST['user'];
@@ -17,7 +16,7 @@ if ($result->num_rows > 1) {
     echo 'alert("Duplicate user error")';
     echo '</script>';
 
-    header("Location: http://" . $_SESSION["websiteLoc"] . "/login.html");
+    header("Location: http://" . $_SESSION["websiteLoc"] . "/login/");
     die(); // This stops the code and ensures that the user is taken to the proper destination without moving on with the script
 } 
 if ($result->num_rows == 1) {
@@ -25,7 +24,7 @@ if ($result->num_rows == 1) {
     if (password_verify($userpassinput, $row["userpass"])) {
         $_SESSION["currentUserId"] = $row["id"];
         $_SESSION["currentUserAccess"] = $row["access"];
-        header("Location: http://" . $_SESSION["websiteLoc"] . "/index.html");
+        header("Location: http://" . $_SESSION["websiteLoc"] . "/home/");
         die();
     }
 }
@@ -35,6 +34,6 @@ if ($result->num_rows == 1) {
 $_SESSION['currentUserId'] = 0; 
 // The userId of 0 will be reserved for notifying the system of invalid input with NULL for not yet inputted
 $_SESSION["currentUserAccess"] = "recruit";
-header("Location: http://" . $_SESSION["websiteLoc"] . "/login.html");
+header("Location: http://" . $_SESSION["websiteLoc"] . "/login/");
 
 ?>

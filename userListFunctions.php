@@ -35,8 +35,7 @@ function formatNullAndStringToSQL($variable) {
 }
 
 function refreshAccess(int $id) {
-    session_start(); // Possibly unnecessary for once implemented fully???
-    establishConnection(); // ^^^
+    establishConnection();
 
     $sql = "SELECT `platoon`, `appointment` FROM `users` WHERE `id` LIKE $id";
     $result = $_SESSION['conn'] -> query($sql);
@@ -71,8 +70,7 @@ function refreshAccess(int $id) {
 }
 
 function addUser(string $firstName, string $lastName, int $id, string $username, string $userpass, string $rank, string $appointment, string $company, string $platoon, string $section, int $yearLevel) {
-    session_start(); // Possibly unnecessary for once implemented fully???
-    establishConnection(); // ^^^
+    establishConnection();
     $hasheduserpass = password_hash($userpass, PASSWORD_BCRYPT);
     $access = retrieveAccessLevel($appointment, $platoon);
 
@@ -90,11 +88,25 @@ function addUser(string $firstName, string $lastName, int $id, string $username,
     $yearLevel = formatNullAndStringToSQL($yearLevel);
 
     $sql = "INSERT INTO `users` (`firstName`, `lastName`, `id`, `access`, `username`, `userpass`, `rank`, `appointment`, `yearLevel`, `company`, `platoon`, `section`) VALUES ($firstName, $lastName, $id, $access, $username, $hasheduserpass, $rank, $appointment, $yearLevel, $company, $platoon, $section)";
-    
     if ($_SESSION['conn']->query($sql) === TRUE) {
-        echo "New record created successfully";
+        echo "New user record created successfully";
     } else {
         echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error;
+        return;
+    }
+
+    $sql = "INSERT INTO `inventory` (`id`) VALUES ($id);";
+    if ($_SESSION['conn']->query($sql) === TRUE) {
+        echo "New user inventory created successfully";
+    } else {
+        echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error;
+
+        $sql = "DELETE FROM `users` WHERE id = $id;";
+        if ($_SESSION['conn']->query($sql) === TRUE) {
+            echo "User record successfully removed because of previous error";
+        } else {
+            echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error;
+        }
     }
 }
 ?>
