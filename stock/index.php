@@ -1,41 +1,28 @@
-<!DOCTYPE html>
+<?php 
+    require "../functions.php";
+    redirectingUnauthUsers("stock");
+?>
+
 <html lang="en-us">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" href="images/logo.svg" sizes="any" type="image/svg+xml">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="icon" href="../images/logo.svg" sizes="any" type="image/svg+xml">
     <title>QSIM</title>
 </head>
 
 <body>
-    <header>
-        <img src="images/Cadet crest.png" height="60px" style="float:left">
-        <!-- These <span> lines align the text to a centre left alignment -->
-        <span style='display:inline-block; width:2px; text-align:centre'>
-            <span style='float:left; width:2px'>
-                <headertitle>QSIM</headertitle>
-            </span>
-        </span>
-        <a href="profile.html">
-            <headeraccountbox>
-                <span style="float:right; padding-left: 20px"><img src="images/download.png" height="40px"></span>
-                <b>MUIR</b>, Lachlan <br>
-                <span style="padding-right: 60px">CPL SECT 2IC</span>
-            </headeraccountbox>
-        </a>
-    </header>
+    <?php 
+        $header = fopen("../headerFormat.php", "r") or die("Unable to open file!");
+        echo fread($header,filesize("../headerFormat.php"));
+        fclose($header);
+    ?>
 
-    <navbar>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="search.html">Search</a></li>
-                <li><a class="activetab" href="stock.html">Stock</a></li>
-            </ul>
-        </nav>
-    </navbar>
+    <script>
+        document.getElementById("stockTab").className = "activetab";
+    </script>
 
     <maincontents>
         <a href="stockMC.html">Master Controls</a> <br> <br>
