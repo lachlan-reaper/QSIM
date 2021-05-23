@@ -1,6 +1,7 @@
 html {
     height: 100%; 
     width: 100%;
+    background-color: rgb(72, 179, 51);
 }
 
 body {
@@ -17,7 +18,7 @@ header {
     position: fixed;
     top: 0;
 
-    height: 60px;
+    height: 63px;
     width: calc(100% - 15px);
     min-width: 1150px;
     padding-top: 5px;
@@ -41,36 +42,62 @@ headertitle {
     white-space: nowrap;
 }
 
-header a {
-    float: right;
-    padding: 0;
-    color: inherit;
-    text-decoration: none;
-}
-
-header a:hover{
-    text-decoration: underline;
-}
-
 headeraccountbox {
-    float: right;
-    height: 40px;
+    position: fixed;
+    top: 5px;
+    right: 5px;
+
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 10px;
     padding-right: 10px;
     border-radius: 10px;
     background-color: rgb(35, 87, 25);
+    z-index: 3;
 
     font-size: 17px;
     white-space: nowrap;
-    text-decoration: inherit;
+    font-family: 'Verdana', 'Tahoma', 'sans-serif';
+    color: white;
+}
+
+headeraccountbox main {
+    float: right;
+    padding: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.dropdown_content {
+    display: none;
+    float: left;
+    color: rgb(185, 185, 185);
+    padding-bottom: 10px;
+}
+
+.dropdown_content a {
+    display: none;
+    float: left;
+    color: inherit;
+    text-decoration: none;
+}
+
+.dropdown:hover .dropdown_content {
+    display: block;
+}
+
+.dropdown:hover .dropdown_content a {
+    display: block;
+}
+
+.dropdown_content a:hover {
+    color: rgb(243, 243, 243);
 }
 
 navbar {
     display: block;
     position: fixed;
-    top: 70px;
+    top: 73px;
 
     height: 50px;
     width: calc(100% - 240px);
@@ -78,6 +105,7 @@ navbar {
     padding-left: 120px;
     padding-right: 120px;
     background-color: rgb(194, 194, 194);
+    z-index: 2;
 
     font-family: 'Verdana', 'Tahoma', 'sans-serif';
     font-size: 30px;
@@ -162,6 +190,53 @@ maincontents th {
 }
 
 #tableStock td:nth-child(n+2):nth-child(-n+5) {
+    text-align: center;
+}
+
+.filterBox {
+    display: inline-block;
+    background-color: lightgrey; 
+    border-radius: 5px; 
+    padding: 5px;
+}
+
+.searchButtonMain {
+    background-color: rgb(18, 145, 28);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-decoration: bold;
+    display: inline-block;
+    font-size: 20px;
+}
+
+.searchBarMain {
+    width: 100%; 
+    padding: 10px; 
+    border-radius: 30px; 
+    font-size: 30px; 
+    text-align: center;
+}
+
+.searchButtonResult {
+    background-color: rgb(18, 145, 28);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    text-decoration: bold;
+    display: inline-block;
+    font-size: 20px;
+}
+
+.searchBarResult {
+    width: 60%; 
+    padding: 7px; 
+    border-radius: 20px; 
+    font-size: 20px; 
     text-align: center;
 }
 

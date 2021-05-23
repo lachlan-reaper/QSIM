@@ -1,4 +1,5 @@
 home:all|
 profile:all|
+profile?id:admin,qstore|
 search:admin,qstore|
 stock:admin|
