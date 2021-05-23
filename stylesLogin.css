@@ -27,7 +27,6 @@ loginbox {
     position: absolute;
     top: 50%;
     left: 50%;
-    height: 450px;
     width: 350px;
     transform: translate(-50%, -50%);
     z-index: 2;
@@ -39,6 +38,19 @@ loginbox {
     font-size: 30px;
     text-decoration: bold;
     line-height: 2.1;
+}
+
+#invalidLogin {
+    display: inline-block;
+    height: 100%;
+    width: 340px;
+    border: 5px;
+    border-radius: 10px;
+    border-style: solid;
+    border-color: rgb(182, 59, 59);
+    background-color: rgb(255, 152, 152);
+
+    font-size: 15px;
 }
 
 #username, #password {

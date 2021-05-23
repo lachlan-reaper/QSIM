@@ -1,14 +1,16 @@
 <?php
 // require === import AND execute
 // require vs include (require produces fatal error, include produces warning error)
-require 'functions.php';
+require 'databaseFunctions.php';
+// Since the script userListFunctions.php requires functions.php itself, it creates an error when you re-require functions.php
+
 
 establishConnection();
 
 $usernameinput = $_POST['user'];
 $userpassinput = $_POST['pass'];
 
-$sql = "SELECT `userpass`, `id`, `access` FROM `users` WHERE `username` LIKE '$usernameinput'";
+$sql = "SELECT `userpass`, `id`, `access` FROM `users` WHERE `username` = '$usernameinput'";
 $result = $_SESSION['conn'] -> query($sql);
 
 if ($result->num_rows > 1) {
@@ -24,6 +26,7 @@ if ($result->num_rows == 1) {
     if (password_verify($userpassinput, $row["userpass"])) {
         $_SESSION["currentUserId"] = $row["id"];
         $_SESSION["currentUserAccess"] = $row["access"];
+        establishSessionVars();
         header("Location: http://" . $_SESSION["websiteLoc"] . "/home/");
         die();
     }
