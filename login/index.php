@@ -14,8 +14,13 @@
     <loginbox>
         <img src="../images/Cadet crest.png" width="100%"> <br> 
         <div style="padding-top: 15px; text-align: center;">
-            <!-- MUST CHANGE ACTION!!!! -->
-            <form action="../loginVerification.php" method="post">
+            <?php
+                session_start();
+                if ($_SESSION["currentUserId"] === 0) {
+                    echo "<div id='invalidLogin'>Invalid Username or Password</div>";
+                }
+            ?>
+            <form action="loginVerification.php" method="post">
                 <input type="text" id="username" name="user" placeholder="Username" required> <br>
                 <input type="password" id="password" name="pass" placeholder="Password" required> <br>
                 <input type="submit" id="submit" value="Submit">
@@ -23,3 +28,5 @@
         </div>
     </loginbox>
 </body>
+
+</html>
