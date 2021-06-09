@@ -2,4 +2,5 @@ home:all|
 profile:all|
 profile?id:admin,qstore|
 search:admin,qstore|
+issue:admin,qstore|
 stock:admin|
