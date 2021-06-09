@@ -176,6 +176,35 @@ maincontents th {
     color: white;
 }
 
+maincontents table.profilePage {
+    width: 100%;
+    min-width: 715px;
+    border-collapse: collapse;
+    border: 0 solid white;
+    background-color: white;
+}
+
+maincontents table.profilePage tr {
+    border: 0 solid white;
+}
+
+maincontents table.profilePage td {
+    background-color: white;
+    border: 0 solid white;
+}
+
+maincontents profilePageBox {
+    display: inline-block;
+    width: calc(100% - 30px);
+    height: calc(100% - 30px);
+    padding: 10px;
+    margin: 5px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: grey;
+    border-radius: 10px;
+}
+
 #tableSearch td:nth-child(1) {
     border-right: 0;
 }
@@ -245,7 +274,7 @@ footer {
 
     height: 10px;
     width: calc(100% - 240px);
-    min-width: 775px;
+    min-width: 925px;
     padding-top: 15px;
     padding-bottom: 20px;
     padding-left: 120px;
