@@ -1,6 +1,18 @@
 <?php 
-    require "../functions.php";
-    redirectingUnauthUsers("profile");
+    require "../databaseFunctions.php";
+    establishConnection();
+    $id = $_GET['id'];
+    if ($id == "") {
+        redirectingUnauthUsers("profile");
+        $id = $_SESSION["currentUserId"];
+    } else {
+        redirectingUnauthUsers("profile?id");
+    }
+    $vars = establishProfilePageVars($id);
+    $firstname = $vars[0];
+    $lastname = $vars[1];
+    $appointment = $vars[2];
+    $rank = $vars[3];
 ?>
 
 <html lang="en-us">
@@ -15,23 +27,112 @@
 
 <body>
     <?php 
-        $header = fopen("../headerFormat.php", "r") or die("Unable to open file!");
-        echo fread($header,filesize("../headerFormat.php"));
-        fclose($header);
+        displayHeader();
     ?>
 
-    <navbar>
-        <nav>
-            <ul>
-                <li><a href="../home/">Home</a></li>
-                <li><a href="../search/">Search</a></li>
-                <li><a href="../stock/">Stock</a></li>
-            </ul>
-        </nav>
-    </navbar>
-
     <maincontents>
-        hello
+        <table class="profilePage">
+            <tr>
+                <td rowspan=2 style="height:500px;width:55%">
+                    <profilePageBox>
+                        <b>Current Issue</b>
+                        <table style="border-width:0px;min-width:0px;max-width:90%;margin-left:20px;width:auto;">
+                            <?php 
+                            $items = retrieveAllIssuedItemsOnStock();
+                            $i = $items->num_rows;
+                            $str = "";
+                            while($i > 0) {
+                                $item = $items->fetch_assoc();
+                                $str = $str . "|" . $item["item"];
+                                $i = $i - 1;
+                            }
+                            $str = substr($str, 1);
+                            $cols = explode("|", $str); // Creates an array of every item on issue
+
+                            $rowFormat = "<tr> <td>NUMx</td> <td>ITEM</td> </tr>";
+                            $results = retrieveIssuedItems($id);
+
+                            $i = 0;
+                            $max = $items->num_rows;
+                            $num = $results->fetch_assoc();
+                            while($i < $max) { // Displays the count of each item issued of every item on issue
+                                $name = $cols[$i];
+                                $row = $rowFormat;
+                                $row = str_replace("NUM", $num[$name], $row);
+                                $row = str_replace("ITEM", $name, $row);
+                                echo $row;
+                                $i = $i + 1;
+                            }
+                            ?>
+                        </table>
+                    </profilePageBox>
+                </td>
+                <td style="height:300px;width:45%">
+                    <profilePageBox>
+                        <b>Identification</b> <br>
+                        <?php 
+                            $rowFormat = "<img src='../photo/IDNUM.jpg' style='object-fit:cover;float:left;margin:10px' height='250px' width='250px'>";
+                            $rowFormat = str_replace("IDNUM", $id, $rowFormat);
+                            echo $rowFormat;
+
+                            $rowFormat = "<br> <b>LASTNAME</b><br> <b>FIRSTNAME</b><br> RANK<br> APPOINTMENT";
+                            $rowFormat = str_replace("LASTNAME",    $firstname, $rowFormat);
+                            $rowFormat = str_replace("FIRSTNAME",   $lastname, $rowFormat);
+                            $rowFormat = str_replace("RANK",        $rank, $rowFormat);
+                            $rowFormat = str_replace("APPOINTMENT", strtoupper($appointment), $rowFormat);
+                            echo $rowFormat
+                        ?>
+                    </profilePageBox>
+                </td>
+            </tr>
+            <tr>
+                <td style="height:150px">
+                    <profilePageBox>
+                        <b><i>If you have any issues or concerns please contact the QM at:</i></b> <br>
+                        jpriv2021@waverley.nsw.edu.au <br>
+                        <b><i>Or the RQMS at:</i></b> <br>
+                        breid2022@waverley.nsw.edu.au
+                    </profilePageBox>
+                </td>
+            </tr>
+            <tr>
+                <td colspan=1>
+                    <profilePageBox>
+                        <b>History of Issuing</b> <br> <br>
+                        <table style="border-width:0px;min-width:0px">
+                            <?php 
+                                $history = "";
+                                $rowFormatIssue =  "<tr> <td>TIMESTAMP</td> <td>Issued:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $rowFormatReturn = "<tr style='color:orange'> <td style='color:black'>TIMESTAMP</td> <td>Returned:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $rowFormatLost = "<tr style='color:red'> <td style='color:black'>TIMESTAMP</td> <td>Lost:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $results = retrieveIssueHistory($id);
+                                $i = $results->num_rows;
+                                while($i > 0) {
+                                    $receipt = $results->fetch_assoc();
+                                    $num = $receipt["changeInNum"];
+                                    if ($receipt["lostOrDamaged"] == 1) {
+                                        $row = $rowFormatLost;
+                                        $num = $num * -1;
+                                    } else if ($num > 0) {
+                                        $row = $rowFormatIssue;
+                                    } else {
+                                        $row = $rowFormatReturn;
+                                        $num = $num * -1;
+                                    }
+                                    
+                                    $row = str_replace("TIMESTAMP", $receipt["time"], $row);
+                                    $row = str_replace("NUM", $num, $row);
+                                    $row = str_replace("ITEM", $receipt["item"], $row);
+                                    $history = $row . $history;
+                                    $i = $i - 1;
+                                }
+                                echo $history;
+                            ?>
+                        </table>
+                    </profilePageBox>
+                </td>
+            </tr>
+        </table>
     </maincontents>
 
     <footer>
