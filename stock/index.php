@@ -1,5 +1,5 @@
 <?php 
-    require "../functions.php";
+    require "../databaseFunctions.php";
     redirectingUnauthUsers("stock");
 ?>
 
@@ -15,9 +15,7 @@
 
 <body>
     <?php 
-        $header = fopen("../headerFormat.php", "r") or die("Unable to open file!");
-        echo fread($header,filesize("../headerFormat.php"));
-        fclose($header);
+        displayHeader();
     ?>
 
     <script>
@@ -25,7 +23,7 @@
     </script>
 
     <maincontents>
-        <a href="stockMC.html">Master Controls</a> <br> <br>
+        <a href="../stockMC/">Master Controls</a> <br> <br>
         <table id="tableStock">
             <tr>
                 <th style="width:40%">Equipment</th>
@@ -35,38 +33,29 @@
                 <th style="width:10%">Lost/Damaged</th>
                 <th style="width:20%"></th>
             </tr>
-            <tr>
-                <td>DPCU Shirt</td>
-                <td>1000</td>
-                <td>900</td>
-                <td>100</td>
-                <td>10</td>
-                <td><button type="button">Add Stock</button> <button type="button">Remove Stock</button></td>
-            </tr>
-            <tr>
-                <td>DPCU Pants</td>
-                <td>1000</td>
-                <td>900</td>
-                <td>100</td>
-                <td>10</td>
-                <td><button type="button">Add Stock</button> <button type="button">Remove Stock</button></td>
-            </tr>
-            <tr>
-                <td>DPCU Boots</td>
-                <td>1000</td>
-                <td>900</td>
-                <td>100</td>
-                <td>10</td>
-                <td><button type="button">Add Stock</button> <button type="button">Remove Stock</button></td>
-            </tr>
-            <tr>
-                <td>DPCU Hats</td>
-                <td>1000</td>
-                <td>900</td>
-                <td>100</td>
-                <td>10</td>
-                <td><button type="button">Add Stock</button> <button type="button">Remove Stock</button></td>
-            </tr>
+            <?php 
+            $rowFormat = "<tr>
+                <td>ITEM</td>
+                <td>TOTAL</td>
+                <td>SHELF</td>
+                <td>LOAN</td>
+                <td>LOST</td>
+                <td><button type='button'>Add Stock</button> <button type='button'>Remove Stock</button></td>
+            </tr>";
+            $results = retrieveStock();
+            $i = $results->num_rows;
+            while($i > 0) {
+                $item = $results->fetch_assoc();
+                $row = $rowFormat;
+                $row = str_replace("ITEM", $item["item"], $row);
+                $row = str_replace("TOTAL", $item["total"], $row);
+                $row = str_replace("SHELF", $item["onShelf"], $row);
+                $row = str_replace("LOAN", $item["onLoan"], $row);
+                $row = str_replace("LOST", $item["lostOrDamaged"], $row);
+                echo $row;
+                $i = $i - 1;
+            }
+            ?>
         </table>
     </maincontents>
 
