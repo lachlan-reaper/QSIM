@@ -15,9 +15,7 @@
 
 <body>
     <?php 
-        $header = fopen("../headerFormat.php", "r") or die("Unable to open file!");
-        echo fread($header,filesize("../headerFormat.php"));
-        fclose($header);
+        displayHeader();
     ?>
 
     <script>
