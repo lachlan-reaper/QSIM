@@ -15,61 +15,26 @@
 
 <body>
     <?php 
-        $header = fopen("../headerFormat.php", "r") or die("Unable to open file!");
-        echo fread($header,filesize("../headerFormat.php"));
-        fclose($header);
+        displayHeader();
     ?>
 
     <script>
         document.getElementById("searchTab").className = "activetab";
     </script>
 
-    <maincontents>
-        
-        Filters: <span style="background-color:lightgrey; border-radius:5px; padding:5px;">1x DPCU SHIRT  <b>X</b></span> <br> <br> <input type="text" style="width:50%; padding:10px; border-radius:20px;"> <br> <br> <br>
-        <a href="">Export List</a> 
-        <span style="float:right"><a href="">Advanced Search</a></span> <br> <br>
-        <table id="tableSearch" style="width: 85%; margin-left: 7.5%;"> <!-- THIS IS PADDING -->
-            <tr>
-                <th style="width:45%" colspan="2">Name</th>
-                <th style="width:5%">PL</th>
-                <th style="width:10%">Rank</th>
-                <th style="width:10%">APPT</th>
-                <th style="width:30%"></th>
-            </tr>
-            <tr>
-                <td>SMITH</td>
-                <td>John</td>
-                <td>1</td>
-                <td>CPL</td>
-                <td>SECT 2IC</td>
-                <td><button type="button">Issue</button> <button type="button">Return</button> <button type="button">Lost/Damaged</button></td>
-            </tr>
-            <tr>
-                <td>SMITH</td>
-                <td>John</td>
-                <td>1</td>
-                <td>CPL</td>
-                <td>SECT 2IC</td>
-                <td><button type="button">Issue</button> <button type="button">Return</button> <button type="button">Lost/Damaged</button></td>
-            </tr>
-            <tr>
-                <td>SMITH</td>
-                <td>John</td>
-                <td>1</td>
-                <td>CPL</td>
-                <td>SECT 2IC</td>
-                <td><button type="button">Issue</button> <button type="button">Return</button> <button type="button">Lost/Damaged</button></td>
-            </tr>
-            <tr>
-                <td>SMITH</td>
-                <td>John</td>
-                <td>1</td>
-                <td>CPL</td>
-                <td>SECT 2IC</td>
-                <td><button type="button">Issue</button> <button type="button">Return</button> <button type="button">Lost/Damaged</button></td>
-            </tr>
-        </table>
+    <maincontents style="display: flex;">
+        <span style="width: 100%; align-self:center;" >
+            <div>
+                <div style="float:right"><a href="../advancedSearch/">Advanced Search</a></div> <br>
+            </div> <br>
+            <form action="../searchResult/" method="get">
+                <input type="text" id="searchQuery" name="searchQuery" class="searchBarMain"> <br> <br>
+                <input type="hidden" id="searchFilters" name="searchFilters" value="">
+                <div style="text-align:center;">
+                    <input type="submit" class="searchButtonMain" value="Search"></input>
+                </div>
+            </form>
+        </span>
     </maincontents>
 
     <footer>
