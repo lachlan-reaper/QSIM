@@ -1,5 +1,6 @@
 <?php 
 require "../databaseFunctions.php";
+session_start();
 redirectingUnauthUsers("issue");
 
 
@@ -47,7 +48,7 @@ if ($action == "Issue") {
     }
     declareLostOrDamaged($id, $mods);
 } else {
-    die("Improper function. DONT TOUCH THE URL!");
+    die("Improper function. DON'T TOUCH THE URL!");
 }
 
 header("Location: " . $prevPage);
