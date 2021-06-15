@@ -1,8 +1,7 @@
 <?php
 
 function establishConnection() {
-    // Establishe a connection with the server and sets up any necessary $SESSION variables
-    session_start();
+    // Establishes a connection with the server and sets up any necessary $SESSION variables
     $host = $_SERVER['HTTP_HOST'];
     $_SESSION["websiteLoc"] = $host . "/QSIM";
 
@@ -12,9 +11,9 @@ function establishConnection() {
     $databaseName = "QSIMDB";
 
     // Ensures that not too many connections are established without being closed.
-    if ($_SESSION['conn'] != NULL) {
-        $_SESSION['conn']->close();
-    }
+    //if ($_SESSION['conn']) {
+    //    $_SESSION['conn']->close();
+    //}
 
     // Create connection
     $_SESSION['conn'] = new mysqli($servername, $username, $password, $databaseName);
@@ -48,7 +47,6 @@ function validUser(string $pagename, string $accessLevel) : bool {
 
 function formatProfileBox(string $strHTMLFile) : string {
     // Given the HTML format of the Profile Box in theupper left of the screen, it will output the HTML lines of the box as customised to the user.
-    session_start();
     $firstname = ucfirst($_SESSION["currentUserFirstName"]);
     $strHTMLFile = str_replace('FIRSTNAME', $firstname, $strHTMLFile);
 
@@ -93,7 +91,6 @@ function displayHeader() {
 
 function redirectingUnauthUsers(string $pagename) {
     // Given the page name, it will check if the current user has access to the webpage.
-    establishConnection();
     if ($_SESSION["currentUserId"] === 0 or $_SESSION["currentUserId"] === NULL) {
         // If the user has not logged in.
         header("Location: http://" . $_SESSION["websiteLoc"] . "/login/");

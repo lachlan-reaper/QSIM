@@ -141,12 +141,12 @@ nav li {
 
 maincontents {
     display: block;
-    min-width: 865px;
+    min-width: calc(1165px - 20%);
     min-height: calc(100% - 265px);
     padding-top: 170px;
     padding-bottom: 50px;
-    padding-left: 150px;
-    padding-right: 150px;
+    padding-left: 10%;
+    padding-right: 10%;
     background-color: rgb(255, 255, 255);
     color: black;
 }
@@ -203,6 +203,10 @@ maincontents profilePageBox {
     border-style: solid;
     border-color: grey;
     border-radius: 10px;
+}
+
+maincontents table#tableSearch td a {
+    text-decoration: none currentcolor solid;
 }
 
 #tableSearch td:nth-child(1) {
