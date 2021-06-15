@@ -1,5 +1,6 @@
 <?php 
     require "../databaseFunctions.php";
+    session_start();
     redirectingUnauthUsers("search");
 ?>
 
@@ -128,7 +129,7 @@
                     while($i > 0) {
                         $row = $results->fetch_assoc();
                         echo formatRowSearchResult($row);
-                        $i = $i - 1;
+                        $i--;
                     }
                 }
 
