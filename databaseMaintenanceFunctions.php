@@ -1,12 +1,13 @@
 <?php
 
-require 'databaseFunctions.php';
+require '../databaseFunctions.php';
 
 // refreshUserAccess("3718363097");
 // refreshAllAccess();
 // refreshStockTotal();
 // refreshStockOnLoan();
 // refreshStockTable();
+// completeRefresh();
 
 function refreshUserAccess(string $id) {
     // Given the ID num of a user, it will check the user's access level as defined by their appointment and thusly correct any discrepancies automatically.
@@ -65,9 +66,9 @@ function refreshAllAccess() {
         $id = formatNullAndStringToSQL($id);
         $access = formatNullAndStringToSQL($access);
 
-        $sql += "UPDATE `users` SET `access` = $access WHERE `id` = $id;";
+        $sql = $sql . "UPDATE `users` SET `access` = $access WHERE `id` = $id;";
         
-        $i -= 1;
+        $i--;
     }
     if ($_SESSION['conn']->multi_query($sql) === TRUE) {
         echo "Records updated successfully";
@@ -110,5 +111,11 @@ function refreshStockTable () {
     // Recaculates the total amount on loan and then the total amount in the unit.
     refreshStockOnLoan();
     refreshStockTotal();
+}
+
+function completeRefresh () {
+    // Recalculates all possible variables.
+    refreshStockTable();
+    refreshAllAccess();
 }
 ?>

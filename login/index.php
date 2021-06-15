@@ -16,7 +16,9 @@
         <div style="padding-top: 15px; text-align: center;">
             <?php
                 session_start();
-                if ($_SESSION["currentUserId"] === 0) {
+                if(empty($_SESSION) or ! isset($_SESSION["currentUserId"])){
+                    $x=1;
+                } else if ($_SESSION["currentUserId"] === 0) {
                     echo "<div id='invalidLogin'>Invalid Username or Password</div>";
                 }
             ?>

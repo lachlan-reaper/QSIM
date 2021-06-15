@@ -1,5 +1,6 @@
-<?php // MAKE SURE IT WORKS THIS IS A OBSOLETE VERSION
+<?php
     require "../databaseFunctions.php";
+    session_start();
     redirectingUnauthUsers("issue");
 ?>
 
@@ -21,25 +22,25 @@
     <maincontents>
         <div style="vertical-align:text-top;text-align:center">
             <div style="display:inline-block;width:65%">
-                <table id="tableFilters" style="min-width:0;">
+                <table style="min-width:0;">
                     <tr>
                         <th style="width:60%">Equipment</th>
                         <th style="width:20%">#</th>
                         <th style="width:20%"></th>
                     </tr>
                     <?php 
-                    $rowFormat = "<tr>
-                    <td>ITEM</td>
-                    <td><input class='equipNum' id='ITEM' type='number' min='0' value=0></td>
-                    <td><button type='button' onClick='changeValue(\"ITEM\", 1)'>+1</button>  <button type='button' onClick='changeValue(\"ITEM\", -1)'>-1</button></td>
-                    </tr>";
-                    $results = retrieveAllIssuedItemsOnStock();
-                    $i = $results->num_rows;
-                    while($i > 0) {
-                        $item = $results->fetch_assoc();
-                        echo str_replace("ITEM", $item["item"], $rowFormat);
-                        $i = $i - 1;
-                    }
+                        $rowFormat = "<tr>
+                        <td>ITEM</td>
+                        <td><input class='equipNum' id='ITEM' type='number' min='0' value=0></td>
+                        <td><button type='button' onClick='changeValue(\"ITEM\", 1)'>+1</button>  <button type='button' onClick='changeValue(\"ITEM\", -1)'>-1</button></td>
+                        </tr>";
+                        $results = retrieveAllIssuedItemsOnStock();
+                        $i = $results->num_rows;
+                        while($i > 0) {
+                            $item = $results->fetch_assoc();
+                            echo str_replace("ITEM", $item["item"], $rowFormat);
+                            $i = $i - 1;
+                        }
                     ?>
                 </table> <br>
                 <div style="text-align:right">

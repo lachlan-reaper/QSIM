@@ -28,7 +28,7 @@ function retrieveAccessLevel(string $appointment, string $platoon) : string {
     $access = substr($line, $start+1, $end-$start-1);
 
     // If the cadet is in the QM PL they require extra priviledges in order to complete their duties.
-    if ($access !== "admin" and $platoon === "qm") {
+    if ($access !== "admin" and $platoon === "QM") {
         $access = "qstore";
     }
 
@@ -61,18 +61,20 @@ function getUserValue(string $id, string $uservalue, string $table) {
     }
 }
 
-function getMultiUserValues(string $id, array $uservalues, string $table) { // TO BE TESTED AND IMPLEMENTED WHERE NECESSARY
-    // Given user ID and values that are desired to be used, will return the respective values in the form of a MySQLi object.
+function getMultiUserValues(string $id, array $uservalues, string $table) { // TO BE IMPLEMENTED WHERE NECESSARY
+    // Given user ID and values that are desired to be used, will return the respective values in the form of an array.
     establishConnection();
 
     $id = formatNullAndStringToSQL($id);
 
     $i = count($uservalues);
+    $values = "";
     while ($i > 0) {
         $i--;
         $x = $uservalues[$i];
-        $values = $values . "`$x`";
+        $values = $values . ", `$x`";
     }
+    $values = substr($values, 2);
 
     $sql = "SELECT $values FROM `$table` WHERE `id` LIKE $id";
     
@@ -95,15 +97,8 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // T
     }
 }
 
-function retrieveAccess(string $id) { // TO BE REMOVED! IS NOW REDUNDANT!!!
-    // Returns the access level for the given person (identified by their id num) from the database stored on the server.
-    $result = getUserValue($id, "access", "users");
-    return $result;
-}
-
 function establishSessionVars() {
     // Defines the session variables
-    session_start();
     $id = $_SESSION["currentUserId"]; // ID is the only one to not assign to the session var as it is what is used as the credential for the user.
     $_SESSION["currentUserFirstName"] =     getUserValue($id, "firstName", "users");
     $_SESSION["currentUserLastName"] =      getUserValue($id, "lastName", "users");
@@ -111,13 +106,14 @@ function establishSessionVars() {
     $_SESSION["currentUserRank"] =          getUserValue($id, "rank", "users");
 }
 
-function establishProfilePageVars(string $id) {
+function establishProfilePageVars(string $id) { // CAN BE OPTIMISED AND MADE REDUNDANT
     // Returns the variables that the profile page desires.
-    session_start();
-    $firstname =    getUserValue($id, "firstName", "users");
-    $lastname =     getUserValue($id, "lastName", "users");
-    $appointment =  getUserValue($id, "appointment", "users");
-    $rank =         getUserValue($id, "rank", "users");
+    $values = array("firstName", "lastName", "appointment", "rank");
+    $result = getMultiUserValues($id, $values, "users");
+    $firstname =    $result["firstName"];
+    $lastname =     $result["lastName"];
+    $appointment =  $result["appointment"];
+    $rank =         $result["rank"];
     return array($firstname, $lastname, $appointment, $rank);
 }
 
@@ -125,7 +121,7 @@ function addUser(string $firstName, string $lastName, string $id, string $userna
     // Adds a user to the database as well as encrypt the password.
     establishConnection();
     $hasheduserpass = password_hash($userpass, PASSWORD_BCRYPT);
-    $access = retrieveAccessLevel($appointment, $platoon);
+    $access = retrieveAccessLevel($appointment, strtoupper($platoon));
 
     $firstName =                formatNullAndStringToSQL($firstName);
     $lastName =                 formatNullAndStringToSQL($lastName);
@@ -283,7 +279,7 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
 
                 if ($parameter == "rank") {
                     if ($value == "'Officers'") {
-                        $rankSql = $rankSql . " OR users.`yearLevel` IS NULL"; // Officers don't go to school i.e. no yearLevel
+                        $rankSql = $rankSql . " OR users.`yearLevel` = 0"; // Officers don't go to school i.e. no yearLevel
                     } else {
                         $rankSql = $rankSql . " OR users.`$parameter` $comparator $value";
                     }
@@ -337,6 +333,13 @@ function formatRowSearchResult ($row) : string {
     return $rowFormat;
 }
 
+function retrieveAllUserColumns () {
+    establishConnection();
+    $sql = "SHOW COLUMNS FROM `users`;";
+    $result = $_SESSION['conn']->query($sql);
+    return $result;
+}
+
 function retrieveAllIssuedItemsOnStock() {
     // Returns a MySQLi object of all of the different items that are on stock in QCS
     establishConnection();
@@ -366,7 +369,7 @@ function retrieveIssueHistory(string $id) {
     // Retrieves a MySQLi object of the history of item issuements and returns for a certain user.
     establishConnection();
     $id = formatNullAndStringToSQL($id);
-    $sql = "SELECT * FROM `equipmentReceipts` WHERE `id` = $id";
+    $sql = "SELECT * FROM `equipmentReceipts` WHERE `id` = $id ORDER BY `receiptNum` DESC";
     $result = $_SESSION['conn'] -> query($sql);
     return $result;
 }
@@ -374,6 +377,10 @@ function retrieveIssueHistory(string $id) {
 function issueEquipment (string $id, $listOfIssues) { // CHECK IF THE REDOING OF THE WHILE LOOP FIXES THE PROBLEM!!!
     // Issues a list of items to a user and only allows the issues if every item has enough items on shelf on record. It also makes a record of this transaction.
     establishConnection();
+
+    $formattedMods =  "";
+    $formattedReceipt = "";
+    $sqlStock = "";
 
     $id = formatNullAndStringToSQL($id);
     $time = date_format(date_create(), "Y/m/d H:i:s");
@@ -424,6 +431,10 @@ function returnEquipment (string $id, $listOfReturns) {
     // Returns a list of items from a user and only allows the returns if every item has enough on issue to the user. It also makes a record of this transaction.
     establishConnection();
 
+    $formattedMods =  "";
+    $formattedReceipt = "";
+    $sqlStock = "";
+
     $id = formatNullAndStringToSQL($id);
     $time = date_format(date_create(), "Y/m/d H:i:s");
     $time = formatNullAndStringToSQL($time);
@@ -455,6 +466,10 @@ function declareLostOrDamaged (string $id, $listOfLost) {
     // Declares a list of items as lost or damaged from the user and makes a record of this transaction.
     establishConnection();
 
+    $formattedMods =  "";
+    $formattedReceipt = "";
+    $sqlStock = "";
+
     $id = formatNullAndStringToSQL($id);
     $time = date_format(date_create(), "Y/m/d H:i:s");
     $time = formatNullAndStringToSQL($time);
@@ -466,7 +481,7 @@ function declareLostOrDamaged (string $id, $listOfLost) {
         $value = formatNullAndStringToSQL($listOfLost[$i][1]);
         $formattedMods = $formattedMods . ", `" . $listOfLost[$i][0] . "` = `" . $listOfLost[$i][0] . "` - " . $value;
         $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", '-" . $listOfLost[$i][1] . "', " . $time . ", 1, '" . $_SESSION["currentUserId"] . "')";
-        $sqlStock = $sqlStock . "UPDATE `stock` SET `lostOrDamaged` = `lostOrDamaged` + " . $value . ", `onLoan` = `onLoan` - " . $value . " WHERE `item` = " . $item . ";";
+        $sqlStock = $sqlStock . "UPDATE `stock` SET `lostOrDamaged` = `lostOrDamaged` + " . $value . ", `onLoan` = `onLoan` - " . $value . ", `total` = `total` - " . $value . " WHERE `item` = " . $item . ";";
     }
 
     // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
