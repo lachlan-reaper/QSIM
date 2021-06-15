@@ -1,5 +1,6 @@
 <?php 
     require "../databaseFunctions.php";
+    session_start();
     redirectingUnauthUsers("search");
 ?>
 
