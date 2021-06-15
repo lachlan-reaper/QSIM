@@ -2,6 +2,7 @@
 // require === import AND execute
 // require vs include (require produces fatal error, include produces warning error)
 require '../databaseFunctions.php';
+session_start();
 // Since the script userListFunctions.php requires functions.php itself, it creates an error when you re-require functions.php
 
 
