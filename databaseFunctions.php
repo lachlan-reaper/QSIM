@@ -217,13 +217,13 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%') OR 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
             (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%'))";
+            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR 
+            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%'))";
         } else if (count($userQueryArr) == 4) {
             $sql = "SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
             (users.`firstName` LIKE '%" . implode('% %', $userQueryArr) . "%') OR
@@ -233,13 +233,13 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%') OR 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
             (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%') OR
+            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR 
+            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR
 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 2)) . "%') OR 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 2)) . "%') OR 
@@ -307,15 +307,15 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
 function formatRowSearchResult ($row) : string {
     // Takes a MySQLi result row object as input and returns the formatted version of a row of a search result table.
     $rowFormat = "<tr> <td>LASTNAME</td> <td>FIRSTNAME</td> <td>PLATOON</td> <td>RANK</td> <td>APPOINTMENT</td>
-    <td>    <a href='../issue/?action=Issue&id=ID'> <button type='button'>  Issue     </button> </a> 
-            <a href='../issue/?action=Return&id=ID'><button type='button'>  Return    </button> </a> 
-            <a href='../issue/?action=Lost&id=ID'>  <button type='button'>  Lost      </button> </a> 
-            <a href='../profile/?id=ID'>            <button type='button'>  Profile   </button> </a> </td> </tr>";
+    <td>    <button type='button' onClick='redirect(\"../issue/?action=Issue&id=ID\", false)'>  Issue     </button> 
+            <button type='button' onClick='redirect(\"../issue/?action=Return&id=ID\", false)'> Return    </button>
+            <button type='button' onClick='redirect(\"../issue/?action=Lost&id=ID\", false)'>   Lost      </button>
+            <button type='button' onClick='redirect(\"../profile/?id=ID\", false)'>             Profile   </button> </td> </tr>";
     
-    $firstname = ucfirst($row['firstName']);
+    $firstname = $row['firstName'];
     $rowFormat = str_replace('FIRSTNAME', $firstname, $rowFormat);
 
-    $lastname = ucfirst($row['lastName']);
+    $lastname = $row['lastName'];
     $rowFormat = str_replace('LASTNAME', $lastname, $rowFormat);
 
     $appointment = strtoupper($row['appointment']);
@@ -370,6 +370,14 @@ function retrieveIssueHistory(string $id) {
     establishConnection();
     $id = formatNullAndStringToSQL($id);
     $sql = "SELECT * FROM `equipmentReceipts` WHERE `id` = $id ORDER BY `receiptNum` DESC";
+    $result = $_SESSION['conn'] -> query($sql);
+    return $result;
+}
+
+function retrieveStockHistory() {
+    // Retrieves a MySQLi object of the history of all item issuements and returns it.
+    establishConnection();
+    $sql = "SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC";
     $result = $_SESSION['conn'] -> query($sql);
     return $result;
 }

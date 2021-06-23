@@ -70,29 +70,6 @@
         query = query.replace(/\+/g, " ");
         if (isNaN(query.trim())) {
             bar.value = query.trim();
-        }        
-
-        function removeFilter(filter) {
-            URL = window.location.href;
-            filter = filter.replace(/ /g, "-");
-            filter = encodeURIComponent(filter);
-            URL = URL.replace(filter, "");
-            filter = filter.replace(/!/g, "%21");
-            URL = URL.replace(filter, "");
-            encodedSymbol = encodeURIComponent("|");
-            URL = URL.replace(encodedSymbol+encodedSymbol, encodedSymbol);
-            URL = URL.replace("=" + encodedSymbol, "=");
-            if (URL.slice(-3) == encodedSymbol) {
-                URL = URL.slice(0, -3)
-            }
-            window.location.href = URL;
-        }
-        function addSearchFilters() { 
-            input = document.getElementById("searchFilters");
-            URL = window.location.href;
-            pos = URL.indexOf("searchFilters=");
-            filters = URL.slice(pos+14);
-            input.value = decodeURIComponent(filters);
         }
         </script>
 
@@ -136,6 +113,39 @@
             ?>
 
         </table>
+        <script>
+            function removeFilter(filter) {
+                URL = window.location.href;
+                filter = filter.replace(/ /g, "-");
+                filter = encodeURIComponent(filter);
+                URL = URL.replace(filter, "");
+                filter = filter.replace(/!/g, "%21");
+                URL = URL.replace(filter, "");
+                encodedSymbol = encodeURIComponent("|");
+                URL = URL.replace(encodedSymbol+encodedSymbol, encodedSymbol);
+                URL = URL.replace("=" + encodedSymbol, "=");
+                if (URL.slice(-3) == encodedSymbol) {
+                    URL = URL.slice(0, -3)
+                }
+                window.location.href = URL;
+            }
+            function addSearchFilters() { 
+                input = document.getElementById("searchFilters");
+                URL = window.location.href;
+                pos = URL.indexOf("searchFilters=");
+                filters = URL.slice(pos+14);
+                input.value = decodeURIComponent(filters);
+            }
+            function redirect (URL, confirmation) {
+                if (confirmation) {
+                    if (confirm('Do you really want to submit the form?')) {
+                        window.location.href = URL;
+                    }
+                } else {
+                    window.location.href = URL;
+                }
+            }
+        </script>
     </maincontents>
 
     <footer>

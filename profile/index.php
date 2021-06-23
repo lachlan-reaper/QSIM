@@ -36,37 +36,32 @@
     ?>
 
     <maincontents>
+        <?php
+            if (validUser("stockMC", $_SESSION["currentUserAccess"])) {
+                echo "<span style='float:right'><button type='button' onClick='redirect(\"../stockMC/changeUser.php?function=manualModifyUser&id=$id\", false)'>Edit User</button></span>";
+            }
+        ?>
         <table class="profilePage">
             <tr>
                 <td rowspan=2 style="height:500px;width:55%">
                     <profilePageBox>
                         <b>Current Issue</b>
                         <table style="border-width:0px;min-width:0px;max-width:90%;margin-left:20px;width:auto;">
-                            <?php 
-                                $items = retrieveAllIssuedItemsOnStock();
-                                $i = $items->num_rows;
-                                $str = "";
-                                while($i > 0) {
-                                    $item = $items->fetch_assoc();
-                                    $str = $str . "|" . $item["item"];
-                                    $i = $i - 1;
-                                }
-                                $str = substr($str, 1);
-                                $cols = explode("|", $str); // Creates an array of every item on issue
-
+                            <?php
                                 $rowFormat = "<tr> <td>NUMx</td> <td>ITEM</td> </tr>";
                                 $results = retrieveIssuedItems($id);
+                                $items = retrieveAllIssuedItemsOnStock();
 
-                                $i = 0;
-                                $max = $items->num_rows;
+                                $i = $items->num_rows;
                                 $num = $results->fetch_assoc();
-                                while($i < $max) { // Displays the count of each item issued of every item on issue
-                                    $name = $cols[$i];
+                                while($i > 0) { // Displays the count of each item issued of every item on issue
+                                    $item = $items->fetch_assoc();
+                                    $name = $item["item"];
                                     $row = $rowFormat;
                                     $row = str_replace("NUM", $num[$name], $row);
                                     $row = str_replace("ITEM", $name, $row);
                                     echo $row;
-                                    $i = $i + 1;
+                                    $i--;
                                 }
                             ?>
                         </table>
@@ -107,9 +102,13 @@
                         <table style="border-width:0px;min-width:0px">
                             <?php 
                                 $history = "";
-                                $rowFormatIssue =  "<tr> <td>TIMESTAMP</td> <td>Issued:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
-                                $rowFormatReturn = "<tr style='color:orange'> <td style='color:black'>TIMESTAMP</td> <td>Returned:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
-                                $rowFormatLost = "<tr style='color:red'> <td style='color:black'>TIMESTAMP</td> <td>Lost:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
+
+                                $rowFormatIssue =   "<tr>                       <td>TIMESTAMP</td>                      <td>Issued:</td>   <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $rowFormatReturn =  "<tr style='color:orange'>  <td style='color:black'>TIMESTAMP</td>  <td>Returned:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $rowFormatLost =    "<tr style='color:red'>     <td style='color:black'>TIMESTAMP</td>  <td>Lost:</td>     <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $rowFormatIssueShort =  "<tr>                      <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $rowFormatReturnShort = "<tr style='color:orange'> <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
+                                $rowFormatLostShort =   "<tr style='color:red'>    <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
                                 $results = retrieveIssueHistory($id);
 
                                 if (isset($_GET["maxRows"])) {
@@ -119,39 +118,77 @@
                                 }
 
                                 $lastDOI = "";
-                                $lastAction = "";
+                                $lastMode = 2; // -1 for Lost/Damaged, 0 for Returned, 1 for Issued, 2 for Nothing Prior
                                 $num_rows = 0;
                                 $i = $results->num_rows;
                                 while($i > 0) {
                                     if ($num_rows >= $max_rows) {
-                                            $history = $history."<tr><td colspan=4 style='text-align:center'><a href='URL'><button type='button'>Show More Rows</button></a></td></tr>";
-                                            $history = str_replace("URL", "//" . $_SESSION["websiteLoc"] . "/profile/?id=$id&maxRows=" . ($max_rows+10), $history);
-                                            break;
+                                        $history = $history."<tr><td colspan=4 style='text-align:center'><button type='button' onClick='redirect(\"URL\", false)'>Show More Rows</button></td></tr>";
+                                        $history = str_replace("URL", "//" . $_SESSION["websiteLoc"] . "/profile/?id=$id&maxRows=" . ($max_rows+10), $history);
+                                        break;
 									}
+                                    $row = "";
+
                                     $receipt = $results->fetch_assoc();
                                     $num = $receipt["changeInNum"];
-                                    if ($receipt["lostOrDamaged"] == 1) {
-                                        $row = $rowFormatLost;
-                                        $num = $num * -1;
-                                    } else if ($num > 0) {
-                                        $row = $rowFormatIssue;
-                                    } else {
-                                        $row = $rowFormatReturn;
-                                        $num = $num * -1;
-                                    }
 
                                     if ($receipt["time"] == $lastDOI) {
-                                        $receipt["time"] = "";                       
-									} else {
+                                        $receipt["time"] = "";
+
+                                        if ($receipt["lostOrDamaged"] == 1 and $lastMode == -1) {
+                                            $row = $rowFormatLostShort;
+                                            $num = $num * -1;
+                                        } else if ($num > 0 and $lastMode == 1) {
+                                            $row = $rowFormatIssueShort;
+                                        } else if ($num < 0 and $lastMode == 0) {
+                                            $row = $rowFormatReturnShort;
+                                            $num = $num * -1;
+                                        } else {
+                                            $row = "<tr><td></td></tr>" . $row;
+                                            if ($receipt["lostOrDamaged"] == 1) {
+                                                $row = $rowFormatLost;
+                                                $lastMode = -1;
+                                                $num = $num * -1;
+                                            } else if ($num > 0) {
+                                                $row = $rowFormatIssue;
+                                                $lastMode = 1;
+                                            } else if ($num < 0) {
+                                                $row = $rowFormatReturn;
+                                                $lastMode = 0;
+                                                $num = $num * -1;
+                                            } else {
+                                                echo "Error! Receipt Num = " . $receipt["receiptNum"];
+                                                continue;
+                                            }
+                                        }
+                                    } else {
+                                        $numOfConsecRows = 0;
                                         if (! $lastDOI == "") {
                                             $row = "<tr><td></td></tr>" . $row;
                                         }
                                         $lastDOI = $receipt["time"];
-									}
+
+                                        if ($receipt["lostOrDamaged"] == 1) {
+                                            $row = $rowFormatLost;
+                                            $lastMode = -1;
+                                            $num = $num * -1;
+                                        } else if ($num > 0) {
+                                            $row = $rowFormatIssue;
+                                            $lastMode = 1;
+                                        } else if ($num < 0) {
+                                            $row = $rowFormatReturn;
+                                            $lastMode = 0;
+                                            $num = $num * -1;
+                                        } else {
+                                            echo "Error! Receipt Num = " . $receipt["receiptNum"];
+                                            continue;
+                                        }
+                                    }
                                     
                                     $row = str_replace("TIMESTAMP", $receipt["time"], $row);
                                     $row = str_replace("NUM", $num, $row);
                                     $row = str_replace("ITEM", $receipt["item"], $row);
+                                    
                                     $history = $history . $row;
                                     $i--;
                                     $num_rows++;
@@ -163,6 +200,18 @@
                 </td>
             </tr>
         </table>
+
+        <script>
+            function redirect (URL, confirmation) {
+                if (confirmation) {
+                    if (confirm('Do you really want to submit the form?')) {
+                        window.location.href = URL;
+                    }
+                } else {
+                    window.location.href = URL;
+                }
+            }
+        </script>
     </maincontents>
 
     <footer>

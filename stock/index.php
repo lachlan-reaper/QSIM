@@ -1,5 +1,6 @@
 <?php 
     require "../databaseFunctions.php";
+    session_start();
     redirectingUnauthUsers("stock");
 ?>
 
@@ -23,38 +24,40 @@
     </script>
 
     <maincontents>
-        <a href="../stockMC/">Master Controls</a> <br> <br>
+        <?php
+            if (validUser("stockMC", $_SESSION["currentUserAccess"])) {
+                echo "<div style='display:block;width:100%'><a href='../stockMC/'>Master Controls</a> <span style='float:right'><a href='../stockMC/history.php'>Issue History</a></span></div> <br>";
+            }
+        ?>
         <table id="tableStock">
             <tr>
                 <th style="width:40%">Equipment</th>
-                <th style="width:10%">Total</th>
-                <th style="width:10%">On Shelf</th>
-                <th style="width:10%">On Loan</th>
-                <th style="width:10%">Lost/Damaged</th>
-                <th style="width:20%"></th>
+                <th style="width:15%">Total</th>
+                <th style="width:15%">On Shelf</th>
+                <th style="width:15%">On Loan</th>
+                <th style="width:15%">Lost/Damaged</th>
             </tr>
             <?php 
-            $rowFormat = "<tr>
-                <td>ITEM</td>
-                <td>TOTAL</td>
-                <td>SHELF</td>
-                <td>LOAN</td>
-                <td>LOST</td>
-                <td><button type='button'>Add Stock</button> <button type='button'>Remove Stock</button></td>
-            </tr>";
-            $results = retrieveStock();
-            $i = $results->num_rows;
-            while($i > 0) {
-                $item = $results->fetch_assoc();
-                $row = $rowFormat;
-                $row = str_replace("ITEM", $item["item"], $row);
-                $row = str_replace("TOTAL", $item["total"], $row);
-                $row = str_replace("SHELF", $item["onShelf"], $row);
-                $row = str_replace("LOAN", $item["onLoan"], $row);
-                $row = str_replace("LOST", $item["lostOrDamaged"], $row);
-                echo $row;
-                $i = $i - 1;
-            }
+                $rowFormat = "<tr>
+                    <td>ITEM</td>
+                    <td>TOTAL</td>
+                    <td>SHELF</td>
+                    <td>LOAN</td>
+                    <td>LOST</td>
+                </tr>";
+                $results = retrieveStock();
+                $i = $results->num_rows;
+                while($i > 0) {
+                    $item = $results->fetch_assoc();
+                    $row = $rowFormat;
+                    $row = str_replace("ITEM", $item["item"], $row);
+                    $row = str_replace("TOTAL", $item["total"], $row);
+                    $row = str_replace("SHELF", $item["onShelf"], $row);
+                    $row = str_replace("LOAN", $item["onLoan"], $row);
+                    $row = str_replace("LOST", $item["lostOrDamaged"], $row);
+                    echo $row;
+                    $i--;
+                }
             ?>
         </table>
     </maincontents>
