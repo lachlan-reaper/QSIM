@@ -47,6 +47,118 @@ function refreshUserAccess(string $id) {
     }
 }
 
+function commaRemoval($matches) {
+    $line = $matches[0];
+    $line = str_replace('"', '', $line);
+    $line = str_replace(',', '&comm;', $line);
+    return $line;
+}
+
+function csvLineToArr(string $line) {
+    // 1. Replace all [""] with [&dbqt;]
+    // 2. Preg-replace [/"(.*),(.*)"/] with [$1&comm;$2]
+    // 3. Explode the string with [,]
+    // 4. Iterate through the array, replacing each [&dbqt;] and [&comm;]
+    
+    $line = str_replace('""', '&dbqt;', $line);
+    $line = preg_replace_callback('|"[^"]+"|', 'commaRemoval', $line);
+    $arr = explode(",", $line);
+    $i = count($arr);
+    $parameters = array('&comm;', '&dbqt;');
+    $replacements = array(',', '"');
+    while ($i > 0) {
+        $i--;
+        $arr[$i] = str_replace($parameters, $replacements, $arr[$i]);
+    }
+    $arr[count($arr)-1] = trim($arr[count($arr)-1]);
+    return $arr;
+}
+
+function addUserArr(array $userValues) {
+    establishConnection();
+    $hasheduserpass = password_hash($userValues["userpass"], PASSWORD_BCRYPT);
+    $access = retrieveAccessLevel($userValues["appointment"], strtoupper($userValues["platoon"]));
+
+    $firstName =                formatNullAndStringToSQL($userValues["firstName"]);
+    $lastName =                 formatNullAndStringToSQL($userValues["lastName"]);
+    $id =                       formatNullAndStringToSQL($userValues["id"]);
+    $access =                   formatNullAndStringToSQL($access);
+    $username =                 formatNullAndStringToSQL($userValues["username"]);
+    $hasheduserpass =           formatNullAndStringToSQL($hasheduserpass);
+    $rank =         strtoupper( formatNullAndStringToSQL($userValues["rank"]));
+    $appointment =  strtolower( formatNullAndStringToSQL($userValues["appointment"]));
+    $company =      strtoupper( formatNullAndStringToSQL($userValues["company"]));
+    $platoon =      strtoupper( formatNullAndStringToSQL($userValues["platoon"]));
+    $section =                  formatNullAndStringToSQL($userValues["section"]);
+    if ($userValues["yearLevel"] === 0) {
+        $yearLevel = '0';
+    } else {
+        $yearLevel = $userValues["yearLevel"];
+    }
+
+    // Creates a user record
+    $sql = "INSERT INTO `users` (`firstName`, `lastName`, `id`, `access`, `username`, `userpass`, `rank`, `appointment`, `yearLevel`, `company`, `platoon`, `section`) VALUES ($firstName, $lastName, $id, $access, $username, $hasheduserpass, $rank, $appointment, $yearLevel, $company, $platoon, $section)";
+    if ($_SESSION['conn']->query($sql) === TRUE) {
+        echo "New user record created successfully <br>";
+    } else {
+        echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error . "<br>";
+        return;
+    }
+
+    // Creates a respective inventory record, connected via the ID num
+    $sql = "INSERT INTO `inventory` (`id`) VALUES ($id);";
+    if ($_SESSION['conn']->query($sql) === TRUE) {
+        echo "New user inventory created successfully <br>";
+    } else {
+        echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error . "<br>";
+
+        // In case of the creation of a record inventory fails, it automatically destroys the user's record in order to allow for the reuse of this function after a failure.
+        $sql = "DELETE FROM `users` WHERE id = $id;";
+        if ($_SESSION['conn']->query($sql) === TRUE) {
+            echo "User record successfully removed because of previous error <br>";
+        } else {
+            echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error . "<br>";
+        }
+    }
+}
+
+function removeUserArr(array $userValues) { // MAKE IT ACCEPT NAMES INSTEAD OF ID
+    establishConnection();
+
+    $id = $userValues["id"];
+    $id = formatNullAndStringToSQL($id);
+    $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";
+    $sqlInventory = "DELETE FROM `inventory` WHERE `id` = $id;";
+    $sqlHistory = "DELETE FROM `equipmentreceipts` WHERE `id` = $id;";
+    $result = $_SESSION['conn'] -> query($sqlUser);
+    $result = $_SESSION['conn'] -> query($sqlInventory);
+    $result = $_SESSION['conn'] -> query($sqlHistory);
+}
+
+function updateUserArr(array $userValues) { // MAKE IT NOT NEED ALL VARIABLES!!!!!!!!!!!!!!!!!!!!!
+    establishConnection();
+    $access = retrieveAccessLevel($userValues["appointment"], strtoupper($userValues["platoon"]));
+
+    $firstName =                formatNullAndStringToSQL($userValues["firstName"]);
+    $lastName =                 formatNullAndStringToSQL($userValues["lastName"]);
+    $id =                       formatNullAndStringToSQL($userValues["id"]);
+    $access =                   formatNullAndStringToSQL($access);
+    $username =                 formatNullAndStringToSQL($userValues["username"]);
+    $rank =         strtoupper( formatNullAndStringToSQL($userValues["rank"]));
+    $appointment =  strtolower( formatNullAndStringToSQL($userValues["appointment"]));
+    $company =      strtoupper( formatNullAndStringToSQL($userValues["company"]));
+    $platoon =      strtoupper( formatNullAndStringToSQL($userValues["platoon"]));
+    $section =                  formatNullAndStringToSQL($userValues["section"]);
+    if ($userValues["yearLevel"] === 0) {
+        $yearLevel = '0';
+    } else {
+        $yearLevel = $userValues["yearLevel"];
+    }
+
+    $sql = "UPDATE `users` SET `firstName` = $firstName, `lastName` = $lastName, `access` = $access, `username` = $username, `rank` = $rank, `appointment` = $appointment, `yearLevel` = $yearLevel, `company` = $company, `platoon` = $platoon, `section` = $section WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+}
+
 function refreshAllAccess() {
     // Iterates through the entire list of users and checking with their designated appointment and platoon, will redefine their access level as such.
     establishConnection();
