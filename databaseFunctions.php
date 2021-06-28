@@ -97,6 +97,25 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // T
     }
 }
 
+function getContacts() {
+    $myfile = fopen("../contacts.txt", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../contacts.txt"));
+    $lines = explode("|", $file);
+    
+    $i = 0;
+    $max = count($lines);
+    while ($i < $max) {
+        $lines[$i] = trim($lines[$i]);
+        if ($lines[$i] == "") {
+            $i++;
+            continue;
+        }
+        $lines[$i] = explode(":", $lines[$i]);
+        $i++;
+    }
+    return $lines;
+}
+
 function establishSessionVars() {
     // Defines the session variables
     $id = $_SESSION["currentUserId"]; // ID is the only one to not assign to the session var as it is what is used as the credential for the user.
@@ -382,7 +401,7 @@ function retrieveStockHistory() {
     return $result;
 }
 
-function issueEquipment (string $id, $listOfIssues) { // CHECK IF THE REDOING OF THE WHILE LOOP FIXES THE PROBLEM!!!
+function issueEquipment (string $id, $listOfIssues) {
     // Issues a list of items to a user and only allows the issues if every item has enough items on shelf on record. It also makes a record of this transaction.
     establishConnection();
 
@@ -412,14 +431,17 @@ function issueEquipment (string $id, $listOfIssues) { // CHECK IF THE REDOING OF
             echo '</script>';
             die();
         }
-        
+        $i++;
+    }
+
+    $i = count($listOfIssues);
+    while ($i > 0) {
+        $i--;
         $item = formatNullAndStringToSQL($listOfIssues[$i][0]);
         $value = formatNullAndStringToSQL($listOfIssues[$i][1]);
         $formattedMods = $formattedMods . ", `" . $listOfIssues[$i][0] . "` = `" . $listOfIssues[$i][0] . "` + " . $value;
         $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", " . $value . ", " . $time . ", '" . $_SESSION["currentUserId"] . "')";
         $sqlStock = $sqlStock . "UPDATE `stock` SET `onShelf` = `onShelf` - " . $value . ", `onLoan` = `onLoan` + " . $value . " WHERE `item` = " . $item . ";";
-
-        $i++;
     }
 
     // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
@@ -503,6 +525,31 @@ function declareLostOrDamaged (string $id, $listOfLost) {
     $result = $_SESSION['conn'] -> query($sql);
 
     $result = $_SESSION['conn'] -> multi_query($sqlStock);
+}
+
+function setIssue (string $id, $listOfItems) {
+    // Declares a list of items as lost or damaged from the user and makes a record of this transaction.
+    establishConnection();
+
+    $formattedMods =  "";
+
+    $id = formatNullAndStringToSQL($id);
+    $time = date_format(date_create(), "Y/m/d H:i:s");
+    $time = formatNullAndStringToSQL($time);
+
+    $i = count($listOfItems);
+    while ($i > 0) {
+        $i--;
+        $value = formatNullAndStringToSQL($listOfItems[$i][1]);
+        $formattedMods = $formattedMods . ", `" . $listOfItems[$i][0] . "` = " . $value;
+    }
+
+    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
+    $formattedMods = substr($formattedMods, 2);
+
+    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+
 }
 
 ?>

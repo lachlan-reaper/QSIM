@@ -72,8 +72,8 @@
             bar.value = query.trim();
         }
         </script>
-
-        <a href="">Export List</a> 
+        
+        <a href="downloadProcessing.php?searchQuery=<?php echo $_GET["searchQuery"];?>&searchFilters=<?php echo $_GET["searchFilters"];?>">Export List</a> 
         <span style="float:right"><a href="../advancedSearch/">Advanced Search</a></span> <br> <br>
 
         <table id="tableSearch" style="width: 85%; margin-left: 7.5%;">

@@ -15,13 +15,13 @@ $i = count($mods);
 
 if ($action == "Issue") {
     while($i > 0) {
-        $i -= 1;
+        $i--;
         $mods[$i] = explode("_", $mods[$i]);
     }
     issueEquipment($id, $mods);
 } else if ($action == "Return") {
     while($i > 0) {
-        $i -= 1;
+        $i--;
         $mods[$i] = explode("_", $mods[$i]);
         $currentIssued = getUserValue($id, $mods[$i][0], "inventory");
         if ($mods[$i][1] > $currentIssued) {
@@ -35,7 +35,7 @@ if ($action == "Issue") {
     returnEquipment($id, $mods);
 } else if ($action == "Lost") {
     while($i > 0) {
-        $i -= 1;
+        $i--;
         $mods[$i] = explode("_", $mods[$i]);
         $currentIssued = getUserValue($id, $mods[$i][0], "inventory");
         if ($mods[$i][1] > $currentIssued) {
@@ -47,6 +47,13 @@ if ($action == "Issue") {
         }
     }
     declareLostOrDamaged($id, $mods);
+} else if ($action == "Set") {
+    while($i > 0) {
+        $i--;
+        $mods[$i] = explode("_", $mods[$i]);
+        $currentIssued = getUserValue($id, $mods[$i][0], "inventory");
+    }
+    setIssue($id, $mods);
 } else {
     die("Improper function. DON'T TOUCH THE URL!");
 }

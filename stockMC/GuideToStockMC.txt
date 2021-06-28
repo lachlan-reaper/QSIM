@@ -1,0 +1,30 @@
+This is a guide to understanding the functionality of all the controls of Master Controls and all of their unique requirements.
+
+Unit Information
+-   CHANGE LATER
+
+Modify Users
+-   Automated Tasks
+    1.  Refresh All Access Levels: On click, this function will iterate through ALL users and based on their appropriate access level, as defined by their appointment, will re-assign the set access level. This is useful for correcting corrupt data.
+    2.  Graduate All Cadets: On click, it will increase all cadet's year level value by 1 (except for officers for who have a year level value of 0). Ensuring that this is kept up to date is useful for keeping track of any cadet record for whom has left the unit and fell through the administrative cracks.
+
+-   Manual Entry
+    1.  Add User: Will redirect you to another page, inquiring you to insert the value of the new cadet.
+    2.  Remove User: Will redirect you to another page, inquiring you to select the record to be deleted.
+    3.  Modify User: Will redirect you to another page to select a user to edit and will then again redirect you to another page to modify the desired values.
+
+-   Entry via File
+    1.  Add Users: Takes a .csv file with each 
+    2.  Remove Users: Takes a .csv file with line 1 containing the header(s) ['Id', or 'First Name' & 'Last Name', or all three]. The Program will then remove all users with each specified id/firstanem and lastname. If more than one user qualifies for the criteria, an error will arise and that user only not deleted.
+    3.  Edit Users:
+
+Modify Stock
+-   Automated Tasks
+    1.  Reset Lost or Damaged Numbers: On click, this function will reset all of the lost or damaged numbers displayed on the stock page to 0. Please note that the record of lost or damage items will remain on an individuals record but will no longer be applicable to affect the stock numbers displayed. This is useful for correcting corrupt data.
+    2.  Refresh and Recaculate Stock Tables: On click, this function will SUM all of the equipment currently recorded as on loan to an individual and assign the sums as the number of said item on loan. Then add the on loan and on shelf numbers and recaculate the total of each item. This is useful for correcting corrupt data.
+
+-   Manual Entry
+    1.  Add Stock:
+    2.  Remove Stock:
+    3.  Add a Stock Item:
+    4.  Remove a Stock Item:

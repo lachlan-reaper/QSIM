@@ -101,4 +101,11 @@ require '../databaseFunctions.php';
 establishConnection();
 addUser("Admin", "Admin", "4242424242", "Admin", "Admin", "MAJ", "commander", "RHQ", "RHQ", "", 0);
 
+$sql = "INSERT INTO `inventory` (`id`) VALUES ('stdIssue');INSERT INTO `inventory` (`id`) VALUES ('RECIssue');INSERT INTO `inventory` (`id`) VALUES ('AFXIssue');INSERT INTO `inventory` (`id`) VALUES ('customIssue');";
+if ($_SESSION['conn']->multi_query($sql) === TRUE) {
+    echo "Standard issue records created successfully <br>";
+} else {
+    echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error . "<br>";
+}
+
 ?>

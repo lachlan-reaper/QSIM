@@ -38,10 +38,10 @@
                 $history = "<tbody>";
 
                 $rowFormatIssue =   "<tr>                       <td rowspan=NEXTROWS>TIMESTAMP</td>                      <td rowspan=NEXTROWS>Issued:</td>    <td rowspan=NEXTROWS>By: SERVER</td> <td rowspan=NEXTROWS>To: RECEIVER</td> <td>NUMx</td> <td>ITEM</td> </tr>";
-                $rowFormatReturn =  "<tr style='color:orange'>  <td style='color:black' rowspan=NEXTROWS>TIMESTAMP</td>  <td rowspan=NEXTROWS>Returned:</td>  <td rowspan=NEXTROWS>By: SERVER</td> <td rowspan=NEXTROWS>To: RECEIVER</td> <td>NUMx</td> <td>ITEM</td> </tr>";
+                $rowFormatReturn =  "<tr style='color:darkgoldenrod'>  <td style='color:black' rowspan=NEXTROWS>TIMESTAMP</td>  <td rowspan=NEXTROWS>Returned:</td>  <td rowspan=NEXTROWS>By: SERVER</td> <td rowspan=NEXTROWS>To: RECEIVER</td> <td>NUMx</td> <td>ITEM</td> </tr>";
                 $rowFormatLost =    "<tr style='color:red'>     <td style='color:black' rowspan=NEXTROWS>TIMESTAMP</td>  <td rowspan=NEXTROWS>Lost:</td>      <td rowspan=NEXTROWS>By: SERVER</td> <td rowspan=NEXTROWS>To: RECEIVER</td> <td>NUMx</td> <td>ITEM</td> </tr>";
                 $rowFormatIssueShort =  "<tr>                      <td>NUMx</td> <td>ITEM</td> </tr>";
-                $rowFormatReturnShort = "<tr style='color:orange'> <td>NUMx</td> <td>ITEM</td> </tr>";
+                $rowFormatReturnShort = "<tr style='color:darkgoldenrod'> <td>NUMx</td> <td>ITEM</td> </tr>";
                 $rowFormatLostShort =   "<tr style='color:red'>    <td>NUMx</td> <td>ITEM</td> </tr>";
 
                 $results = retrieveStockHistory();

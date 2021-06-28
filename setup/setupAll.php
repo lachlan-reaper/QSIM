@@ -1,4 +1,5 @@
 <?php
+    date_default_timezone_set('Australia/Sydney');
     $servername = "localhost"; // The server name containing the database
     $username = "root";
 

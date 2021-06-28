@@ -56,7 +56,7 @@
                     while($i > 0) {
                         $item = $results->fetch_assoc();
                         echo str_replace("ITEM", $item["item"], $rowFormat);
-                        $i = $i - 1;
+                        $i--;
                     }
                     ?>
                 </table>

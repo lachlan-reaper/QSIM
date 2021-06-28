@@ -35,7 +35,7 @@ if ($function == "manualModifyStock") {
     die("I SPECIFICALLY SAID DON'T TOUCH THE URL! <br><br><i>Gosh.... Kids these days....</i>"); // Easter Egg
 }
 
-header("Location: http://" . $_SESSION["websiteLoc"] . "/stock/");
+header("Location: http://" . $_SESSION["websiteLoc"] . "/stockMC/");
 die();
 
 

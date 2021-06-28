@@ -74,6 +74,14 @@ function csvLineToArr(string $line) {
     return $arr;
 }
 
+function strToCsv (string $line) {
+    $line = str_replace('"', '""', $line);
+    if (str_contains($line, ",")) {
+        $line = '"' . $line . '"';
+    }
+    return $line;
+}
+
 function addUserArr(array $userValues) {
     establishConnection();
     $hasheduserpass = password_hash($userValues["userpass"], PASSWORD_BCRYPT);
