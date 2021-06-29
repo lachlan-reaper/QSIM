@@ -62,12 +62,17 @@
                             $rowFormat = str_replace("IDNUM", $id, $rowFormat);
                             echo $rowFormat;
 
-                            $rowFormat = "<br> <b>LASTNAME</b><br> <b>FIRSTNAME</b><br> RANK<br> APPOINTMENT";
+                            $rowFormat = "<br> <b>LASTNAME</b><br> <b>FIRSTNAME</b><br> RANK<br> APPOINTMENT<br><br><br><br><br><br>";
                             $rowFormat = str_replace("LASTNAME",    $firstname, $rowFormat);
                             $rowFormat = str_replace("FIRSTNAME",   $lastname, $rowFormat);
                             $rowFormat = str_replace("RANK",        $rank, $rowFormat);
                             $rowFormat = str_replace("APPOINTMENT", strtoupper($appointment), $rowFormat);
-                            echo $rowFormat
+                            echo $rowFormat;
+
+                            echo "<button type='button' onClick='return redirect(\"resetPassword.php?id=$id\", true)'>Reset Password</button><br><br>";
+                            if ($id == $_SESSION["currentUserId"]) {
+                                echo "<button type='button' onClick='return redirect(\"retrievePassword.php?id=$id\", false)'>Change Password</button>";
+                            }
                         ?>
                     </profilePageBox>
                 </td>
