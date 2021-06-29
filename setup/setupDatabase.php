@@ -25,7 +25,7 @@ $sql1 = "CREATE TABLE users (
     yearLevel int(12) NOT NULL,
     company varchar(10) NOT NULL,
     platoon varchar(10) NOT NULL,
-    section varchar(10),
+    section varchar(10) NOT NULL,
     PRIMARY KEY (id)
 );";
 $sql2 = "CREATE TABLE `inventory` (
@@ -95,5 +95,17 @@ if ($result == TRUE) {
     echo "Bad  - 4";
 }
 echo "<br>";
+
+// This allows for the initial access via the website and not needing developer access in order to populate the server
+require '../databaseFunctions.php';
+establishConnection();
+addUser("Admin", "Admin", "4242424242", "Admin", "Admin", "MAJ", "commander", "RHQ", "RHQ", "", 0);
+
+$sql = "INSERT INTO `inventory` (`id`) VALUES ('stdIssue');INSERT INTO `inventory` (`id`) VALUES ('RECIssue');INSERT INTO `inventory` (`id`) VALUES ('AFXIssue');INSERT INTO `inventory` (`id`) VALUES ('customIssue');";
+if ($_SESSION['conn']->multi_query($sql) === TRUE) {
+    echo "Standard issue records created successfully <br>";
+} else {
+    echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error . "<br>";
+}
 
 ?>

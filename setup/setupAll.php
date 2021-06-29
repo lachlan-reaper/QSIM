@@ -1,4 +1,5 @@
 <?php
+    date_default_timezone_set('Australia/Sydney');
     $servername = "localhost"; // The server name containing the database
     $username = "root";
 
@@ -25,7 +26,7 @@
     echo "<br>";
 
     $sql = "CREATE USER lmuir2021 IDENTIFIED BY 'riddles';
-    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX ON `$databaseName`.* TO lmuir2021;";
+    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP ON `$databaseName`.* TO lmuir2021;";
     
     $result = $conn->multi_query($sql);
     if ($result == TRUE) {

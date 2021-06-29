@@ -56,12 +56,12 @@
                     while($i > 0) {
                         $item = $results->fetch_assoc();
                         echo str_replace("ITEM", $item["item"], $rowFormat);
-                        $i = $i - 1;
+                        $i--;
                     }
                     ?>
                 </table>
             </div>
-            <div style="display:inline-block;width:30%">
+            <div style="display:inline-block;width:30%;vertical-align:top;">
                 <table id="tableRank" style="min-width:0;">
                     <tr>
                         <th style="width:80%">Rank</th>

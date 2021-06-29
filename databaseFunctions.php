@@ -4,7 +4,7 @@ require 'functions.php';
 
 function formatNullAndStringToSQL($variable) {
     // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
-    if ($variable === "" or $variable === "NULL" or $variable === null or $variable === 0) {
+    if ($variable === "" or $variable === "NULL" or $variable === null) {
         return "NULL";
     }
     if (gettype($variable) === "string") {
@@ -95,6 +95,25 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // T
         echo '</script>';
         return NULL;
     }
+}
+
+function getContacts() {
+    $myfile = fopen("../contacts.txt", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../contacts.txt"));
+    $lines = explode("|", $file);
+    
+    $i = 0;
+    $max = count($lines);
+    while ($i < $max) {
+        $lines[$i] = trim($lines[$i]);
+        if ($lines[$i] == "") {
+            $i++;
+            continue;
+        }
+        $lines[$i] = explode(":", $lines[$i]);
+        $i++;
+    }
+    return $lines;
 }
 
 function establishSessionVars() {
@@ -217,13 +236,13 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%') OR 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
             (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%'))";
+            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR 
+            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%'))";
         } else if (count($userQueryArr) == 4) {
             $sql = "SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
             (users.`firstName` LIKE '%" . implode('% %', $userQueryArr) . "%') OR
@@ -233,13 +252,13 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%') OR 
             (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[-1] . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
             (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[-1] . "%') OR
+            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR 
+            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR
 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 2)) . "%') OR 
             (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 2)) . "%') OR 
@@ -307,15 +326,15 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
 function formatRowSearchResult ($row) : string {
     // Takes a MySQLi result row object as input and returns the formatted version of a row of a search result table.
     $rowFormat = "<tr> <td>LASTNAME</td> <td>FIRSTNAME</td> <td>PLATOON</td> <td>RANK</td> <td>APPOINTMENT</td>
-    <td>    <a href='../issue/?action=Issue&id=ID'> <button type='button'>  Issue     </button> </a> 
-            <a href='../issue/?action=Return&id=ID'><button type='button'>  Return    </button> </a> 
-            <a href='../issue/?action=Lost&id=ID'>  <button type='button'>  Lost      </button> </a> 
-            <a href='../profile/?id=ID'>            <button type='button'>  Profile   </button> </a> </td> </tr>";
+    <td>    <button type='button' onClick='redirect(\"../issue/?action=Issue&id=ID\", false)'>  Issue     </button> 
+            <button type='button' onClick='redirect(\"../issue/?action=Return&id=ID\", false)'> Return    </button>
+            <button type='button' onClick='redirect(\"../issue/?action=Lost&id=ID\", false)'>   Lost      </button>
+            <button type='button' onClick='redirect(\"../profile/?id=ID\", false)'>             Profile   </button> </td> </tr>";
     
-    $firstname = ucfirst($row['firstName']);
+    $firstname = $row['firstName'];
     $rowFormat = str_replace('FIRSTNAME', $firstname, $rowFormat);
 
-    $lastname = ucfirst($row['lastName']);
+    $lastname = $row['lastName'];
     $rowFormat = str_replace('LASTNAME', $lastname, $rowFormat);
 
     $appointment = strtoupper($row['appointment']);
@@ -374,7 +393,15 @@ function retrieveIssueHistory(string $id) {
     return $result;
 }
 
-function issueEquipment (string $id, $listOfIssues) { // CHECK IF THE REDOING OF THE WHILE LOOP FIXES THE PROBLEM!!!
+function retrieveStockHistory() {
+    // Retrieves a MySQLi object of the history of all item issuements and returns it.
+    establishConnection();
+    $sql = "SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC";
+    $result = $_SESSION['conn'] -> query($sql);
+    return $result;
+}
+
+function issueEquipment (string $id, $listOfIssues) {
     // Issues a list of items to a user and only allows the issues if every item has enough items on shelf on record. It also makes a record of this transaction.
     establishConnection();
 
@@ -404,14 +431,17 @@ function issueEquipment (string $id, $listOfIssues) { // CHECK IF THE REDOING OF
             echo '</script>';
             die();
         }
-        
+        $i++;
+    }
+
+    $i = count($listOfIssues);
+    while ($i > 0) {
+        $i--;
         $item = formatNullAndStringToSQL($listOfIssues[$i][0]);
         $value = formatNullAndStringToSQL($listOfIssues[$i][1]);
         $formattedMods = $formattedMods . ", `" . $listOfIssues[$i][0] . "` = `" . $listOfIssues[$i][0] . "` + " . $value;
         $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", " . $value . ", " . $time . ", '" . $_SESSION["currentUserId"] . "')";
         $sqlStock = $sqlStock . "UPDATE `stock` SET `onShelf` = `onShelf` - " . $value . ", `onLoan` = `onLoan` + " . $value . " WHERE `item` = " . $item . ";";
-
-        $i++;
     }
 
     // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
@@ -495,6 +525,31 @@ function declareLostOrDamaged (string $id, $listOfLost) {
     $result = $_SESSION['conn'] -> query($sql);
 
     $result = $_SESSION['conn'] -> multi_query($sqlStock);
+}
+
+function setIssue (string $id, $listOfItems) {
+    // Declares a list of items as lost or damaged from the user and makes a record of this transaction.
+    establishConnection();
+
+    $formattedMods =  "";
+
+    $id = formatNullAndStringToSQL($id);
+    $time = date_format(date_create(), "Y/m/d H:i:s");
+    $time = formatNullAndStringToSQL($time);
+
+    $i = count($listOfItems);
+    while ($i > 0) {
+        $i--;
+        $value = formatNullAndStringToSQL($listOfItems[$i][1]);
+        $formattedMods = $formattedMods . ", `" . $listOfItems[$i][0] . "` = " . $value;
+    }
+
+    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
+    $formattedMods = substr($formattedMods, 2);
+
+    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+
 }
 
 ?>

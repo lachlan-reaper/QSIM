@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Australia/Sydney');
 
 function establishConnection() {
     // Establishes a connection with the server and sets up any necessary $SESSION variables
@@ -26,7 +27,7 @@ function establishConnection() {
 
 function validUser(string $pagename, string $accessLevel) : bool {
     // Given the page name and user's access level, will return a boolean value signalling whether the user has access to this page.
-    $myfile = fopen("../pageAccessLevels.pal", "r") or die("Internal server error: Unable to open file! JAck");
+    $myfile = fopen("../pageAccessLevels.pal", "r") or die("Internal server error: Unable to open file!");
     $file = fread($myfile, filesize("../pageAccessLevels.pal"));
     $line = strstr($file, $pagename);
     fclose($myfile);

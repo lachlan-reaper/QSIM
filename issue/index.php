@@ -22,6 +22,8 @@
     <maincontents>
         <div style="vertical-align:text-top;text-align:center">
             <div style="display:inline-block;width:65%">
+                <h1><?php echo $_GET["action"]; ?></h1>
+                <h3><?php echo getUserValue($_GET["id"], "lastName", "users"); echo ", "; echo getUserValue($_GET["id"], "firstName", "users");  ?></h3>
                 <table style="min-width:0;">
                     <tr>
                         <th style="width:60%">Equipment</th>
@@ -39,14 +41,15 @@
                         while($i > 0) {
                             $item = $results->fetch_assoc();
                             echo str_replace("ITEM", $item["item"], $rowFormat);
-                            $i = $i - 1;
+                            $i--;
                         }
                     ?>
                 </table> <br>
                 <div style="text-align:right">
-                    <button type="button">Standard REC Issue</button>  
-                    <button type="button">Standard AFX Issue</button>  
-                    <button type="button">Custom Issue</button> <br> <br>
+                    <button type="button" onClick="issueSet('RECIssue')">Standard REC Issue</button>  
+                    <button type="button" onClick="issueSet('AFXIssue')">Standard AFX Issue</button>  
+                    <button type="button" onClick="issueSet('customIssue')">Custom Issue</button>
+                    <button type="button" onClick="reset()">Reset</button> <br> <br>
                     <?php
                         $rowFormat = "<button type='button' onClick='process(\"ACTION\", \"ID\")' class='searchButtonResult' value='ACTION'>ACTION</button>";
                         $row = $rowFormat;
@@ -82,6 +85,82 @@
                 box = document.getElementById(item);
                 if (+ box.value + value >= 0) {
                     box.value = + box.value + value;
+                }
+            }
+            function issueSet(setName) {
+                var set = [];
+                const recSet = [<?php 
+                                $row = "";
+                                $results = retrieveIssuedItems("RECIssue");
+                                $items = retrieveAllIssuedItemsOnStock();
+
+                                $i = $items->num_rows;
+                                $num = $results->fetch_assoc();
+                                while($i > 0) { 
+                                    $item = $items->fetch_assoc();
+                                    $name = $item["item"];
+                                    $row = $row . ", " . $num[$name];
+                                    $i--;
+                                }
+                                $row = substr($row, 2);
+                                echo $row;
+                                ?>];
+                const afxSet = [<?php 
+                                $row = "";
+                                $results = retrieveIssuedItems("AFXIssue");
+                                $items = retrieveAllIssuedItemsOnStock();
+
+                                $i = $items->num_rows;
+                                $num = $results->fetch_assoc();
+                                while($i > 0) { 
+                                    $item = $items->fetch_assoc();
+                                    $name = $item["item"];
+                                    $row = $row . ", " . $num[$name];
+                                    $i--;
+                                }
+                                $row = substr($row, 2);
+                                echo $row;
+                                ?>];
+                const customSet = [<?php 
+                                $row = "";
+                                $results = retrieveIssuedItems("customIssue");
+                                $items = retrieveAllIssuedItemsOnStock();
+
+                                $i = $items->num_rows;
+                                $num = $results->fetch_assoc();
+                                while($i > 0) { 
+                                    $item = $items->fetch_assoc();
+                                    $name = $item["item"];
+                                    $row = $row . ", " . $num[$name];
+                                    $i--;
+                                }
+                                $row = substr($row, 2);
+                                echo $row;
+                                ?>];
+                if (setName == "RECIssue") {
+                    for (i = 0; i < recSet.length; i++) {
+                        set[i] = recSet[i];
+                    }
+                } else if (setName == "AFXIssue") {
+                    for (i = 0; i < afxSet.length; i++) {
+                        set[i] = afxSet[i];
+                    }
+                } else if (setName == "customIssue") {
+                    for (i = 0; i < customSet.length; i++) {
+                        set[i] = customSet[i];
+                    }
+                } else {
+                    return;
+                }
+                items = document.getElementsByClassName("equipNum");
+                for (i = 0; i < items.length; i++) {
+                    items[i].value = +items[i].value + set[i];
+                }
+            }
+            function reset() {
+                items = document.getElementsByClassName("equipNum");
+                for (i = 0; i < items.length; i++) {
+                    items[i].value = 0;
                 }
             }
         </script>

@@ -121,7 +121,6 @@ nav a {
 
 nav a:hover {
     color:white;
-    text-decoration: bold;
 }
 
 nav ul {
@@ -151,6 +150,16 @@ maincontents {
     color: black;
 }
 
+maincontents button {
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 3px;
+    text-align: center;
+    display: inline-block;
+    font-weight: 500;
+    font-size: 15px;
+}
+
 maincontents table {
     width: 100%;
     min-width: 715px;
@@ -176,7 +185,61 @@ maincontents th {
     color: white;
 }
 
-maincontents table.profilePage {
+maincontents table.stockHistory td {
+    vertical-align: top;
+}
+
+maincontents table.stockHistory tbody:nth-child(odd) {
+    background-color: whitesmoke;
+}
+
+maincontents table.stockHistory tbody:nth-child(even) {
+    background-color: white;
+}
+
+maincontents table.stockHistory tbody tr {
+    background-color: inherit;
+}
+
+maincontents table.stockHistory tbody td {
+    background-color: inherit;
+}
+
+maincontents table.stockMCTable {
+    width:100%;
+    border:0;
+}
+
+maincontents table.stockMCTable tr {
+    width:50%;
+    border:0;
+    background-color:white;
+    vertical-align:top;
+}
+
+maincontents table.stockMCTable td {
+    width:50%;
+    border:0;
+    padding-right: 20px;
+    padding-bottom: 10px;
+    background-color:white;
+    vertical-align:top;
+}
+
+maincontents table.stockMCTable tbody tr td table tbody tr:nth-child(odd) {
+    background-color: whitesmoke;
+}
+
+maincontents table.stockMCTable tbody tr td table tbody tr:nth-child(even) {
+    background-color: white;
+}
+
+maincontents table.stockMCTable tbody tr td table tbody tr td {
+    background-color: inherit;
+    padding: 5px;
+}
+
+maincontents .profilePage {
     width: 100%;
     min-width: 715px;
     border-collapse: collapse;
@@ -184,11 +247,11 @@ maincontents table.profilePage {
     background-color: white;
 }
 
-maincontents table.profilePage tr {
+maincontents .profilePage tr {
     border: 0 solid white;
 }
 
-maincontents table.profilePage td {
+maincontents .profilePage td {
     background-color: white;
     border: 0 solid white;
 }
@@ -203,6 +266,15 @@ maincontents profilePageBox {
     border-style: solid;
     border-color: grey;
     border-radius: 10px;
+}
+
+maincontents profilePageBox tr {
+    border: 0 solid white;
+}
+
+maincontents profilePageBox td {
+    background-color: white;
+    border: 0 solid white;
 }
 
 maincontents table#tableSearch td a {
@@ -240,7 +312,7 @@ maincontents table#tableSearch td a {
     color: white;
     padding: 20px;
     text-align: center;
-    text-decoration: bold;
+    font-weight: bold;
     display: inline-block;
     font-size: 20px;
 }
@@ -260,7 +332,7 @@ maincontents table#tableSearch td a {
     color: white;
     padding: 10px;
     text-align: center;
-    text-decoration: bold;
+    font-weight: bold;
     display: inline-block;
     font-size: 20px;
 }
@@ -297,4 +369,5 @@ footer {
 :-webkit-autofill:active {
     font-family: inherit;
     font-size: inherit;
+    font-weight: inherit;
 }

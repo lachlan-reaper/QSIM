@@ -18,11 +18,15 @@ if ($function == "manualModifyStock") {
 } else if ($function == "refreshStockTotals") {
     refreshStockTotals();
 } else if ($function == "manualAddUser") {
-    manualAddUser();
+    $id = manualAddUser();
+    header("Location: http://" . $_SESSION["websiteLoc"] . "/profile/?id=$id");
+    die();
 } else if ($function == "manualRemoveUser") {
     manualRemoveUser();
 } else if ($function == "manualModifyUser") {
-    manualModifyUser();
+    $newId = manualModifyUser();
+    header("Location: http://" . $_SESSION["websiteLoc"] . "/profile/?id=$newId");
+    die();
 } else if ($function == "refreshAccessLevels") {
     refreshAccessLevels();
 } else if ($function == "graduateAllCadets") {
@@ -31,7 +35,7 @@ if ($function == "manualModifyStock") {
     die("I SPECIFICALLY SAID DON'T TOUCH THE URL! <br><br><i>Gosh.... Kids these days....</i>"); // Easter Egg
 }
 
-header("Location: http://" . $_SESSION["websiteLoc"] . "/stock/");
+header("Location: http://" . $_SESSION["websiteLoc"] . "/stockMC/");
 die();
 
 
@@ -156,12 +160,18 @@ function manualAddUser () { // NEED TO MAKE IT CHECK IF APPOINTMENT IS VALID!!!!
 
     $picture = $_FILES["picture"]["tmp_name"];
     move_uploaded_file($picture, "../photo/$id.jpg");
+
+    return $id;
 }
 
 function manualRemoveUser () {
     establishConnection();
+
     $id = $_GET["id"];
-    $unfId = $id;
+    $filename = "../photo/$id.jpg";
+    if (file_exists($filename)) {
+        unlink($filename);
+    }
 
     $id = formatNullAndStringToSQL($id);
     $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";
@@ -171,11 +181,56 @@ function manualRemoveUser () {
     $result = $_SESSION['conn'] -> query($sqlInventory);
     $result = $_SESSION['conn'] -> query($sqlHistory);
 
-    unlink("../photo/$unfId.jpg");
+    
 }
 
-function manualModifyUser () { // try copying the issue function
-    die();
+function manualModifyUser () { // NEED TO MAKE IT CHECK IF APPOINTMENT IS VALID!!!! AND CHANGE ACCESS LEVEL!!!!!!!!
+    establishConnection();
+
+    $oldId = $_GET["id"];
+    $newId = $_POST["id"];
+
+    if (is_uploaded_file($_FILES["picture"]["tmp_name"])) {
+        $filename = "../photo/$oldId.jpg";
+        if (file_exists($filename)) {
+            unlink($filename);
+        }
+
+        $picture = $_FILES["picture"]["tmp_name"];
+        move_uploaded_file($picture, "../photo/$newId.jpg");
+    } else if (! ($newId == $oldId)) {
+        $filename = "../photo/$oldId.jpg";
+        if (file_exists($filename)) {
+            rename($filename, "../photo/$newId.jpg");
+        }
+    }
+
+    $oldId = formatNullAndStringToSQL($oldId);
+    $newId = formatNullAndStringToSQL($newId);
+    $firstName = formatNullAndStringToSQL($_POST["firstName"]);
+    $lastName = formatNullAndStringToSQL($_POST["lastName"]);
+    $username = formatNullAndStringToSQL($_POST["username"]);
+    $rank = formatNullAndStringToSQL($_POST["rank"]);
+    $appointment = formatNullAndStringToSQL($_POST["appointment"]);
+    $company = formatNullAndStringToSQL($_POST["company"]);
+    $platoon = formatNullAndStringToSQL($_POST["platoon"]);
+    $section = formatNullAndStringToSQL($_POST["section"]);
+    $yearLevel = formatNullAndStringToSQL($_POST["yearLevel"]);
+    
+    $sqlUser = "UPDATE `users` SET `firstName` = $firstName, `lastName` = $lastName, `username` = $username, `rank` = $rank, `appointment` = $appointment, `company` = $company, `platoon` = $platoon, `section` = $section, `yearLevel` = $yearLevel, `id` = $newId WHERE `id` = $oldId;";
+    $result = $_SESSION['conn'] -> query($sqlUser);
+
+    if (! ($newId == $oldId)) {
+        $sqlInventory = "UPDATE `inventory` SET `id` = $newId WHERE `id` = $oldId;";
+        $sqlHistory = "UPDATE `equipmentreceipts` SET `id` = $newId WHERE `id` = $oldId; 
+        UPDATE `equipmentreceipts` SET `serverId` = $newId WHERE `serverId` = $oldId;";
+
+        $result = $_SESSION['conn'] -> query($sqlInventory);
+        $result = $_SESSION['conn'] -> multi_query($sqlHistory);
+    }
+
+    establishSessionVars(); // If the user edits themselves then the server may need to update the variables.
+    return $_POST["id"];
 }
 
 function refreshAccessLevels () {

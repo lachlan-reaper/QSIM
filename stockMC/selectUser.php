@@ -25,7 +25,7 @@
 
     <maincontents>
 
-        <form action="removeUser.php" method="GET">
+        <form action="selectUser.php" method="GET">
             <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult">
             <span style="text-align:center;">
                 <input type="submit" class="searchButtonResult" value="Search"></input>
@@ -75,30 +75,51 @@
                 if ($i === 0) {
                     echo "<tr><td colspan=6 style='text-align:center;color:red;'>NO USERS FOUND</td></tr>";
                 } else {
+                    $rowFormat = "<tr> <td>LASTNAME</td> <td>FIRSTNAME</td> <td>PLATOON</td> <td>RANK</td> <td>APPOINTMENT</td>
+                    <td> <a href='SCRIPT.php?function=FUNCTION&id=ID' CLICK> <button type='button'> WORD </button> </a> </td> </tr>";
+
+                    $function = $_GET['function'];
+                    $rowFormat = str_replace('FUNCTION', $function, $rowFormat);
+                    if ($function == "manualModifyUser") {
+                        $word = "Modify";
+                        $scriptDestination = "changeUser";
+                        $click = "";
+                    } else if ($function == "manualRemoveUser") {
+                        $word = "DELETE";
+                        $scriptDestination = "databaseProcessing";
+                        $click = "onClick='return confirmForm();'";
+                    } else {
+                        $word = "DO NOT CLICK! ERROR!";
+                        $scriptDestination = "../home/";
+                        $click = "";
+                    }
+                    $rowFormat = str_replace('WORD', $word, $rowFormat);
+                    $rowFormat = str_replace('SCRIPT', $scriptDestination, $rowFormat);
+                    $rowFormat = str_replace('CLICK', $click, $rowFormat);
+
                     while($i > 0) {
                         $row = $results->fetch_assoc();
-                        $rowFormat = "<tr> <td>LASTNAME</td> <td>FIRSTNAME</td> <td>PLATOON</td> <td>RANK</td> <td>APPOINTMENT</td>
-                        <td> <a href='databaseProcessing.php?function=manualRemoveUser&id=ID' onClick='return confirmForm();'> <button type='button'> DELETE </button> </a> </td> </tr>";
+                        $edittedRow = $rowFormat;
                         
-                        $firstname = ucfirst($row['firstName']);
-                        $rowFormat = str_replace('FIRSTNAME', $firstname, $rowFormat);
+                        $firstname = $row['firstName'];
+                        $edittedRow = str_replace('FIRSTNAME', $firstname, $edittedRow);
 
-                        $lastname = ucfirst($row['lastName']);
-                        $rowFormat = str_replace('LASTNAME', $lastname, $rowFormat);
+                        $lastname = $row['lastName'];
+                        $edittedRow = str_replace('LASTNAME', $lastname, $edittedRow);
 
                         $appointment = strtoupper($row['appointment']);
-                        $rowFormat = str_replace('APPOINTMENT', $appointment, $rowFormat);
+                        $edittedRow = str_replace('APPOINTMENT', $appointment, $edittedRow);
 
                         $rank = strtoupper($row['rank']);
-                        $rowFormat = str_replace('RANK', $rank, $rowFormat);
+                        $edittedRow = str_replace('RANK', $rank, $edittedRow);
 
                         $platoon = strtoupper($row['platoon']);
-                        $rowFormat = str_replace('PLATOON', $platoon, $rowFormat);
+                        $edittedRow = str_replace('PLATOON', $platoon, $edittedRow);
 
                         $id = $row['id'];
-                        $rowFormat = str_replace('ID', $id, $rowFormat);
+                        $edittedRow = str_replace('ID', $id, $edittedRow);
 
-                        echo $rowFormat;
+                        echo $edittedRow;
                         $i--;
                     }
                 }

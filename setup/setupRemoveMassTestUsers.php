@@ -1,0 +1,25 @@
+<?php
+// FOR STRESS TESTING!!!!!
+require "../databaseFunctions.php";
+
+establishConnection();
+
+$max = 800;
+$i = 0;
+
+while ($i < $max) {
+    $id = "$i";
+    $unfId = $id;
+
+    $id = formatNullAndStringToSQL($id);
+    $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";
+    $sqlInventory = "DELETE FROM `inventory` WHERE `id` = $id;";
+    $sqlHistory = "DELETE FROM `equipmentreceipts` WHERE `id` = $id;";
+    $result = $_SESSION['conn'] -> query($sqlUser);
+    $result = $_SESSION['conn'] -> query($sqlInventory);
+    $result = $_SESSION['conn'] -> query($sqlHistory);
+
+    unlink("../photo/$unfId.jpg");
+    $i++;
+}
+?>
