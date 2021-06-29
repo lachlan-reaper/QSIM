@@ -4,7 +4,7 @@ require 'functions.php';
 
 function formatNullAndStringToSQL($variable) {
     // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
-    if ($variable === "" or $variable === "NULL" or $variable === null or $variable === 0) {
+    if ($variable === "" or $variable === "NULL" or $variable === null) {
         return "NULL";
     }
     if (gettype($variable) === "string") {

@@ -36,11 +36,22 @@
     ?>
 
     <maincontents>
-        <?php
-            if (validUser("stockMC", $_SESSION["currentUserAccess"])) {
-                echo "<span style='float:right'><button type='button' onClick='redirect(\"../stockMC/changeUser.php?function=manualModifyUser&id=$id\", false)'>Edit User</button></span>";
-            }
-        ?>
+        <span style='float:right'>
+            <?php
+                if (validUser("issue", $_SESSION["currentUserAccess"])) {
+                    echo "
+                    <button type='button' onClick='redirect(\"../issue/?action=Issue&id=$id\", false)'>  Issue     </button> 
+                    <button type='button' onClick='redirect(\"../issue/?action=Return&id=$id\", false)'> Return    </button>
+                    <button type='button' onClick='redirect(\"../issue/?action=Lost&id=$id\", false)'>   Lost      </button>
+                    ";
+                }
+                if (validUser("stockMC", $_SESSION["currentUserAccess"])) {
+                    echo "
+                    <button type='button' onClick='redirect(\"../stockMC/changeUser.php?function=manualModifyUser&id=$id\", false)'>Edit User</button>
+                    ";
+                }
+            ?>
+        </span>
         <table class="profilePage">
             <tr>
                 <td style="height:300px;width:40%">

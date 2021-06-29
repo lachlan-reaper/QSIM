@@ -22,6 +22,8 @@
     <maincontents>
         <div style="vertical-align:text-top;text-align:center">
             <div style="display:inline-block;width:65%">
+                <h1><?php echo $_GET["action"]; ?></h1>
+                <h3><?php echo getUserValue($_GET["id"], "lastName", "users"); echo ", "; echo getUserValue($_GET["id"], "firstName", "users");  ?></h3>
                 <table style="min-width:0;">
                     <tr>
                         <th style="width:60%">Equipment</th>

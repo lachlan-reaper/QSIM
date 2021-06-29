@@ -75,7 +75,22 @@
             </tr>
             <tr>
                 <td>
-                    <button type="button" onClick="redirect('saveCurrState.php', false)">Download Current State of QSIM (For Archival / Backup)</button>
+                    <table style="min-width:0;width:100%">
+                        <tr>
+                            <th><b>Upload server state: </b></th>
+                        </tr>
+                        <tr>
+                            <td>
+                                <form action="uploadSaveState.php" method="POST" enctype="multipart/form-data" onSubmit="return confirmForm()">
+                                    Save state (.zip): <input type="file" id="saveState" name="saveState" required> <br>
+                                    <input type="submit">
+                                </form>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <button type="button" onClick="redirect('saveCurrState.php', false)">Download Current State of QSIM (For Archival / Backup Purposes)</button>
                 </td>
             </tr>
             <tr> <!-- Adds a separating space -->

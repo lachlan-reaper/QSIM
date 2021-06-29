@@ -26,7 +26,7 @@
     echo "<br>";
 
     $sql = "CREATE USER lmuir2021 IDENTIFIED BY 'riddles';
-    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX ON `$databaseName`.* TO lmuir2021;";
+    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, ALTER, INDEX, DROP ON `$databaseName`.* TO lmuir2021;";
     
     $result = $conn->multi_query($sql);
     if ($result == TRUE) {
