@@ -1,0 +1,373 @@
+html {
+    height: 100%; 
+    width: 100%;
+    background-color: rgb(72, 179, 51);
+}
+
+body {
+    height: 100%; 
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: whitesmoke;
+    font-family: 'Verdana', 'Tahoma', 'sans-serif';
+}
+
+header {
+    display: block;
+    position: fixed;
+    top: 0;
+
+    height: 63px;
+    width: calc(100% - 15px);
+    min-width: 1150px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 5px;
+    background-color: rgb(72, 179, 51);
+
+    font-family: 'Verdana', 'Tahoma', 'sans-serif';
+    color: white;
+}
+
+headertitle {
+    display: inline-block;
+    padding-left: 15px;
+
+    font-size: 50px;
+    font-family: 'Lucida Console';
+    font-weight: 600;
+    color: white;
+    white-space: nowrap;
+}
+
+headeraccountbox {
+    position: fixed;
+    top: 5px;
+    right: 5px;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    background-color: rgb(35, 87, 25);
+    z-index: 3;
+
+    font-size: 17px;
+    white-space: nowrap;
+    font-family: 'Verdana', 'Tahoma', 'sans-serif';
+    color: white;
+}
+
+headeraccountbox main {
+    float: right;
+    padding: 0;
+    color: inherit;
+    text-decoration: none;
+}
+
+.dropdown_content {
+    display: none;
+    float: left;
+    color: rgb(185, 185, 185);
+    padding-bottom: 10px;
+}
+
+.dropdown_content a {
+    display: none;
+    float: left;
+    color: inherit;
+    text-decoration: none;
+}
+
+.dropdown:hover .dropdown_content {
+    display: block;
+}
+
+.dropdown:hover .dropdown_content a {
+    display: block;
+}
+
+.dropdown_content a:hover {
+    color: rgb(243, 243, 243);
+}
+
+navbar {
+    display: block;
+    position: fixed;
+    top: 73px;
+
+    height: 50px;
+    width: calc(100% - 240px);
+    min-width: 925px;
+    padding-left: 120px;
+    padding-right: 120px;
+    background-color: rgb(194, 194, 194);
+    z-index: 2;
+
+    font-family: 'Verdana', 'Tahoma', 'sans-serif';
+    font-size: 30px;
+    color: rgb(54, 54, 54);
+}
+
+nav a {
+    display: block;
+    padding: 7px;
+    color:inherit;
+    text-decoration: none;
+}
+
+nav a:hover {
+    color:white;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav li {
+    float: left;
+}
+
+.activetab {
+    background-color: rgb(143, 143, 143);
+    color: rgb(53, 53, 53);
+}
+
+maincontents {
+    display: block;
+    min-width: calc(1165px - 20%);
+    min-height: calc(100% - 265px);
+    padding-top: 170px;
+    padding-bottom: 50px;
+    padding-left: 10%;
+    padding-right: 10%;
+    background-color: rgb(255, 255, 255);
+    color: black;
+}
+
+maincontents button {
+    border: 1px solid darkgrey;
+    border-radius: 5px;
+    padding: 3px;
+    text-align: center;
+    display: inline-block;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+maincontents table {
+    width: 100%;
+    min-width: 715px;
+    border-collapse: collapse;
+    border: 1px solid grey;
+}
+
+maincontents tr:nth-child(odd) {
+    background-color: whitesmoke;
+}
+
+maincontents tr:nth-child(even) {
+    background-color: white;
+}
+
+maincontents th, td {
+    border-right: 1px solid grey;
+    padding: 5px;
+}
+
+maincontents th {
+    background-color: rgb(72, 179, 51);
+    color: white;
+}
+
+maincontents table.stockHistory td {
+    vertical-align: top;
+}
+
+maincontents table.stockHistory tbody:nth-child(odd) {
+    background-color: whitesmoke;
+}
+
+maincontents table.stockHistory tbody:nth-child(even) {
+    background-color: white;
+}
+
+maincontents table.stockHistory tbody tr {
+    background-color: inherit;
+}
+
+maincontents table.stockHistory tbody td {
+    background-color: inherit;
+}
+
+maincontents table.stockMCTable {
+    width:100%;
+    border:0;
+}
+
+maincontents table.stockMCTable tr {
+    width:50%;
+    border:0;
+    background-color:white;
+    vertical-align:top;
+}
+
+maincontents table.stockMCTable td {
+    width:50%;
+    border:0;
+    padding-right: 20px;
+    padding-bottom: 10px;
+    background-color:white;
+    vertical-align:top;
+}
+
+maincontents table.stockMCTable tbody tr td table tbody tr:nth-child(odd) {
+    background-color: whitesmoke;
+}
+
+maincontents table.stockMCTable tbody tr td table tbody tr:nth-child(even) {
+    background-color: white;
+}
+
+maincontents table.stockMCTable tbody tr td table tbody tr td {
+    background-color: inherit;
+    padding: 5px;
+}
+
+maincontents .profilePage {
+    width: 100%;
+    min-width: 715px;
+    border-collapse: collapse;
+    border: 0 solid white;
+    background-color: white;
+}
+
+maincontents .profilePage tr {
+    border: 0 solid white;
+}
+
+maincontents .profilePage td {
+    background-color: white;
+    border: 0 solid white;
+}
+
+maincontents profilePageBox {
+    display: inline-block;
+    width: calc(100% - 30px);
+    height: calc(100% - 30px);
+    padding: 10px;
+    margin: 5px;
+    border-width: 2px;
+    border-style: solid;
+    border-color: grey;
+    border-radius: 10px;
+}
+
+maincontents profilePageBox tr {
+    border: 0 solid white;
+}
+
+maincontents profilePageBox td {
+    background-color: white;
+    border: 0 solid white;
+}
+
+maincontents table#tableSearch td a {
+    text-decoration: none currentcolor solid;
+}
+
+#tableSearch td:nth-child(1) {
+    border-right: 0;
+}
+
+#tableStock td:nth-child(5) {
+    color: rgb(255, 91, 91);
+}
+
+/* This grabs the 3rd to 5th columns of <td>, inclusive, and applies these values */
+#tableSearch td:nth-child(n+3):nth-child(-n+5) {
+    text-align: center;
+}
+
+#tableStock td:nth-child(n+2):nth-child(-n+5) {
+    text-align: center;
+}
+
+.filterBox {
+    display: inline-block;
+    background-color: lightgrey; 
+    border-radius: 5px; 
+    padding: 5px;
+}
+
+.searchButtonMain {
+    background-color: rgb(18, 145, 28);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-weight: bold;
+    display: inline-block;
+    font-size: 20px;
+}
+
+.searchBarMain {
+    width: 100%; 
+    padding: 10px; 
+    border-radius: 30px; 
+    font-size: 30px; 
+    text-align: center;
+}
+
+.searchButtonResult {
+    background-color: rgb(18, 145, 28);
+    border: none;
+    border-radius: 5px;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    display: inline-block;
+    font-size: 20px;
+}
+
+.searchBarResult {
+    width: 60%; 
+    padding: 7px; 
+    border-radius: 20px; 
+    font-size: 20px; 
+    text-align: center;
+}
+
+footer {
+    display: block;
+
+    height: 10px;
+    width: calc(100% - 240px);
+    min-width: 925px;
+    padding-top: 15px;
+    padding-bottom: 20px;
+    padding-left: 120px;
+    padding-right: 120px;
+    background-color: rgb(226, 226, 226);
+
+    font-size: 10px;
+    color: rgb(90, 90, 90);
+}
+
+/* This modifies the autocomplete to fit with the page and relevant contents and not web browser default, font-size does nothing ??? */
+:-webkit-autofill::first-line,
+:-webkit-autofill,
+:-webkit-autofill:hover,
+:-webkit-autofill:focus,
+:-webkit-autofill:active {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+}
