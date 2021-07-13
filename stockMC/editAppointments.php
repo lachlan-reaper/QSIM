@@ -28,6 +28,11 @@
                         <th style="width:40%">Access</th>
                     </tr>
                     <?php 
+                        if (isset($_GET["extra"])) {
+                            $extraNum = $_GET["extra"];
+                        } else {
+                            $extraNum = 0;
+                        }
                         $rowFormat = "<tr>
                         <td><input class='appointment' type='text' value='APPT'></td>
                         <td><select class='access'>
@@ -43,7 +48,7 @@
                         
                         $i = 0;
                         $max = count($lines);
-                        while ($i < $max) {
+                        while ($i < $max) { // For each appointment, display a new row
                             $row = $rowFormat;
                             $lines[$i] = trim($lines[$i]);
 
@@ -60,7 +65,24 @@
                             echo $row;
                             $i++;
                         }
+                        $i = 0;
+                        while ($i < $extraNum) { // For each extra appointment, display a new row
+                            $row = $rowFormat;
+                            $row = str_replace("APPT", "", $row);
+                            $row = str_replace("value='recruit'", "value='recruit' selected", $row);
+                            echo $row;
+                            $i++;
+                        }
+                        
                     ?>
+                    <tr>
+                        <td colspan=2>
+                            <form action="">
+                                <input type="Hidden" id="extra" name="extra" value=<?php echo $extraNum+1 ?>>
+                                <input type="Submit" value="Add Appointment">
+                            </form>
+                        </td>
+                    </tr>
                 </table> <br>
                 <div style="text-align:right">
                     <button type='button' class='searchButtonResult' onClick='process()' value='Set'>Set</button>

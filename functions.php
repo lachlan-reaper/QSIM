@@ -11,11 +11,6 @@ function establishConnection() {
     $password = "riddles";
     $databaseName = "QSIMDB";
 
-    // Ensures that not too many connections are established without being closed.
-    //if ($_SESSION['conn']) {
-    //    $_SESSION['conn']->close();
-    //}
-
     // Create connection
     $_SESSION['conn'] = new mysqli($servername, $username, $password, $databaseName);
 
@@ -92,6 +87,7 @@ function displayHeader() {
 
 function redirectingUnauthUsers(string $pagename) {
     // Given the page name, it will check if the current user has access to the webpage.
+    establishConnection();
     if ($_SESSION["currentUserId"] === 0 or $_SESSION["currentUserId"] === NULL) {
         // If the user has not logged in.
         header("Location: http://" . $_SESSION["websiteLoc"] . "/login/");

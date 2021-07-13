@@ -2,17 +2,20 @@
     require "../databaseFunctions.php";
     session_start();
     establishConnection();
+
+    // If the id isnt set, then default to the current user's ID and their profile
     if (! isset($_GET["id"])) {
         redirectingUnauthUsers("profile");
         $id = $_SESSION["currentUserId"];
-    } else {
+    } else { // Else, if the id is the current user's then it is just viewing a profile
         $id = $_GET['id'];
         if ($id == $_SESSION["currentUserId"]) {
             redirectingUnauthUsers("profile");
-		} else {
+		} else { // Else, then the person trying to view the profile needs to have been given access to view other's profiles
             redirectingUnauthUsers("profile?id");
         }
 	}
+
     $vars = establishProfilePageVars($id);
     $firstname = $vars[0];
     $lastname = $vars[1];
@@ -38,6 +41,7 @@
     <maincontents>
         <span style='float:right'>
             <?php
+                // If a user doesn't have access to a page, then the link to the page is not shown
                 if (validUser("issue", $_SESSION["currentUserAccess"])) {
                     echo "
                     <button type='button' onClick='redirect(\"../issue/?action=Issue&id=$id\", false)'>  Issue     </button> 
@@ -57,11 +61,13 @@
                 <td style="height:300px;width:40%">
                     <profilePageBox>
                         <b>Identification</b> <br>
-                        <?php // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CHECK PHOTO FILE EXISTS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        <?php
+                            // Display profile pic
                             $rowFormat = "<img src='../photo/IDNUM.jpg' style='object-fit:cover;float:left;margin:10px' height='250px' width='250px'>";
                             $rowFormat = str_replace("IDNUM", $id, $rowFormat);
                             echo $rowFormat;
 
+                            // Display profile information
                             $rowFormat = "<br> <b>LASTNAME</b><br> <b>FIRSTNAME</b><br> RANK<br> APPOINTMENT<br><br><br><br><br><br>";
                             $rowFormat = str_replace("LASTNAME",    $firstname, $rowFormat);
                             $rowFormat = str_replace("FIRSTNAME",   $lastname, $rowFormat);
@@ -69,8 +75,11 @@
                             $rowFormat = str_replace("APPOINTMENT", strtoupper($appointment), $rowFormat);
                             echo $rowFormat;
 
-                            echo "<button type='button' onClick='return redirect(\"resetPassword.php?id=$id\", true)'>Reset Password</button><br><br>";
-                            if ($id == $_SESSION["currentUserId"]) {
+                            if (validUser("stockMC", $_SESSION["currentUserAccess"])) { // Only people with access to the mastercontrols, i.e. Admins
+                                echo "<button type='button' onClick='return redirect(\"resetPassword.php?id=$id\", true)'>Reset Password</button><br><br>";
+                            }
+                            if ($id == $_SESSION["currentUserId"]) { // If this is the current user than they can reset or change the passowrd, they decide
+                                echo "<button type='button' onClick='return redirect(\"resetPassword.php?id=$id\", true)'>Reset Password</button><br><br>";
                                 echo "<button type='button' onClick='return redirect(\"retrievePassword.php?id=$id\", false)'>Change Password</button>";
                             }
                         ?>
@@ -107,7 +116,8 @@
                             <?php
                                 $rowFormatMissing = "<tr style='color:red'> <td>Missing:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
                                 $rowFormatExcess = "<tr> <td>Excess Of:</td><td>NUMx</td> <td>ITEM</td> </tr>";
-                                $resultsExp = retrieveIssuedItems("stdIssue");
+
+                                $resultsExp = retrieveIssuedItems("stdIssue"); // The expected issue has a constant id
                                 $resultsId = retrieveIssuedItems($id);
                                 $items = retrieveAllIssuedItemsOnStock();
 
@@ -119,15 +129,15 @@
                                     $name = $item["item"];
                                     $expected = $numExp[$name];
                                     $current = $numId[$name];
-                                    if ($current < $expected) {
+                                    if ($current < $expected) { // If there is not enough items issued
                                         $row = $rowFormatMissing;
                                         $row = str_replace("NUM", $expected-$current, $row);
                                         $row = str_replace("ITEM", $name, $row);
-                                    } else if ($current >= ($expected * 2) and $current > ($expected + 1)) {
+                                    } else if ($current >= ($expected * 2) and $current > ($expected + 1)) { // If the item is in excess
                                         $row = $rowFormatExcess;
                                         $row = str_replace("NUM", $current-($expected*2), $row);
                                         $row = str_replace("ITEM", $name, $row);
-                                    } else {
+                                    } else { // Else no need to display anything
                                         $row = "";
                                     }
                                     echo $row;
@@ -147,10 +157,15 @@
                             <b><i>Or the APPT2 at:</i></b> <br>
                             EMAIL2";
                             $contacts = getContacts();
+
+                            // Format the RQMS's contact details
                             $rowsFormat = str_replace("APPT1", strtoupper($contacts[0][0]), $rowsFormat);
                             $rowsFormat = str_replace("EMAIL1", $contacts[0][1], $rowsFormat);
+                            
+                            // Format the QM's contact details
                             $rowsFormat = str_replace("APPT2", strtoupper($contacts[1][0]), $rowsFormat);
                             $rowsFormat = str_replace("EMAIL2", $contacts[1][1], $rowsFormat);
+
                             echo $rowsFormat;
                         ?>
                     </profilePageBox>
@@ -170,22 +185,23 @@
                         $rowFormatIssueShort =  "<tr>                      <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
                         $rowFormatReturnShort = "<tr style='color:darkgoldenrod'> <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
                         $rowFormatLostShort =   "<tr style='color:red'>    <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
+
                         $results = retrieveIssueHistory($id);
 
                         if (isset($_GET["maxRows"])) {
                             $max_rows = $_GET['maxRows'];
                         } else {
-                            $max_rows = 20;
+                            $max_rows = 25;
                         }
 
                         $lastDOI = "";
                         $lastMode = 2; // -1 for Lost/Damaged, 0 for Returned, 1 for Issued, 2 for Nothing Prior
                         $num_rows = 0;
                         $i = $results->num_rows;
-                        while($i > 0) {
+                        while($i > 0) { // For each log into the history
                             if ($num_rows >= $max_rows) {
                                 $history = $history."<tr><td colspan=4 style='text-align:center'><button type='button' onClick='redirect(\"URL\", false)'>Show More Rows</button></td></tr>";
-                                $history = str_replace("URL", "//" . $_SESSION["websiteLoc"] . "/profile/?id=$id&maxRows=" . ($max_rows+10), $history);
+                                $history = str_replace("URL", "//" . $_SESSION["websiteLoc"] . "/profile/?id=$id&maxRows=" . ($max_rows+25), $history);
                                 break;
                             }
                             $row = "";
@@ -193,7 +209,7 @@
                             $receipt = $results->fetch_assoc();
                             $num = $receipt["changeInNum"];
 
-                            if ($receipt["time"] == $lastDOI) {
+                            if ($receipt["time"] == $lastDOI) { // If the last log was processed at the same time
                                 $receipt["time"] = "";
 
                                 if ($receipt["lostOrDamaged"] == 1 and $lastMode == -1) {
@@ -222,7 +238,7 @@
                                         continue;
                                     }
                                 }
-                            } else {
+                            } else { // Else reset the counter of logs that are in the same row
                                 $numOfConsecRows = 0;
                                 if (! $lastDOI == "") {
                                     $row = "<tr><td></td></tr>" . $row;

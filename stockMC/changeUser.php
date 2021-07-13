@@ -29,10 +29,10 @@
             if (isset($_GET["id"])) {
                 $id = "&id=" . $_GET["id"];
             } else {
-                $id = "";
+                $id = ""; // Sets id so there are no warnings errors displayed later.
             }
-            echo "<form action='databaseProcessing.php?function=$function$id' method='POST' enctype='multipart/form-data' onSubmit='return confirmForm()'>";
         ?>
+        <form action='databaseProcessing.php?function=<?php echo $function . $id ?>' id='userInfo' method='POST' enctype='multipart/form-data' onSubmit='return confirmForm()'>
                 <div style="display:inline-block;width:50%">
                     <table style="min-width:0;">
                         <tr>
@@ -40,6 +40,12 @@
                             <th style="width:30%">Value</th>
                         </tr>
                         <?php 
+                            $rowFormatSelectionInput = "<tr>
+                            <td>NAME</td>
+                            <td><select class='selectInputs' id='ITEM' name='ITEM' form='userInfo' required>OPTIONS</select></td>
+                            </tr>";
+                            $optionFormat = "<option value='NAME'>NAMEFORMATTED</option>";
+
                             if ($function == "manualAddUser") {
                                 $rowFormatTextInput = "<tr>
                                 <td>NAME</td>
@@ -67,7 +73,41 @@
                                         $name = ucfirst($name);
                                     }
 
-                                    if (substr($item["Type"], 0, 3) == "int") { // Ignores the rest of the var since that holds the varying size of the variable.
+                                    if ($item["Field"] == "appointment") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $myfile = fopen("../appointmentAccessRoles.aars", "r") or die("Internal server error: Unable to open file!");
+                                        $file = fread($myfile, filesize("../appointmentAccessRoles.aars"));
+                                        $lines = explode("|", $file);
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $lines[$x] = explode(":", $lines[$x]);
+                                            $appt = $lines[$x][0];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                    } else if (substr($item["Type"], 0, 3) == "int") { // Ignores the rest of the var since that holds the varying size of the variable.
                                         $row = $rowFormatNumInput;
                                     } else {
                                         $row = $rowFormatTextInput;
@@ -105,7 +145,47 @@
                                         $name = ucfirst($name);
                                     }
 
-                                    if (substr($item["Type"], 0, 3) == "int") { // Ignores the rest of the var since that holds the varying size of the variable.
+                                    if ($item["Field"] == "appointment") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $myfile = fopen("../appointmentAccessRoles.aars", "r") or die("Internal server error: Unable to open file!");
+                                        $file = fread($myfile, filesize("../appointmentAccessRoles.aars"));
+                                        $lines = explode("|", $file);
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $lines[$x] = explode(":", $lines[$x]);
+                                            $appt = $lines[$x][0];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $userAppt = getUserValue($id, "appointment", "users");
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                        $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
+
+                                        if ($count == 0) { // If the user's current appointment no longer exists, then they are by default selecting recruit
+                                            $row = str_replace("value='recruit'", "value='recruit' selected", $row);
+                                        }
+                                    } else if (substr($item["Type"], 0, 3) == "int") { // Ignores the rest of the var since that holds the varying size of the variable
                                         $row = $rowFormatNumInput;
                                     } else {
                                         $row = $rowFormatTextInput;
@@ -146,6 +226,13 @@
     <script>
 
         function confirmForm () {
+            rank = document.getElementById("rank").value;
+            document.getElementById("rank").value = rank.toUpperCase();
+            rank = rank.toUpperCase();
+            year = document.getElementById("yearLevel").value;
+            if (rank != "REC" && rank != "LCPL" && rank != "CPL" && rank != "SGT" && rank != "WO2" && rank != "WO1" && rank != "CUO" && year != 0) {
+                return confirm('Are you sure this is the correct year level for this person with this rank?');
+            }
             return confirm('Do you really want to submit the form?'); 
         }
 

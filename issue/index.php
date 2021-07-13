@@ -23,7 +23,7 @@
         <div style="vertical-align:text-top;text-align:center">
             <div style="display:inline-block;width:65%">
                 <h1><?php echo $_GET["action"]; ?></h1>
-                <h3><?php echo getUserValue($_GET["id"], "lastName", "users"); echo ", "; echo getUserValue($_GET["id"], "firstName", "users");  ?></h3>
+                <h3><?php echo getUserValue($_GET["id"],"lastName","users"); echo ", "; echo getUserValue($_GET["id"],"firstName","users");  ?></h3> <!--Displays the selected users name-->
                 <table style="min-width:0;">
                     <tr>
                         <th style="width:60%">Equipment</th>
@@ -38,7 +38,7 @@
                         </tr>";
                         $results = retrieveAllIssuedItemsOnStock();
                         $i = $results->num_rows;
-                        while($i > 0) {
+                        while($i > 0) { // Displays a row of input for every type of equipment issued.
                             $item = $results->fetch_assoc();
                             echo str_replace("ITEM", $item["item"], $rowFormat);
                             $i--;
@@ -89,7 +89,7 @@
             }
             function issueSet(setName) {
                 var set = [];
-                const recSet = [<?php 
+                const recSet = [<?php // These next few PHP scripts is to output a javascript safe array to use when someone clicks the predefined set button.
                                 $row = "";
                                 $results = retrieveIssuedItems("RECIssue");
                                 $items = retrieveAllIssuedItemsOnStock();

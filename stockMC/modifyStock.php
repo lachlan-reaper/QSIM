@@ -36,15 +36,16 @@
                         </tr>";
                         $results = retrieveAllIssuedItemsOnStock();
                         $i = $results->num_rows;
-                        while($i > 0) {
+                        while($i > 0) { // Displays a row for each possible item to modify the stock of
                             $item = $results->fetch_assoc();
                             echo str_replace("ITEM", $item["item"], $rowFormat);
-                            $i = $i - 1;
+                            $i--;
                         }
                     ?>
                 </table> <br>
                 <div style="text-align:right">
                     <?php
+                        // Ensures the button says the correct words and completes the correct functions
                         $rowFormat = "<button type='button' onClick='process(\"ACTION\")' class='searchButtonResult' value='ACTION'>ACTION</button>";
                         $row = $rowFormat;
                         $row = str_replace("ACTION", $_GET["action"], $row);

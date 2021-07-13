@@ -23,6 +23,7 @@
     <maincontents>
         <div style="padding-top:15px;text-align:center;width:100%;">
             <?php
+                // Checks if the user has already tried to do his but provided the wrong password
                 if(isset($_GET["error"])) {
                     if ($_GET["error"] == "true") {
                         echo "<div style='color:red;'><b>Password provided was invalid</b></div><br>";

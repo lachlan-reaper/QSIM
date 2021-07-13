@@ -1,5 +1,4 @@
 <?php
-
 require 'functions.php';
 
 function formatNullAndStringToSQL($variable) {
@@ -24,7 +23,9 @@ function retrieveAccessLevel(string $appointment, string $platoon) : string {
 
     // Finds the starting and sentinel characters for the invidual appointment lines and returns the access level.
     $start = strpos($line, ':');
-    $end = strpos($line, '|');
+    if (! $end = strpos($line, '|')) {
+        $end = strlen($line);
+    }
     $access = substr($line, $start+1, $end-$start-1);
 
     // If the cadet is in the QM PL they require extra priviledges in order to complete their duties.
@@ -67,6 +68,7 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // T
 
     $id = formatNullAndStringToSQL($id);
 
+    // Formats and adds the values to a SQL query
     $i = count($uservalues);
     $values = "";
     while ($i > 0) {
@@ -75,7 +77,6 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // T
         $values = $values . ", `$x`";
     }
     $values = substr($values, 2);
-
     $sql = "SELECT $values FROM `$table` WHERE `id` LIKE $id";
     
     $result = $_SESSION['conn'] -> query($sql);
@@ -98,10 +99,12 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // T
 }
 
 function getContacts() {
+    // Returns an array of the the appointments and contacts for Q Store from the contacts.txt file
     $myfile = fopen("../contacts.txt", "r") or die("Internal server error: Unable to open file!");
     $file = fread($myfile, filesize("../contacts.txt"));
     $lines = explode("|", $file);
     
+    // Iterates through all of the lines of contacts in the file
     $i = 0;
     $max = count($lines);
     while ($i < $max) {
@@ -113,6 +116,7 @@ function getContacts() {
         $lines[$i] = explode(":", $lines[$i]);
         $i++;
     }
+
     return $lines;
 }
 
@@ -314,6 +318,7 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
             }
         }
 
+        // Allows the query to search through two different tables but not double up on results after joining the table together
         $sql = $sql . " AND users.`id` = inventory.`id`";
         $sql = $sql . " ORDER BY users.`lastName` ASC, users.`firstName` ASC, users.`platoon` ASC";
 
@@ -353,6 +358,7 @@ function formatRowSearchResult ($row) : string {
 }
 
 function retrieveAllUserColumns () {
+    // Returns an array of all of the columns used to define a user
     establishConnection();
     $sql = "SHOW COLUMNS FROM `users`;";
     $result = $_SESSION['conn']->query($sql);
@@ -434,6 +440,7 @@ function issueEquipment (string $id, $listOfIssues) {
         $i++;
     }
 
+    // Creates the different SQL queries
     $i = count($listOfIssues);
     while ($i > 0) {
         $i--;
@@ -469,6 +476,7 @@ function returnEquipment (string $id, $listOfReturns) {
     $time = date_format(date_create(), "Y/m/d H:i:s");
     $time = formatNullAndStringToSQL($time);
 
+    // Creates the different SQL queries
     $i = count($listOfReturns);
     while ($i > 0) {
         $i--;
@@ -504,6 +512,7 @@ function declareLostOrDamaged (string $id, $listOfLost) {
     $time = date_format(date_create(), "Y/m/d H:i:s");
     $time = formatNullAndStringToSQL($time);
 
+    // Creates the different SQL queries
     $i = count($listOfLost);
     while ($i > 0) {
         $i--;
@@ -528,7 +537,7 @@ function declareLostOrDamaged (string $id, $listOfLost) {
 }
 
 function setIssue (string $id, $listOfItems) {
-    // Declares a list of items as lost or damaged from the user and makes a record of this transaction.
+    // Redefines the set of equipment issued to a user. Does not create a record of transaction.
     establishConnection();
 
     $formattedMods =  "";
@@ -537,6 +546,7 @@ function setIssue (string $id, $listOfItems) {
     $time = date_format(date_create(), "Y/m/d H:i:s");
     $time = formatNullAndStringToSQL($time);
 
+    // Creates the different SQL queries
     $i = count($listOfItems);
     while ($i > 0) {
         $i--;

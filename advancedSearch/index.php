@@ -47,13 +47,13 @@
                         <option>=</option>
                         <option>>=</option>
                         <option>></option>
-                        <option>!=</option>
+                        <option><></option>
                     </select></td>
                     <td><input class='equipNum' type='number' min='0'></td>
                     </tr>";
                     $results = retrieveAllIssuedItemsOnStock();
                     $i = $results->num_rows;
-                    while($i > 0) {
+                    while($i > 0) { // Iterate through each item on stock and display a formatted row accordingly
                         $item = $results->fetch_assoc();
                         echo str_replace("ITEM", $item["item"], $rowFormat);
                         $i--;

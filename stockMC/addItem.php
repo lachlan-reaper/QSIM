@@ -2,7 +2,6 @@
     require "../databaseFunctions.php";
     session_start();
     redirectingUnauthUsers("stockMC");
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ADD MULTIPLE ROWS OF INPUT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ?>
 
 <html lang="en-us">

@@ -8,6 +8,7 @@ function convertDBToCsvFile ($dbname) {
     $cols = [];
     $row = "";
 
+    // Retrieve the column's names and add it to the first line of that table's .csv save file
     $sql = "SHOW COLUMNS FROM `$dbname`;";
     $results = $_SESSION["conn"]->query($sql);
     $i = $results->num_rows;
@@ -22,6 +23,7 @@ function convertDBToCsvFile ($dbname) {
     fwrite($mfile, $row);
     $size = count($cols);
 
+    // Adds all of that table's information to the rest of the .csv save file
     $sql = "SELECT * FROM `$dbname`;";
     $results = $_SESSION["conn"]->query($sql);
     $i = $results->num_rows;
@@ -40,9 +42,11 @@ function convertDBToCsvFile ($dbname) {
         fwrite($mfile, $row);
         $i--;
     }
+
     fclose($mfile);
 }
 
+// Creates the database's save files
 convertDBToCsvFile('users');
 convertDBToCsvFile('inventory');
 convertDBToCsvFile('equipmentReceipts');

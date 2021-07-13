@@ -3,24 +3,24 @@ require "../databaseFunctions.php";
 session_start();
 redirectingUnauthUsers("issue");
 
-
 $action = $_GET["action"];
 $id = $_GET["id"];
 $mods = $_GET["mods"];
 $prevPage = $_GET["prev"];
 
+// Reformat the URL safe variables into their intended meaning
 $mods = str_replace("-", " ", $mods);
 $mods = explode("|", $mods);
 $i = count($mods);
 
 if ($action == "Issue") {
-    while($i > 0) {
+    while($i > 0) { // Iterates through each item to be affected
         $i--;
         $mods[$i] = explode("_", $mods[$i]);
     }
     issueEquipment($id, $mods);
 } else if ($action == "Return") {
-    while($i > 0) {
+    while($i > 0) { // Iterates through each item to be affected and makes sure the proprosed action is valid
         $i--;
         $mods[$i] = explode("_", $mods[$i]);
         $currentIssued = getUserValue($id, $mods[$i][0], "inventory");
@@ -34,7 +34,7 @@ if ($action == "Issue") {
     }
     returnEquipment($id, $mods);
 } else if ($action == "Lost") {
-    while($i > 0) {
+    while($i > 0) { // Iterates through each item to be affected and makes sure the proprosed action is valid
         $i--;
         $mods[$i] = explode("_", $mods[$i]);
         $currentIssued = getUserValue($id, $mods[$i][0], "inventory");
@@ -47,7 +47,7 @@ if ($action == "Issue") {
         }
     }
     declareLostOrDamaged($id, $mods);
-} else if ($action == "Set") {
+} else if ($action == "Set") { // Iterates through each item to be affected
     while($i > 0) {
         $i--;
         $mods[$i] = explode("_", $mods[$i]);

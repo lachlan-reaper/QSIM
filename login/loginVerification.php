@@ -1,9 +1,6 @@
 <?php
-// require === import AND execute
-// require vs include (require produces fatal error, include produces warning error)
 require '../databaseFunctions.php';
 session_start();
-// Since the script userListFunctions.php requires functions.php itself, it creates an error when you re-require functions.php
 
 
 establishConnection();
@@ -36,7 +33,7 @@ if ($result->num_rows == 1) {
 // If the code reaches this point then it means that the user has not been redirected as 
 // they have not provided the correct username or password
 // The userId of 0 will be reserved for notifying the system of invalid input with NULL for not yet attempted
-$_SESSION['currentUserId'] = 0; 
+$_SESSION['currentUserId'] = "Invalid"; 
 $_SESSION["currentUserAccess"] = "recruit";
 header("Location: http://" . $_SESSION["websiteLoc"] . "/login/");
 

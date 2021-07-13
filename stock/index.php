@@ -25,7 +25,7 @@
 
     <maincontents>
         <?php
-            if (validUser("stockMC", $_SESSION["currentUserAccess"])) {
+            if (validUser("stockMC", $_SESSION["currentUserAccess"])) { // If this user is allowed access, then the link will be displayed.
                 echo "<div style='display:block;width:100%'><a href='../stockMC/'>Master Controls</a> <span style='float:right'><a href='../stockMC/history.php'>Issue History</a></span></div> <br>";
             }
         ?>
@@ -47,7 +47,7 @@
                 </tr>";
                 $results = retrieveStock();
                 $i = $results->num_rows;
-                while($i > 0) {
+                while($i > 0) { // Display a row for each item currently in stock
                     $item = $results->fetch_assoc();
                     $row = $rowFormat;
                     $row = str_replace("ITEM", $item["item"], $row);

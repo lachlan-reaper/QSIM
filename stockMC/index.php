@@ -26,6 +26,12 @@
     <maincontents>
         <table style="border:0px;" class="stockMCTable">
             <tr>
+                <td colspan=2 style="text-align:center">
+                    <br><b>PLEASE ensure you understand how these function work before using them.</b> 
+                    If you are unsure, you can find out more <a href="guides/GuideToStockMC.txt" download>here</a>.
+                </td>
+            </tr>
+            <tr>
                 <td>
                     <h1>Unit Information</h1>
                 </td>
@@ -158,19 +164,13 @@
                         </tr>
                         <tr>
                             <td><button type="button" onClick="redirect('modifyStock.php?action=Add', false)">Add Stock</button></td>
-                            <td><button type="button" onClick="redirect('modifyStock.php?action=Remove', false)">Remove Stock</button> </td>
+                            <td><button type="button" onClick="redirect('modifyStock.php?action=Remove', false)">Write off Stock</button> </td>
                         </tr>
                         <tr>
                             <td><button type="button" onClick="redirect('addItem.php', false)">Add a Stock Item</button></td>
                             <td><button type="button" onClick="redirect('removeItem.php', false)">Remove a Stock Item</button></td>
                         </tr>
                     </table>
-                </td>
-            </tr>
-            <tr>
-                <td colspan=2 style="text-align:center">
-                    <br><b>PLEASE ensure you understand how these function work before using them.</b> 
-                    If you are unsure, you can find out more <a href="GuideToStockMC.txt" download>here</a>.
                 </td>
             </tr>
             <tr>
@@ -239,12 +239,12 @@
                     </table>
                 </td>
             </tr>
-            <tr> <!-- NEED TO MAKE THE FORMATTED EXAMPLES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+            <tr>
                 <td style="text-align:justify">
-                    If you would like a formatted example for updating or entering new users, click <a href="GuideToStockMC.txt">here</a> for the .csv and <a href="GuideToStockMC.txt">here</a> for the .xlsx which will still need to be converted into a .csv for processing.
+                    If you would like a formatted example for updating or entering new users, click <a href="guides/users.csv">here</a> for the .csv and <a href="guides/users.xlsx">here</a> for the .xlsx which will still need to be converted into a .csv for processing.
                 </td>
                 <td style="text-align:justify">
-                    If you would like a formatted example for mass issuing, returning or declaring lost stock, click <a href="GuideToStockMC.txt">here</a> for the .csv and <a href="GuideToStockMC.txt">here</a> for the .xlsx which will still need to be converted into a .csv for processing.
+                    If you would like a formatted example for mass issuing, returning or declaring lost stock, click <a href="guides/inventory.csv">here</a> for the .csv and <a href="guides/inventory.xlsx">here</a> for the .xlsx which will still need to be converted into a .csv for processing.
                 </td>
             </tr>
         </table>

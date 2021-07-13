@@ -37,7 +37,7 @@
                         $id = $_GET["id"];
                         $results = retrieveAllIssuedItemsOnStock();
                         $i = $results->num_rows;
-                        while($i > 0) {
+                        while($i > 0) { // Display a formatted row for each item that can be possibly issued
                             $row = $rowFormat;
                             $item = $results->fetch_assoc();
                             $row = str_replace("ITEM", $item["item"], $row);
@@ -50,6 +50,7 @@
                 </table> <br>
                 <div style="text-align:right">
                     <?php
+                        // Make sure the submit button says the right action and will complete the correct function.
                         $rowFormat = "<button type='button' onClick='process(\"Set\", \"ID\")' class='searchButtonResult' value='Set'>Set</button>";
                         $row = $rowFormat;
                         $row = str_replace("ID", $id, $row);

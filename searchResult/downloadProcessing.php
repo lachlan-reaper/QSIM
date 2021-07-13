@@ -14,9 +14,11 @@
         $searchFilters = "";
     }
 
+    // Retrieves an array of the searched for users
     $searchFilters = formatSearchFilters($searchFilters);
     $results = retrieveSearchQueryResults($userQuery, $searchFilters);
 
+    // Writes a formatted row for each searched user into the file
     $row = "id,firstName,lastName,platoon,rank,appointment\n";
     fwrite($mfile, $row);
     $i = $results->num_rows;

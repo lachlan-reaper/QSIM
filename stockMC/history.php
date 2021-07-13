@@ -25,6 +25,14 @@
 
     <maincontents>
         <h1>History of Issuing</h1>
+        <div style="float:right;">
+            <select onChange="refreshNewFilter()" id="filter">
+                <option value="all">All</option>
+                <option value="issue">Issue</option>
+                <option value="return">Return</option>
+                <option value="lost">Lost</option>
+            </select>
+        </div> <br> <br>
         <table style="min-width:0px" class="stockHistory">
             <tr>
                 <th>Time</th>
@@ -35,6 +43,12 @@
                 <th>Item</th>
             </tr>
             <?php 
+                if (isset($_GET["filter"])) {
+                    $filter = $_GET["filter"];
+                } else {
+                    $filter = "all";
+                }
+
                 $history = "<tbody>";
 
                 $rowFormatIssue =   "<tr>                       <td rowspan=NEXTROWS>TIMESTAMP</td>                      <td rowspan=NEXTROWS>Issued:</td>    <td rowspan=NEXTROWS>By: SERVER</td> <td rowspan=NEXTROWS>To: RECEIVER</td> <td>NUMx</td> <td>ITEM</td> </tr>";
@@ -46,88 +60,148 @@
 
                 $results = retrieveStockHistory();
 
-                if (isset($_GET["maxRows"])) {
-                    $max_rows = $_GET['maxRows'];
-                } else {
-                    $max_rows = 20;
-                }
-
                 $lastDOI = "";
                 $lastServer = "";
                 $lastReceiver = "";
                 $lastMode = 2; // -1 for Lost/Damaged, 0 for Returned, 1 for Issued, 2 for Nothing Prior
                 $numOfConsecRows = 0;
-                $num_rows = 0;
                 $i = $results->num_rows;
-                while($i > 0) {
+                while($i > 0) { // Display a row for every new input in the history log
                     $row = "";
                     $numOfConsecRows++;
 
                     $receipt = $results->fetch_assoc();
                     $num = $receipt["changeInNum"];
-
-                    if ($receipt["time"] == $lastDOI and $lastReceiver == $receipt["id"] and $lastServer == $receipt["serverId"]) {
+                    
+                    // If the current receipt was issued at the same time as the last one by the same person then that information can be skipped.
+                    if ($receipt["time"] == $lastDOI and $lastReceiver == $receipt["id"] and $lastServer == $receipt["serverId"]) { 
                         $receipt["time"] = "";
 
+                        // Checks if the last row was of the same function type as the current one
                         if ($receipt["lostOrDamaged"] == 1 and $lastMode == -1) {
-                            $row = $rowFormatLostShort;
-                            $num = $num * -1;
+                            if ($filter == "all" or $filter == "lost") {
+                                $row = $rowFormatLostShort;
+                                $num = $num * -1;
+                            } else {
+                                $i--;
+                                $numOfConsecRows = 0;
+                                continue;
+                            }
                         } else if ($num > 0 and $lastMode == 1) {
-                            $row = $rowFormatIssueShort;
+                            if ($filter == "all" or $filter == "issue") {
+                                $row = $rowFormatIssueShort;
+                            } else {
+                                $i--;
+                                $numOfConsecRows = 0;
+                                continue;
+                            }
                         } else if ($num < 0 and $lastMode == 0) {
-                            $row = $rowFormatReturnShort;
-                            $num = $num * -1;
+                            if ($filter == "all" or $filter == "return") {
+                                $row = $rowFormatReturnShort;
+                                $num = $num * -1;
+                            } else {
+                                $i--;
+                                $numOfConsecRows = 0;
+                                continue;
+                            }
                         } else {
+                            // Replaces NEXTROWS to instruct rowspan the date, server and recipient boxes should stretch
                             $history = str_replace("NEXTROWS", $numOfConsecRows, $history);
-                            $history = $history . "</tbody><tbody>";
                             $numOfConsecRows = 0;
-                            $row = "<tr><td></td></tr>" . $row;
+                            if ($lastDOI != "") {
+                                $row = "<tr><td></td></tr>" . $row;
+                            }
+                            $lastDOI = $receipt["time"];
+                            $lastReceiver = $receipt["id"];  
+                            $lastServer = $receipt["serverId"];
+                            
+                            // Checks what function type the current row is
                             if ($receipt["lostOrDamaged"] == 1) {
-                                $row = $rowFormatLost;
                                 $lastMode = -1;
-                                $num = $num * -1;
+                                if ($filter == "all" or $filter == "lost") {
+                                    $row = $rowFormatLost;
+                                    $num = $num * -1;
+                                } else {
+                                    $i--;
+                                    continue;
+                                }
                             } else if ($num > 0) {
-                                $row = $rowFormatIssue;
                                 $lastMode = 1;
+                                if ($filter == "all" or $filter == "issue") {
+                                    $row = $rowFormatIssue;
+                                } else {
+                                    $i--;
+                                    continue;
+                                }
                             } else if ($num < 0) {
-                                $row = $rowFormatReturn;
                                 $lastMode = 0;
-                                $num = $num * -1;
+                                if ($filter == "all" or $filter == "return") {
+                                    $row = $rowFormatReturn;
+                                    $num = $num * -1;
+                                } else {
+                                    $i--;
+                                    continue;
+                                }
                             } else {
                                 echo "Error! Receipt Num = " . $receipt["receiptNum"];
                                 continue;
                             }
+
+                            // Adds a tbody for alternate colouring
+                            $history = $history . "</tbody><tbody>";
                         }
-                    } else {
+                    } else { // Else nothing is in common
+                        // Replaces NEXTROWS to instruct rowspan the date, server and recipient boxes should stretch
                         $history = str_replace("NEXTROWS", $numOfConsecRows, $history);
-                        $history = $history . "</tbody><tbody>";
                         $numOfConsecRows = 0;
-                        if (! $lastDOI == "") {
+                        if ($lastDOI != "") {
                             $row = "<tr><td></td></tr>" . $row;
                         }
                         $lastDOI = $receipt["time"];
                         $lastReceiver = $receipt["id"];  
                         $lastServer = $receipt["serverId"];
-
+                        
+                        // Checks what function type the current row is
                         if ($receipt["lostOrDamaged"] == 1) {
-                            $row = $rowFormatLost;
                             $lastMode = -1;
-                            $num = $num * -1;
+                            if ($filter == "all" or $filter == "lost") {
+                                $row = $rowFormatLost;
+                                $num = $num * -1;
+                            } else {
+                                $i--;
+                                continue;
+                            }
                         } else if ($num > 0) {
-                            $row = $rowFormatIssue;
                             $lastMode = 1;
+                            if ($filter == "all" or $filter == "issue") {
+                                $row = $rowFormatIssue;
+                            } else {
+                                $i--;
+                                continue;
+                            }
                         } else if ($num < 0) {
-                            $row = $rowFormatReturn;
                             $lastMode = 0;
-                            $num = $num * -1;
+                            if ($filter == "all" or $filter == "return") {
+                                $row = $rowFormatReturn;
+                                $num = $num * -1;
+                            } else {
+                                $i--;
+                                continue;
+                            }
                         } else {
                             echo "Error! Receipt Num = " . $receipt["receiptNum"];
                             continue;
                         }
+
+                        // Adds a tbody for alternate colouring
+                        $history = $history . "</tbody><tbody>";
                     }
 
+                    // Get the information of the one who served the equipment
                     $server = getMultiUserValues($receipt["serverId"], array('firstName', 'lastName'), 'users');
                     $server = $server["lastName"] . ", " . $server["firstName"];
+                    
+                    // Get the information of the one who received the equipment, used same variable name to save memory
                     $receiver = getMultiUserValues($receipt["id"], array('firstName', 'lastName'), 'users');
                     $receiver = $receiver["lastName"] . ", " . $receiver["firstName"];
                     
@@ -139,7 +213,6 @@
                     
                     $history = $history . $row;
                     $i--;
-                    $num_rows++;
                 }
                 $history = str_replace("NEXTROWS", $numOfConsecRows+1, $history);
                 $history = $history . "</tbody>";
@@ -147,6 +220,23 @@
             ?>
         </table>
         <script>
+            currFilter = "<?php echo $filter?>";
+            select = document.getElementById("filter");
+            if (currFilter == "all") {
+                select.selectedIndex = 0;
+            } else if (currFilter == "issue") {
+                select.selectedIndex = 1;
+            } else if (currFilter == "return") {
+                select.selectedIndex = 2;
+            } else if (currFilter == "lost") {
+                select.selectedIndex = 3;
+            }
+
+            function refreshNewFilter() {
+                newFilter = document.getElementById("filter").value;
+                window.location.href = "http://<?php echo $_SESSION["websiteLoc"] ?>/stockMC/history.php?filter=" + newFilter;
+            }
+
             function redirect (URL, confirmation) {
                 if (confirmation) {
                     if (confirm('Do you really want to submit the form?')) {

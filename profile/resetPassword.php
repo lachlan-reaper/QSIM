@@ -16,9 +16,9 @@ session_start();
 establishConnection();
 
 $id = $_GET["id"];
-if ($id != $_SESSION["currentUserId"]) {
-    redirectingUnauthUsers("issue");
-} // Else that person can freely change their own password
+if ($id != $_SESSION["currentUserId"]) { // Makes sure that anyone trying to change a password is only changing their own unles they are an admin
+    redirectingUnauthUsers("stockMC");
+}
 
 $hashedpass = password_hash("cadet", PASSWORD_BCRYPT);
 $sql = "UPDATE `users` SET `userpass` = '$hashedpass' WHERE `id` = '$id';";

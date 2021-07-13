@@ -12,6 +12,8 @@ while ($i < $max) {
     $unfId = $id;
 
     $id = formatNullAndStringToSQL($id);
+
+    // Remove from the database
     $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";
     $sqlInventory = "DELETE FROM `inventory` WHERE `id` = $id;";
     $sqlHistory = "DELETE FROM `equipmentreceipts` WHERE `id` = $id;";
@@ -19,7 +21,9 @@ while ($i < $max) {
     $result = $_SESSION['conn'] -> query($sqlInventory);
     $result = $_SESSION['conn'] -> query($sqlHistory);
 
+    // Delete profile picture
     unlink("../photo/$unfId.jpg");
+    
     $i++;
 }
 ?>

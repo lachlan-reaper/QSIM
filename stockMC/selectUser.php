@@ -20,12 +20,13 @@
     ?>
 
     <script>
-        document.getElementById("searchTab").className = "activetab";
+        document.getElementById("stockTab").className = "activetab";
     </script>
 
     <maincontents>
 
         <form action="selectUser.php" method="GET">
+            <input type="hidden" id="function" name="function" value="<?php echo $_GET["function"] ?>">
             <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult">
             <span style="text-align:center;">
                 <input type="submit" class="searchButtonResult" value="Search"></input>
@@ -58,6 +59,7 @@
             </tr>
 
             <?php
+                // Makes sure that the searchQuery parameter is set for the rest of the function. This stops warning messages from popping up and confusing the user.
                 if (!isset($_GET["searchQuery"])) {
                     $userQuery = "";
                 } else {
@@ -80,6 +82,7 @@
 
                     $function = $_GET['function'];
                     $rowFormat = str_replace('FUNCTION', $function, $rowFormat);
+
                     if ($function == "manualModifyUser") {
                         $word = "Modify";
                         $scriptDestination = "changeUser";
@@ -88,16 +91,17 @@
                         $word = "DELETE";
                         $scriptDestination = "databaseProcessing";
                         $click = "onClick='return confirmForm();'";
-                    } else {
+                    } else { // Makes sure that if an error occurs that no unintentional side effects will occur
                         $word = "DO NOT CLICK! ERROR!";
                         $scriptDestination = "../home/";
                         $click = "";
                     }
+
                     $rowFormat = str_replace('WORD', $word, $rowFormat);
                     $rowFormat = str_replace('SCRIPT', $scriptDestination, $rowFormat);
                     $rowFormat = str_replace('CLICK', $click, $rowFormat);
 
-                    while($i > 0) {
+                    while($i > 0) { // Displays a new row for each searched account with formatted information
                         $row = $results->fetch_assoc();
                         $edittedRow = $rowFormat;
                         

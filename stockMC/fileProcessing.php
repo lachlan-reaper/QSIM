@@ -25,10 +25,11 @@ if ($function == "fileAddUsers") {
 header("Location: http://" . $_SESSION["websiteLoc"] . "/stockMC/");
 
 function arr2dSort ($a, $b) {
+    // Sorts an array alphabetically by the first item of each of the arrays
     $arr = array($a[0], $b[0]);
     $arrS = $arr;
     sort($arrS);
-    if ($a[0] == $b[0]) {
+    if ($a[0] === $b[0]) {
         return 0;
     } else if ($arr === $arrS) {
         return -1;
@@ -38,15 +39,19 @@ function arr2dSort ($a, $b) {
 }
 
 function fileAddUsers () {
+    // Adds users based on the file sent through HTML form method POST
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
     
     $userParameterArray = array();
     $userParameterArrayIndexes = array();
+
     $file = fopen("tmp.csv", "r");
     $firstLine = fgets($file);
     $firstLine = csvLineToArr($firstLine);
 
+    // Creates an array that will act as key for where each of the variables could be found, i.e. if the first column stores a User's platoon then this array when given the 
+    // key of "platoon" will provide the value of 1, pointing to the first index of the array
     $results = retrieveAllUserColumns();
     $i = $results->num_rows;
     while ($i > 0) {
@@ -65,23 +70,28 @@ function fileAddUsers () {
             $name = ucfirst($name);
         }
         $userParameterArray[] = $DBname;
-        $userParameterArrayIndexes[$DBname] = array_search($name, $firstLine);
+
+        if (! $userParameterArrayIndexes[$DBname] = array_search($name, $firstLine)) {
+            die("The provided file does not contain all of the required columns or a column may be misspelt.");
+        }
     }
     
 
+    // Iterates throgh each of the user entries
     $numOfLines = count(file("tmp.csv")) - 1; // -1 is to not include the first line
     $lineNum = 0;
     while ($lineNum < $numOfLines) {
         $line = fgets($file);
         $line = csvLineToArr($line);
 
+        // Iterates through each item and assigns in a new array the value of the item to the key of the corresponding column
+        // I.e. the value of the user's password is assigned to the key of 'userpass'
         $i = 0;
         $max = count($userParameterArray);
         while ($i < $max) {
             $name = $userParameterArray[$i];
             $index = $userParameterArrayIndexes[$name];
-            $value = $line[$index];
-            $userValue[$name] = $value;
+            $userValue[$name] = $line[$index];
             $i++;
         }
 
@@ -92,6 +102,7 @@ function fileAddUsers () {
 
     unlink("tmp.csv");
 
+    // Adds all of the profile pictures
     $i = 0;
     $num = count($_FILES["userPhotos"]["name"]);
     while ($i < $num) {
@@ -103,15 +114,19 @@ function fileAddUsers () {
 }
 
 function fileRemoveUsers () {
+    // Removes users based on the file sent through HTML form method POST
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
     
     $userParameterArray = array();
     $userParameterArrayIndexes = array();
+
     $file = fopen("tmp.csv", "r");
     $firstLine = fgets($file);
     $firstLine = csvLineToArr($firstLine);
     
+    // Creates an array that will act as key for where each of the variables could be found, i.e. if the first column stores a User's first name then this array when given the 
+    // key of "firstName" will provide the value of 1, pointing to the first index of the array
     $userParameterArray[] = "id";
     $userParameterArrayIndexes["id"] = array_search("Id", $firstLine);
     $userParameterArray[] = "firstName";
@@ -119,25 +134,29 @@ function fileRemoveUsers () {
     $userParameterArray[] = "lastName";
     $userParameterArrayIndexes["lastName"] = array_search("Last Name", $firstLine);
 
+    // Iterates through each of the user entries
     $numOfLines = count(file("tmp.csv")) - 1; // -1 is to not include the first line
     $lineNum = 0;
     while ($lineNum < $numOfLines) {
         $line = fgets($file);
         $line = csvLineToArr($line);
 
+        // Iterates through each item and assigns in a new array the value of the item to the key of the corresponding column
+        // I.e. the value of the user's password is assigned to the key of 'userpass'
         $i = 0;
         $max = count($userParameterArray);
         while ($i < $max) {
             $name = $userParameterArray[$i];
             $index = $userParameterArrayIndexes[$name];
-            $value = $line[$index];
-            $userValue[$name] = $value;
+            $userValue[$name] = $line[$index];
             $i++;
         }
 
         removeUserArr($userValue);
 
         $id = $userValue["id"];
+
+        // Removes the profile pic
         $filename = "../photo/$id.jpg";
         if (file_exists($filename)) {
             unlink($filename);
@@ -146,18 +165,25 @@ function fileRemoveUsers () {
         $lineNum++;
     }
     unlink("tmp.csv");
+
+    // Ensures stock table numbers are accurate
+    refreshStockTable();
 }
 
-function fileUpdateUsers () { // MAKE IT ACCEPT NAMES INSTEAD OF ID ONLY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+function fileUpdateUsers () { 
+    // Updates users based on the file sent through HTML form method POST
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
     
     $userParameterArray = array();
     $userParameterArrayIndexes = array();
+
     $file = fopen("tmp.csv", "r");
     $firstLine = fgets($file);
     $firstLine = csvLineToArr($firstLine);
 
+    // Creates an array that will act as key for where each of the variables could be found, i.e. if the first column stores a User's platoon then this array when given the 
+    // key of "platoon" will provide the value of 1, pointing to the first index of the array
     $results = retrieveAllUserColumns();
     $i = $results->num_rows;
     while ($i > 0) {
@@ -176,25 +202,27 @@ function fileUpdateUsers () { // MAKE IT ACCEPT NAMES INSTEAD OF ID ONLY !!!!!!!
         }
 
         $result = array_search(strtolower($name), array_map('strtolower', $firstLine));
-        if (! ($result === FALSE)) { // It returns fales if not found, thus wont do it if so. NEED TO CHECK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        if (! ($result === FALSE)) { // It returns false if not found, thus wont do it if so.
             $userParameterArray[] = $DBname;
             $userParameterArrayIndexes[$DBname] = $result;
         }
     }
 
+    // Iterates throgh each of the user entries
     $numOfLines = count(file("tmp.csv")) - 1; // -1 is to not include the first line
     $lineNum = 0;
     while ($lineNum < $numOfLines) {
         $line = fgets($file);
         $line = csvLineToArr($line);
 
+        // Iterates through each item and assigns in a new array the value of the item to the key of the corresponding column
+        // I.e. the value of the user's password is assigned to the key of 'userpass'
         $i = 0;
         $max = count($userParameterArray);
         while ($i < $max) {
             $name = $userParameterArray[$i];
             $index = $userParameterArrayIndexes[$name];
-            $value = $line[$index];
-            $userValue[$name] = $value;
+            $userValue[$name] = $line[$index];
             $i++;
         }
 
@@ -205,6 +233,7 @@ function fileUpdateUsers () { // MAKE IT ACCEPT NAMES INSTEAD OF ID ONLY !!!!!!!
 
     unlink("tmp.csv");
 
+    // Updates if necessary all of the profile pictures
     $i = 0;
     $num = count($_FILES["userPhotos"]["name"]);
     while ($i < $num) {
@@ -216,6 +245,7 @@ function fileUpdateUsers () { // MAKE IT ACCEPT NAMES INSTEAD OF ID ONLY !!!!!!!
 }
 
 function fileIssueStock () {
+    // Issues stock en masse based on the file sent through HTML form method POST
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
 
@@ -229,6 +259,7 @@ function fileIssueStock () {
         $line = fgets($mfile);
         $line = csvLineToArr($line);
 
+        // Formats each item in the line into an array
         $i = 0;
         $num = count($line);
         $listOfIssues = [];
@@ -252,6 +283,7 @@ function fileIssueStock () {
 }
 
 function fileReturnStock () {
+    // Returns stock en masse based on the file sent through HTML form method POST
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
 
@@ -265,6 +297,7 @@ function fileReturnStock () {
         $line = fgets($mfile);
         $line = csvLineToArr($line);
 
+        // Formats each item in the line into an array
         $i = 0;
         $num = count($line);
         $listOfReturns = [];
@@ -288,6 +321,7 @@ function fileReturnStock () {
 }
 
 function fileLostStock () {
+    // Declares stock en masse as lost or damaged based on the file sent through HTML form method POST
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
 
@@ -301,6 +335,7 @@ function fileLostStock () {
         $line = fgets($mfile);
         $line = csvLineToArr($line);
 
+        // Formats each item in the line into an array
         $i = 0;
         $num = count($line);
         $listOfLost = [];

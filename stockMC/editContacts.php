@@ -33,15 +33,17 @@
                         <td><input class='contacts' id='APPT' type='text' value=VALUES style='width:100%'></td>
                         </tr>";
                         $contacts = getContacts();
-                        $row1 = $rowFormat;
-                        $row2 = $rowFormat;
 
+                        // Create and display the RQMS's contact details
+                        $row1 = $rowFormat;
                         $row1 = str_replace("APPT", $contacts[0][0], $row1);
                         $row1 = str_replace("VALUES", $contacts[0][1], $row1);
+                        echo $row1;
+                        
+                        // Create and display the QM's contact details
+                        $row2 = $rowFormat;
                         $row2 = str_replace("APPT", $contacts[1][0], $row2);
                         $row2 = str_replace("VALUES", $contacts[1][1], $row2);
-
-                        echo $row1;
                         echo $row2;
                     ?>
                 </table> <br>

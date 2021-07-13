@@ -34,7 +34,7 @@
                         </tr>";
                         $results = retrieveAllIssuedItemsOnStock();
                         $i = $results->num_rows;
-                        while($i > 0) {
+                        while($i > 0) { // Displays a row to affect for each currently issued item
                             $item = $results->fetch_assoc();
                             echo str_replace("ITEM", $item["item"], $rowFormat);
                             $i--;

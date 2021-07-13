@@ -2,17 +2,11 @@
 
 require '../databaseFunctions.php';
 
-// refreshUserAccess("3718363097");
-// refreshAllAccess();
-// refreshStockTotal();
-// refreshStockOnLoan();
-// refreshStockTable();
-// completeRefresh();
-
 function refreshUserAccess(string $id) {
     // Given the ID num of a user, it will check the user's access level as defined by their appointment and thusly correct any discrepancies automatically.
     establishConnection();
 
+    // Retrieve User information
     $id = formatNullAndStringToSQL($id);
     $sql = "SELECT `platoon`, `appointment` FROM `users` WHERE `id` LIKE $id";
     $result = $_SESSION['conn'] -> query($sql);
@@ -33,13 +27,13 @@ function refreshUserAccess(string $id) {
         echo '</script>';
         return;
     }
+
     $access = retrieveAccessLevel($appointment, $platoon);
-    
     $id =       formatNullAndStringToSQL($id);
     $access =   formatNullAndStringToSQL($access);
 
+    // Update User information
     $sql = "UPDATE `users` SET `access` = $access WHERE `users`.`id` = $id;";
-    
     if ($_SESSION['conn']->query($sql) === TRUE) {
         echo "Record updated successfully";
     } else {
@@ -48,6 +42,7 @@ function refreshUserAccess(string $id) {
 }
 
 function commaRemoval($matches) {
+    // Reformats csv lines into strings without actual commas that would otherwise interrupt the csv formatting process
     $line = $matches[0];
     $line = str_replace('"', '', $line);
     $line = str_replace(',', '&comm;', $line);
@@ -58,23 +53,29 @@ function csvLineToArr(string $line) {
     // 1. Replace all [""] with [&dbqt;]
     // 2. Preg-replace [/"(.*),(.*)"/] with [$1&comm;$2]
     // 3. Explode the string with [,]
-    // 4. Iterate through the array, replacing each [&dbqt;] and [&comm;]
+    // 4. Iterate through the array, replacing each [&dbqt;] and [&comm;] with ["] and [,] respectively
     
     $line = str_replace('""', '&dbqt;', $line);
+
+    // Replaces commas inside of a pair of double quotes
     $line = preg_replace_callback('|"[^"]+"|', 'commaRemoval', $line);
+    
     $arr = explode(",", $line);
     $i = count($arr);
     $parameters = array('&comm;', '&dbqt;');
     $replacements = array(',', '"');
-    while ($i > 0) {
+    while ($i > 0) { // For each item in the new array, replace the substituting identifiers into their respective characters
         $i--;
         $arr[$i] = str_replace($parameters, $replacements, $arr[$i]);
     }
+
     $arr[count($arr)-1] = trim($arr[count($arr)-1]);
+
     return $arr;
 }
 
 function strToCsv (string $line) {
+    // Converts a str into a csv safe format, does only one item at a time
     $line = str_replace('"', '""', $line);
     if (str_contains($line, ",")) {
         $line = '"' . $line . '"';
@@ -83,6 +84,7 @@ function strToCsv (string $line) {
 }
 
 function addUserArr(array $userValues) {
+    // Adds a user based off of a customly keyed array
     establishConnection();
     $hasheduserpass = password_hash($userValues["userpass"], PASSWORD_BCRYPT);
     $access = retrieveAccessLevel($userValues["appointment"], strtoupper($userValues["platoon"]));
@@ -98,6 +100,7 @@ function addUserArr(array $userValues) {
     $company =      strtoupper( formatNullAndStringToSQL($userValues["company"]));
     $platoon =      strtoupper( formatNullAndStringToSQL($userValues["platoon"]));
     $section =                  formatNullAndStringToSQL($userValues["section"]);
+    
     if ($userValues["yearLevel"] === 0) {
         $yearLevel = '0';
     } else {
@@ -130,7 +133,8 @@ function addUserArr(array $userValues) {
     }
 }
 
-function removeUserArr(array $userValues) { // MAKE IT ACCEPT NAMES INSTEAD OF ID
+function removeUserArr(array $userValues) {
+    // Removes a user by a customly keyed array
     establishConnection();
 
     $id = $userValues["id"];
@@ -143,27 +147,67 @@ function removeUserArr(array $userValues) { // MAKE IT ACCEPT NAMES INSTEAD OF I
     $result = $_SESSION['conn'] -> query($sqlHistory);
 }
 
-function updateUserArr(array $userValues) { // MAKE IT NOT NEED ALL VARIABLES!!!!!!!!!!!!!!!!!!!!!
+function updateUserArr(array $userValues) {
+    // Updates a user based on a customly keyed array
     establishConnection();
-    $access = retrieveAccessLevel($userValues["appointment"], strtoupper($userValues["platoon"]));
-
-    $firstName =                formatNullAndStringToSQL($userValues["firstName"]);
-    $lastName =                 formatNullAndStringToSQL($userValues["lastName"]);
-    $id =                       formatNullAndStringToSQL($userValues["id"]);
-    $access =                   formatNullAndStringToSQL($access);
-    $username =                 formatNullAndStringToSQL($userValues["username"]);
-    $rank =         strtoupper( formatNullAndStringToSQL($userValues["rank"]));
-    $appointment =  strtolower( formatNullAndStringToSQL($userValues["appointment"]));
-    $company =      strtoupper( formatNullAndStringToSQL($userValues["company"]));
-    $platoon =      strtoupper( formatNullAndStringToSQL($userValues["platoon"]));
-    $section =                  formatNullAndStringToSQL($userValues["section"]);
-    if ($userValues["yearLevel"] === 0) {
-        $yearLevel = '0';
-    } else {
-        $yearLevel = $userValues["yearLevel"];
+    $variables = "";
+    
+    // If each value is set, then it can be added to the set of variables to modify
+    if (isset($userValues["firstName"])) {
+        $firstName = formatNullAndStringToSQL($userValues["firstName"]);
+        $variables = $variables . ", `firstName` = $firstName";
+    }
+    if (isset($userValues["lastName"])) {
+        $lastName = formatNullAndStringToSQL($userValues["lastName"]);
+        $variables = $variables . ", `lastName` = $lastName";
+    }
+    if (isset($userValues["id"])) {
+        $id = formatNullAndStringToSQL($userValues["id"]);
+        $variables = $variables . ", `id` = $id";
+    }
+    if (isset($userValues["appointment"]) and isset($userValues["platoon"])) {
+        $access = retrieveAccessLevel($userValues["appointment"], strtoupper($userValues["platoon"]));
+        $access = formatNullAndStringToSQL($access);
+        $variables = $variables . ", `access` = $access";
+    }
+    if (isset($userValues["username"])) {
+        $username =                 formatNullAndStringToSQL($userValues["username"]);
+        $variables = $variables . ", `username` = $username";
+    }
+    if (isset($userValues["rank"])) {
+        $rank = strtoupper( formatNullAndStringToSQL($userValues["rank"]));
+        $variables = $variables . ", `rank` = $rank";
+    }
+    if (isset($userValues["appointment"])) {
+        $appointment = strtolower( formatNullAndStringToSQL($userValues["appointment"]));
+        $variables = $variables . ", `appointment` = $appointment";
+    }
+    if (isset($userValues["company"])) {
+        $company = strtoupper( formatNullAndStringToSQL($userValues["company"]));
+        $variables = $variables . ", `company` = $company";
+    }
+    if (isset($userValues["platoon"])) {
+        $platoon = strtoupper( formatNullAndStringToSQL($userValues["platoon"]));
+        $variables = $variables . ", `platoon` = $platoon";
+    }
+    if (isset($userValues["section"])) {
+        $section = formatNullAndStringToSQL($userValues["section"]);
+        $variables = $variables . ", `section` = $section";
+    }
+    
+    if (isset($userValues["yearLevel"])) {
+        if ($userValues["yearLevel"] === 0) {
+            $yearLevel = '0';
+        } else {
+            $yearLevel = $userValues["yearLevel"];
+        }
+        $variables = $variables . ", `yearLevel` = $yearLevel";
     }
 
-    $sql = "UPDATE `users` SET `firstName` = $firstName, `lastName` = $lastName, `access` = $access, `username` = $username, `rank` = $rank, `appointment` = $appointment, `yearLevel` = $yearLevel, `company` = $company, `platoon` = $platoon, `section` = $section WHERE `id` = $id";
+    // Remove unnecessary commas at the front
+    $variables = substr($variables, 2);
+
+    $sql = "UPDATE `users` SET $variables WHERE `id` = $id";
     $result = $_SESSION['conn'] -> query($sql);
 }
 
@@ -190,9 +234,10 @@ function refreshAllAccess() {
         
         $i--;
     }
-    if ($_SESSION['conn']->multi_query($sql) === TRUE) {
+
+    if ($_SESSION['conn']->multi_query($sql) === TRUE) { // If the query is successful
         echo "Records updated successfully";
-    } else {
+    } else { // Else, display the error
         echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error;
     }
 }
@@ -215,15 +260,17 @@ function refreshStockOnLoan () {
         $item = $items->fetch_assoc();
         $name = $item['item'];
 
-        $sql = "SELECT SUM(`$name`) AS 'sum' FROM `inventory`";
+        // SUM() is a MySQL inbuilt function that performs the function in a more efficient manner
+        $sql = "SELECT SUM(`$name`) AS 'sum' FROM `inventory` WHERE NOT (`id` = 'customIssue' OR `id` = 'AFXIssue' OR `id` = 'RECIssue' OR `id` = 'stdIssue')";
         $result = $_SESSION['conn'] -> query($sql);
+
         $sum = $result->fetch_assoc();
         $sum = $sum['sum'];
 
         $sql = "UPDATE `stock` SET `onLoan` = '$sum' WHERE `item` = '$name';";
         $result = $_SESSION['conn'] -> query($sql);
         
-        $i = $i - 1;
+        $i--;
     }
 }
 

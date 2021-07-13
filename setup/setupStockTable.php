@@ -13,6 +13,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Add all of the initial default items
 $sql = "INSERT INTO `stock` (`item`) VALUES 
     ('DPCU Pants'),
     ('DPCU Shirt'),

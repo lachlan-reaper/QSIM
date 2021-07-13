@@ -13,6 +13,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// SQL commands to create the four tables
 $sql1 = "CREATE TABLE users (
     id varchar(12) NOT NULL,
     firstName varchar(32) NOT NULL,
@@ -67,6 +68,7 @@ $sql4 = "CREATE TABLE equipmentReceipts (
     PRIMARY KEY (receiptNum)
 );";
 
+// Queries the predefined SQL commands
 $result = $conn->query($sql1);
 if ($result == TRUE) {
     echo "Good - 1";
@@ -101,6 +103,7 @@ require '../databaseFunctions.php';
 establishConnection();
 addUser("Admin", "Admin", "4242424242", "Admin", "Admin", "MAJ", "commander", "RHQ", "RHQ", "", 0);
 
+// Adds the predefined sets into the inventory table so they may be used
 $sql = "INSERT INTO `inventory` (`id`) VALUES ('stdIssue');INSERT INTO `inventory` (`id`) VALUES ('RECIssue');INSERT INTO `inventory` (`id`) VALUES ('AFXIssue');INSERT INTO `inventory` (`id`) VALUES ('customIssue');";
 if ($_SESSION['conn']->multi_query($sql) === TRUE) {
     echo "Standard issue records created successfully <br>";

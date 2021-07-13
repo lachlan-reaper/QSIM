@@ -15,13 +15,15 @@
         <img src="../images/Cadet crest.png" width="100%"> <br> 
         <div style="padding-top: 15px; text-align: center;">
             <?php
+                require "../databaseFunctions.php";
                 session_start();
                 if(empty($_SESSION) or ! isset($_SESSION["currentUserId"])){
                     $x=1;
-                } else if ($_SESSION["currentUserId"] === 0) {
+                } else if ($_SESSION["currentUserId"] === "Invalid") {
                     echo "<div id='invalidLogin'>Invalid Username or Password</div>";
                 }
             ?>
+            <span style="float:right;font-size:medium;"><a href="" onClick="return displayContact()">Forgot Password?</a></span>
             <form action="loginVerification.php" method="post">
                 <input type="text" id="username" name="user" placeholder="Username" required> <br>
                 <input type="password" id="password" name="pass" placeholder="Password" required> <br>
@@ -29,6 +31,12 @@
             </form>
         </div>
     </loginbox>
+    <script>
+        function displayContact () {
+            alert("Please contact the QM at <?php echo getContacts()[1][1]; ?> and ask for your password to be reset.");
+            return false;
+        }
+    </script>
 </body>
 
 </html>

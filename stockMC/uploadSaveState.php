@@ -31,7 +31,7 @@ function convertCsvToDBSave($dbname) {
         $line = fgets($mfile);
         $lineSql = csvLineToArr($line);
         $i = count($lineSql);
-        while ($i > 0) {
+        while ($i > 0) { // For each item in the line array, formats the items into a SQL query
             $i--;
             if (is_numeric($lineSql[$i])) {
                 if ($cols[$i] == "id" or $cols[$i] == "serverId" or $cols[$i] == "platoon" or $cols[$i] == "section" or $cols[$i] == "username" or $cols[$i] == "company") {
@@ -41,13 +41,15 @@ function convertCsvToDBSave($dbname) {
                 $lineSql[$i] = formatNullAndStringToSQL($lineSql[$i]);
             }
         }
-        $lineSql = implode(", ", $lineSql);
+        $lineSql = implode(", ", $lineSql); // Recombines the array back into a SQL safe string
+
         $sql = "INSERT INTO `$dbname` ($colsStr) VALUES ($lineSql);";
         $results = $_SESSION["conn"]->query($sql);
-        if (! $results) {
-            echo "bad!<br>";
-            echo $_SESSION["conn"]->error;
-            echo $sql;
+
+        if (! $results) { // If the query didn't work
+            echo "SQL Query failed due to these reasons:<br>";
+            echo $_SESSION["conn"]->error . "<br>";
+            echo "The SQL in issue: " . $sql . "<br>";
         }
         $numOfLines--;
     }
@@ -91,7 +93,7 @@ convertCsvToDBSave('stock');
 convertCsvToDBSave('inventory');
 convertCsvToDBSave('equipmentReceipts');
 
-// Delete photos
+// Delete photos in the zip folder
 $handle = opendir($zipFolder . "/photo/");
 while (false !== ($entry = readdir($handle))) {
     if ($entry != "." && $entry != ".." && !is_dir($zipFolder . "/photo/" . $entry)) {

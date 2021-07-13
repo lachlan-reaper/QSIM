@@ -38,7 +38,7 @@
             
             $x = count($items);
             $i = 0;
-            while ($i < $x) {
+            while ($i < $x) { // Formats and displays the filter boxes
                 $row = $filterBoxFormat;
                 $id = str_replace("-", " ", $items[$i][0]);
                 $row = str_replace("ITEM", $id, $row);
@@ -103,7 +103,7 @@
                 if ($i === 0) {
                     echo "<tr><td colspan=6 style='text-align:center;color:red;'>NO USERS FOUND</td></tr>";
                 } else {
-                    while($i > 0) {
+                    while($i > 0) { // Displays all of the searched for users
                         $row = $results->fetch_assoc();
                         echo formatRowSearchResult($row);
                         $i--;
