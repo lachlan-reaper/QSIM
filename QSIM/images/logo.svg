@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="171.539 167.591 167.284 167.284" width="167.284" height="167.284" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
-  <circle style="fill: rgb(216, 216, 216);" cx="255.181" cy="251.233" r="83.642"/>
-  <path d="M 133.597 242.649 m -66.092 0 a 66.092 66.092 0 1 0 132.184 0 a 66.092 66.092 0 1 0 -132.184 0 Z M 133.597 242.649 m -39.655 0 a 39.655 39.655 0 0 1 79.31 0 a 39.655 39.655 0 0 1 -79.31 0 Z" style="fill: rgb(0, 100, 7);" transform="matrix(-0.707107, 0.707107, -0.707107, -0.707107, 521.227088, 328.344427)" bx:shape="ring 133.597 242.649 39.655 39.655 66.092 66.092 1@314e02db"/>
-  <line style="stroke-linecap: round; stroke-miterlimit: 1; stroke-width: 30px; fill: rgb(0, 100, 7); stroke: rgb(0, 100, 7);" x1="267.954" y1="264.082" x2="299.08" y2="295.208"/>
-</svg>
