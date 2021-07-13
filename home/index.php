@@ -55,7 +55,7 @@
                                         $row = $rowFormatMissing;
                                         $row = str_replace("NUM", $expected-$current, $row);
                                         $row = str_replace("ITEM", $name, $row);
-                                    } else if ($current >= ($expected * 2) and $current > ($expected + 1)) { // Calculates if the issued amount is too much compared to what the person is expected to have
+                                    } else if ($current > ($expected * 2) and $current > ($expected + 1)) { // Calculates if the issued amount is too much compared to what the person is expected to have
                                         $row = $rowFormatExcess;
                                         $row = str_replace("NUM", $current-($expected*2), $row);
                                         $row = str_replace("ITEM", $name, $row);

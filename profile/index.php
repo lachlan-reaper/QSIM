@@ -133,7 +133,7 @@
                                         $row = $rowFormatMissing;
                                         $row = str_replace("NUM", $expected-$current, $row);
                                         $row = str_replace("ITEM", $name, $row);
-                                    } else if ($current >= ($expected * 2) and $current > ($expected + 1)) { // If the item is in excess
+                                    } else if ($current > ($expected * 2) and $current > ($expected + 1)) { // If the item is in excess
                                         $row = $rowFormatExcess;
                                         $row = str_replace("NUM", $current-($expected*2), $row);
                                         $row = str_replace("ITEM", $name, $row);

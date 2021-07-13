@@ -28,7 +28,7 @@
             <tr>
                 <td colspan=2 style="text-align:center">
                     <br><b>PLEASE ensure you understand how these function work before using them.</b> 
-                    If you are unsure, you can find out more <a href="guides/GuideToStockMC.txt" download>here</a>.
+                    If you are unsure, you can find out more <a href="guides/GuideToStockMC.pdf" download>here</a>.
                 </td>
             </tr>
             <tr>
