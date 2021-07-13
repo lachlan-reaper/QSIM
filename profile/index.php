@@ -75,12 +75,11 @@
                             $rowFormat = str_replace("APPOINTMENT", strtoupper($appointment), $rowFormat);
                             echo $rowFormat;
 
-                            if (validUser("stockMC", $_SESSION["currentUserAccess"])) { // Only people with access to the mastercontrols, i.e. Admins
-                                echo "<button type='button' onClick='return redirect(\"resetPassword.php?id=$id\", true)'>Reset Password</button><br><br>";
-                            }
                             if ($id == $_SESSION["currentUserId"]) { // If this is the current user than they can reset or change the passowrd, they decide
                                 echo "<button type='button' onClick='return redirect(\"resetPassword.php?id=$id\", true)'>Reset Password</button><br><br>";
                                 echo "<button type='button' onClick='return redirect(\"retrievePassword.php?id=$id\", false)'>Change Password</button>";
+                            } else if (validUser("stockMC", $_SESSION["currentUserAccess"])) { // Only people with access to the mastercontrols, i.e. Admins
+                                echo "<button type='button' onClick='return redirect(\"resetPassword.php?id=$id\", true)'>Reset Password</button><br><br>";
                             }
                         ?>
                     </profilePageBox>
