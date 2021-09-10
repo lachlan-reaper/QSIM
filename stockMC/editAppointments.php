@@ -36,8 +36,8 @@
                                 $extraNum = 0;
                             }
                             $rowFormat = "<tr name='row'>
-                            <td><input class='appointment' form='apptAccess' id='appt' name='APPT' type='text' value='APPT'></td>
-                            <td><select class='access' form='apptAccess' id='access' name='APPTAccess'>
+                            <td><input class='appointment' form='apptAccess' id='appt' name='APPTS' type='text' value='APPTS' placeholder='Appointment'></td>
+                            <td><select class='access' form='apptAccess' id='access' name='APPTSAccess'>
                                 <option value='admin'>Admin</option>
                                 <option value='qstore'>Q Store</option>
                                 <option value='rank'>Rank</option>
@@ -54,7 +54,7 @@
 
                                 $appt = $lines[$i][0];
                                 $access = $lines[$i][1];
-                                $row = str_replace("APPT", $appt, $row);
+                                $row = str_replace("APPTS", $appt, $row);
                                 $row = str_replace("value='$access'", "value='$access' selected", $row);
                                 echo $row;
                                 $i++;
@@ -62,7 +62,7 @@
                             $i = 0;
                             while ($i < $extraNum) { // For each extra appointment, display a new row
                                 $row = $rowFormat;
-                                $row = str_replace("APPT", "", $row);
+                                $row = str_replace("APPTS", "", $row);
                                 $row = str_replace("value='recruit'", "value='recruit' selected", $row);
                                 echo $row;
                                 $i++;

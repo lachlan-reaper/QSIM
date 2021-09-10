@@ -58,6 +58,14 @@
                                 <button type="button" onClick="redirect('editPLStructure.php', false)">Edit the Platoon Structure</button>
                             </td>
                         </tr>
+                        <tr>
+                            <td>
+                                <button type="button" onClick="redirect('editCOYsAndPLs.php', false)">Edit the Companies' Platoons</button>
+                            </td>
+                            <td>
+                                
+                            </td>
+                        </tr>
                     </table>
                 <td>
                     <table style="min-width:0;width:100%"> <!-- USE THE INVENTORY TABLE AS THE STORAGE MEDIUM -->
@@ -118,13 +126,15 @@
                 <td>
                     <table style="min-width:0;width:100%">
                         <tr>
-                            <th>Automated Tasks</th>
+                            <th colspan=2>Automated Tasks</th>
                         </tr>
                         <tr>
                             <td><button type="button" onClick="redirect('databaseProcessing.php?function=refreshAccessLevels', true)">Refresh All Access Levels</button></td>
+                            <td></td>
                         </tr>
                         <tr>
                             <td><button type="button" onClick="redirect('databaseProcessing.php?function=graduateAllCadets', true)">Graduate All Cadets</button></td>
+                            <td><button type="button" onClick="redirect('../searchResult/?searchQuery=&searchFilters=year_%3D_13', false)">Show Graduated Cadets</button></td>
                         </tr>
                     </table>
                 </td>

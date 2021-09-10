@@ -105,6 +105,55 @@ if ($function == "appointments") {
     fwrite($mfile, $file);
 
     fclose($mfile);
+} else if ($function == "coyStruct") {
+    $coys = [];
+    $post_keys = array_keys($_POST);
+    $max = count($post_keys);
+    $i = 0;
+    $num = 0;
+    $coy = "";
+    while($max > $i) {
+        $key = $post_keys[$i];
+        
+        if ($key == "func") {
+            $i++;
+            continue;
+        } else if (substr($key, strlen($key)-2) == "-h") {
+            $i++;
+            continue;
+        } else if (substr($key, strlen($key)-2) == "-0") {
+            $coy = substr($key, 0, strlen($key)-2);
+        }
+        
+        $arr = [$coy];
+        $x = 0;
+        $skip = 0;
+        while (true) {
+            $key = $coy . "-" . $x;
+            if (isset($_POST[$key])) {
+                if ($_POST[$key] == "") {
+                    $skip++;
+                } else {
+                    $arr[$x+1-$skip] = strtoupper($_POST[$key]);
+                }
+                $x++;
+                $i++;
+            } else {
+                break;
+            }
+        }
+        
+        $coys[$num] = $arr;
+        $i++;
+        $num++;
+    }
+
+    $mfile = fopen("../unitStructure/COY-PL.csv", "w");
+    
+    $file = arr2DToCsvFile($coys);
+    fwrite($mfile, $file);
+
+    fclose($mfile);
 }
 
 header("Location: http://" . $_SESSION["websiteLoc"] . "/stockMC/");

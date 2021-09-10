@@ -26,7 +26,7 @@
                 // Checks if the user has already tried to do his but provided the wrong password
                 if(isset($_GET["error"])) {
                     if ($_GET["error"] == "true") {
-                        echo "<div style='color:red;'><b>Password provided was invalid</b></div><br>";
+                        echo "<div style='color:red;'><b>Sorry but the provided passwords were not valid or were not the same.</b></div><br>";
                     }
                 }
             ?>
@@ -52,6 +52,11 @@
                             <input type="password" id="newpass" name="newpass" placeholder="New Password" required> <br>
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            <input type="password" id="newpass1" name="newpass1" placeholder="Confirm New Password" required> <br>
+                        </td>
+                    </tr>
                 </table>
                 <br>
                 <input type="submit" id="submit" class="searchButtonMain" value="Change" style="height:auto;width:auto;padding:7px;">
@@ -62,7 +67,9 @@
             function check() {
                 el1 = document.getElementById("oldpass");
                 el2 = document.getElementById("oldpass1");
-                if (el1.value == el2.value) {
+                el3 = document.getElementById("newpass");
+                el4 = document.getElementById("newpass1");
+                if (el1.value == el2.value && el3.value == el4.value) {
                     return true;
                 } else {
                     window.location.href = "http://<?php echo $_SESSION["websiteLoc"] ?>/profile/changePassword.php?id=<?php echo $_GET["id"]?>&error=true";

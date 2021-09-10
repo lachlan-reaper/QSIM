@@ -26,7 +26,7 @@ header("Location: http://" . $_SESSION["websiteLoc"] . "/stockMC/");
 
 function arr2dSort ($a, $b) {
     // Sorts an array alphabetically by the first item of each of the arrays
-    $arr = array($a[0], $b[0]);
+    $arr = [$a[0], $b[0]];
     $arrS = $arr;
     sort($arrS);
     if ($a[0] === $b[0]) {
@@ -43,8 +43,8 @@ function fileAddUsers () {
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
     
-    $userParameterArray = array();
-    $userParameterArrayIndexes = array();
+    $userParameterArray = [];
+    $userParameterArrayIndexes = [];
 
     $file = fopen("tmp.csv", "r");
     $firstLine = fgets($file);
@@ -118,8 +118,8 @@ function fileRemoveUsers () {
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
     
-    $userParameterArray = array();
-    $userParameterArrayIndexes = array();
+    $userParameterArray = [];
+    $userParameterArrayIndexes = [];
 
     $file = fopen("tmp.csv", "r");
     $firstLine = fgets($file);
@@ -175,8 +175,8 @@ function fileUpdateUsers () {
     $userInfo = $_FILES["userInfo"]["tmp_name"];
     move_uploaded_file($userInfo, "tmp.csv");
     
-    $userParameterArray = array();
-    $userParameterArrayIndexes = array();
+    $userParameterArray = [];
+    $userParameterArrayIndexes = [];
 
     $file = fopen("tmp.csv", "r");
     $firstLine = fgets($file);
@@ -271,7 +271,7 @@ function fileIssueStock () {
                 continue;
             } else {
                 $val = (int)$line[$i];
-                $listOfIssues[] = array($cols[$i], $val);
+                $listOfIssues[] = [$cols[$i], $val];
             }
             $i++;
         }
@@ -309,7 +309,7 @@ function fileReturnStock () {
                 continue;
             } else {
                 $val = (int)$line[$i];
-                $listOfReturns[] = array($cols[$i], $val);
+                $listOfReturns[] = [$cols[$i], $val];
             }
             $i++;
         }
@@ -347,7 +347,7 @@ function fileLostStock () {
                 continue;
             } else {
                 $val = (int)$line[$i];
-                $listOfLost[] = array($cols[$i], $val);
+                $listOfLost[] = [$cols[$i], $val];
             }
             $i++;
         }

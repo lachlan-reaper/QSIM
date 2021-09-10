@@ -32,7 +32,7 @@
                 $id = ""; // Sets id so there are no warnings errors displayed later.
             }
         ?>
-        <form action='databaseProcessing.php?function=<?php echo $function . $id ?>' id='userInfo' method='POST' enctype='multipart/form-data' onSubmit='return confirmForm()'>
+            <form action='databaseProcessing.php?function=<?php echo $function . $id ?>' id='userInfo' method='POST' enctype='multipart/form-data' onSubmit='return confirmForm()'>
                 <div style="display:inline-block;width:50%">
                     <table style="min-width:0;">
                         <tr>
@@ -78,9 +78,7 @@
                                         $options = "";
 
                                         // Create a line by line array
-                                        $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
-                                        $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
-                                        $lines = explode("|", $file);
+                                        $lines = getAppointments(false);
                                         
                                         $x = 0;
                                         $max = count($lines);
@@ -94,8 +92,131 @@
                                             }
 
                                             // Grab only the name of the appointment
-                                            $lines[$x] = explode(":", $lines[$x]);
-                                            $appt = $lines[$x][0];
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                    } else if ($item["Field"] == "company") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getCompanies();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                    } else if ($item["Field"] == "platoon") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getPlatoons();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                    } else if ($item["Field"] == "rank") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getRanks();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                    } else if ($item["Field"] == "yearLevel") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getYears();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
 
                                             $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
                                             $option = str_replace("NAME", $appt, $option);
@@ -150,9 +271,7 @@
                                         $options = "";
 
                                         // Create a line by line array
-                                        $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
-                                        $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
-                                        $lines = csvFileToArr2D($file);
+                                        $lines = getAppointments(false);
                                         
                                         $x = 0;
                                         $max = count($lines);
@@ -160,7 +279,7 @@
                                             $option = $optionFormat;
 
                                             // Grab only the name of the appointment
-                                            $appt = $lines[$x][0];
+                                            $appt = $lines[$x];
 
                                             $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
                                             $option = str_replace("NAME", $appt, $option);
@@ -178,6 +297,138 @@
                                         if ($count == 0) { // If the user's current appointment no longer exists, then they are by default selecting recruit
                                             $row = str_replace("value='recruit'", "value='recruit' selected", $row);
                                         }
+                                    } else if ($item["Field"] == "company") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getCompanies();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $userAppt = getUserValue($id, "company", "users");
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                        $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
+                                    } else if ($item["Field"] == "platoon") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getPlatoons();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $userAppt = getUserValue($id, "platoon", "users");
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                        $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
+                                    } else if ($item["Field"] == "rank") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getRanks();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $userAppt = getUserValue($id, "rank", "users");
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                        $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
+                                    } else if ($item["Field"] == "yearLevel") {
+                                        $row = $rowFormatSelectionInput;
+                                        $options = "";
+
+                                        // Create a line by line array
+                                        $lines = getYears();
+                                        
+                                        $x = 0;
+                                        $max = count($lines);
+                                        while ($x < $max) { // For each appointment, add a new option
+                                            $option = $optionFormat;
+                                            $lines[$x] = trim($lines[$x]);
+
+                                            if ($lines[$x] == "") {
+                                                $x++;
+                                                continue;
+                                            }
+
+                                            // Grab only the name of the appointment
+                                            $appt = $lines[$x];
+
+                                            $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);
+                                            $option = str_replace("NAME", $appt, $option);
+
+                                            // Add to the list of options
+                                            $options = $options . $option;
+
+                                            $x++;
+                                        }
+
+                                        $userAppt = getUserValue($id, "yearLevel", "users");
+                                        $row = str_replace("OPTIONS", $options, $row);
+                                        $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
                                     } else if (substr($item["Type"], 0, 3) == "int") { // Ignores the rest of the var since that holds the varying size of the variable
                                         $row = $rowFormatNumInput;
                                     } else {

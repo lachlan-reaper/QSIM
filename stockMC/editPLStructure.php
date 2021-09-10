@@ -48,7 +48,22 @@
                             $max = count($platoons);
                             $i = 0;
                             while ($max > $i) {
-                                $struct = $structure[$platoons[$i]];
+                                if (isset($structure[$platoons[$i]])) {
+                                    $struct = $structure[$platoons[$i]];
+                                } else {
+                                    $x = 0;
+
+                                    $select = str_replace("PLATOON", $platoons[$i] . "-h", $selectFormat);
+                                    $select = str_replace("form='plStruct'", "hidden", $select);
+
+                                    $row = "<tr><td>PLATOON</td><td id='$i'>" . $select . "<button type='button' id='$i-btn' onClick='addInput($i, $x, \"PLATOON\")'>Add more Appts</button></td></tr>";
+                                    $row = str_replace("PLATOON", $platoons[$i], $row);
+                                    
+                                    echo $row;
+                                    $i++;
+                                    continue;
+                                }
+
                                 $selects = "";
 
                                 $select = str_replace("PLATOON", $platoons[$i] . "-h", $selectFormat);

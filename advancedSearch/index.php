@@ -30,7 +30,7 @@
         </span> <br> <br> <br>
 
         <div style="vertical-align:text-top">
-            <div style="display:inline-block;width:65%">
+            <div style="display:inline-block;width:55%;vertical-align:top;">
                 <table id="tableFilters" style="min-width:0;">
                     <tr>
                         <th style="width:70%">Equipment</th>
@@ -61,7 +61,7 @@
                     ?>
                 </table>
             </div>
-            <div style="display:inline-block;width:30%;vertical-align:top;">
+            <div style="display:inline-block;width:20%;vertical-align:top;">
                 <table id="tableRank" style="min-width:0;">
                     <tr>
                         <th style="width:80%">Rank</th>
@@ -151,7 +151,8 @@
                         }
                     ?>
                 </table>
-                <br>
+            </div>
+            <div style="display:inline-block;width:20%;vertical-align:top;">
                 <table id="tablePlatoon" style="min-width:0;">
                     <tr>
                         <th style="width:80%">Platoon</th>
@@ -215,6 +216,23 @@
                     filters += "|year_=_" + el.id;
                 }
             }
+
+            var coyEls = document.getElementsByClassName("companyCheck");
+            for (i = 0; i < coyEls.length; i++) {
+                el = coyEls[i];
+                if (el.checked == true) {
+                    filters += "|company_=_" + el.id;
+                }
+            }
+
+            var plEls = document.getElementsByClassName("platoonCheck");
+            for (i = 0; i < plEls.length; i++) {
+                el = plEls[i];
+                if (el.checked == true) {
+                    filters += "|platoon_=_" + el.id;
+                }
+            }
+
             filters = filters.slice(1);
             window.location.href = "../searchResult/?searchQuery=" + searchQuery + "&searchFilters=" + encodeURIComponent(filters);
         }

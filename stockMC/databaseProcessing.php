@@ -259,7 +259,7 @@ function manualModifyUser () {
     $lastName = formatNullAndStringToSQL($_POST["lastName"]);
     $username = formatNullAndStringToSQL($_POST["username"]);
     $rank = strtoupper(formatNullAndStringToSQL($_POST["rank"]));
-    $appointment = strtolower(formatNullAndStringToSQL($_POST["appointment"]));
+    $appointment = strtoupper(formatNullAndStringToSQL($_POST["appointment"]));
     $company = strtoupper(formatNullAndStringToSQL($_POST["company"]));
     $platoon = strtoupper(formatNullAndStringToSQL($_POST["platoon"]));
     $section = formatNullAndStringToSQL($_POST["section"]);
