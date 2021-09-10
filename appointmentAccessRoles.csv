@@ -1,0 +1,28 @@
+COMMANDER,admin
+SUO,admin
+LOGSO,admin
+QM,admin
+RQMS,admin
+ADJT,rank
+TRGO,rank
+OPSO,rank
+RMO,rank
+RSO,rank
+COY COMD,rank
+COY 2IC,rank
+PL COMD,rank
+RSM,rank
+CSM,rank
+CQMS,qstore
+TRGWO,rank
+WO2,rank
+DRUM MAJOR,rank
+PL SGT,rank
+SGT MENTOR,rank
+SGT,rank
+SECT COMD,rank
+SECT 2IC,rank
+CPL,rank
+LCPL,recruit
+RECRUIT,recruit
+Q CPL,qstore
