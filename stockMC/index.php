@@ -54,7 +54,9 @@
                             <td>
                                 <button type="button" onClick="redirect('editAppointments.php', false)">Edit the Appointment's Access Levels</button>
                             </td>
-                            <td></td>
+                            <td>
+                                <button type="button" onClick="redirect('editPLStructure.php', false)">Edit the Platoon Structure</button>
+                            </td>
                         </tr>
                     </table>
                 <td>

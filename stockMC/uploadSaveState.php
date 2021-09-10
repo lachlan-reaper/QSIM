@@ -81,11 +81,11 @@ closedir($handle);
 
 // Overwrite server files
 unlink("../pageAccessLevels.pal");
-unlink("../appointmentAccessRoles.aars");
-unlink("../contacts.txt");
+unlink("../appointmentAccessRoles.csv");
+unlink("../contacts.csv");
 copy($zipFolder . '/pageAccessLevels.pal', "../pageAccessLevels.pal");
-copy($zipFolder . '/appointmentAccessRoles.aars', "../appointmentAccessRoles.aars");
-copy($zipFolder . '/contacts.txt', "../contacts.txt");
+copy($zipFolder . '/appointmentAccessRoles.csv', "../appointmentAccessRoles.csv");
+copy($zipFolder . '/contacts.csv', "../contacts.csv");
 
 // Upload state of DBs
 convertCsvToDBSave('users');
@@ -110,8 +110,8 @@ unlink($zipFolder . '/inventory.csv');
 unlink($zipFolder . '/stock.csv');
 unlink($zipFolder . '/equipmentReceipts.csv');
 unlink($zipFolder . '/pageAccessLevels.pal');
-unlink($zipFolder . '/appointmentAccessRoles.aars');
-unlink($zipFolder . '/contacts.txt');
+unlink($zipFolder . '/appointmentAccessRoles.csv');
+unlink($zipFolder . '/contacts.csv');
 rmdir($zipFolder);
 
 header("Location: http://" . $_SESSION["websiteLoc"] . "/stockMC/");

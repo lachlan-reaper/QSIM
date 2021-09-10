@@ -62,8 +62,8 @@ $zip->addFile("inventory.csv");
 $zip->addFile("stock.csv");
 $zip->addFile("equipmentReceipts.csv");
 $zip->addFile("../pageAccessLevels.pal");
-$zip->addFile("../appointmentAccessRoles.aars");
-$zip->addFile("../contacts.txt");
+$zip->addFile("../appointmentAccessRoles.csv");
+$zip->addFile("../contacts.csv");
 
 // Add all photos
 $zip->addEmptyDir('photo');
