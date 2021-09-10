@@ -78,8 +78,8 @@
                                         $options = "";
 
                                         // Create a line by line array
-                                        $myfile = fopen("../appointmentAccessRoles.aars", "r") or die("Internal server error: Unable to open file!");
-                                        $file = fread($myfile, filesize("../appointmentAccessRoles.aars"));
+                                        $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
+                                        $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
                                         $lines = explode("|", $file);
                                         
                                         $x = 0;
@@ -150,23 +150,16 @@
                                         $options = "";
 
                                         // Create a line by line array
-                                        $myfile = fopen("../appointmentAccessRoles.aars", "r") or die("Internal server error: Unable to open file!");
-                                        $file = fread($myfile, filesize("../appointmentAccessRoles.aars"));
-                                        $lines = explode("|", $file);
+                                        $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
+                                        $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
+                                        $lines = csvFileToArr2D($file);
                                         
                                         $x = 0;
                                         $max = count($lines);
                                         while ($x < $max) { // For each appointment, add a new option
                                             $option = $optionFormat;
-                                            $lines[$x] = trim($lines[$x]);
-
-                                            if ($lines[$x] == "") {
-                                                $x++;
-                                                continue;
-                                            }
 
                                             // Grab only the name of the appointment
-                                            $lines[$x] = explode(":", $lines[$x]);
                                             $appt = $lines[$x][0];
 
                                             $option = str_replace("NAMEFORMATTED", strtoupper($appt), $option);

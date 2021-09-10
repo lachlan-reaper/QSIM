@@ -1,7 +1,354 @@
 <?php
-require 'functions.php';
 
-function formatNullAndStringToSQL($variable) {
+require 'functions.php';
+require 'csvFunctions.php';
+
+// NEW
+function formatVarToSQL ($variable) : string { // Was "formatNullAndStringToSQL"
+    // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
+    if ($variable === "" or $variable === "NULL" or $variable === null) {
+        return "NULL";
+    }
+    if (gettype($variable) === "string") {
+        return "'" . $variable . "'";
+    }
+    return $variable;
+}
+
+function getUserValues (string $id, array $uservalues, string $table) : array { // Was "getMultiUserValues"
+    // Given user ID and values that are desired to be used, will return the respective values in the form of an array.
+    establishConnection();
+
+    $id = formatVarToSQL($id);
+
+    // Formats and adds the values to a SQL query
+    $i = count($uservalues);
+    $values = "";
+    while ($i > 0) {
+        $i--;
+        $x = $uservalues[$i];
+        $values = $values . ", `$x`";
+    }
+    $values = substr($values, 2);
+
+    $sql = "SELECT $values FROM `$table` WHERE `id` LIKE $id";
+    $result = $_SESSION['conn'] -> query($sql);
+
+    if ($result->num_rows > 1) {
+        echo '<script language="javascript">';
+        echo 'alert("Duplicate user ID error. ID: ' . $id . '")';
+        echo '</script>';
+        return NULL;
+    } 
+    if ($result->num_rows == 1) {
+        $row = $result->fetch_assoc();
+        return $row;
+    } else {
+        echo '<script language="javascript">';
+        echo 'alert("No user by the id of: ' . $id . '")';
+        echo '</script>';
+        return NULL;
+    }
+}
+
+
+// Unit Structure
+function getContacts () : array {
+    // Returns an array of the the appointments and contacts for Q Store from the contacts.csv file indexed by their appointment
+    $myfile = fopen("../contacts.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../contacts.csv"));
+    $lines = csvFileToArr2D($file);
+    $contacts = [];
+
+    // Iterates through all of the lines of contacts in the file
+    $i = count($lines);
+    while ($i > 0) {
+        $i--;
+        $contacts[$lines[$i][0]] = $lines[$i][1];
+    }
+
+    fclose($myfile);
+    return $contacts;
+}
+
+function getCompanies () : array {
+    // Returns a one dimesional array of all companies
+    $myfile = fopen("../unitStructure/COY-PL.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../unitStructure/COY-PL.csv"));
+    $lines = csvFileToArr2D($file);
+    $companies = [];
+
+    $i = count($lines);
+    while ($i > 0) {
+        $i--;
+        $companies[$i] = $lines[$i][0];
+    }
+    
+    fclose($myfile);
+    return $companies;
+}
+
+function getPlatoons (string $company=NULL) : array {
+    // Returns a one dimensional array of all the plattons, likited to just the company if the argument is provided
+    $myfile = fopen("../unitStructure/COY-PL.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../unitStructure/COY-PL.csv"));
+    $lines = csvFileToArr2D($file);
+    $platoons = [];
+    
+    $coys = count($lines);
+    $i = 0;
+    $num = 0;
+    if ($company === NULL) {
+        while ($coys > $i) {
+            $pls = count($lines[$i]);
+            $x = 1; // First in the line is the coy not a platoon
+            while ($pls > $x) {
+                $platoons[$num] = $lines[$i][$x];
+                $num++;
+                $x++;
+            }
+            $i++;
+        }
+    } else if (gettype($company) == "string") {
+        while ($coys > $i) {
+            if (!($lines[$i][0] == $company)) {
+                $i++;
+                continue;
+            }
+
+            $pls = count($lines[$i]);
+            $x = 1; // First in the line is the coy not a platoon
+            while ($pls > $x) {
+                $platoons[$num] = $lines[$i][$x];
+                $num++;
+                $x++;
+            }
+            $i++;
+        }
+    } else {
+        die("Error! The provided company argument was not a string.");
+    }
+    
+    fclose($myfile);
+    return $platoons;
+}
+
+function getAppointments (bool $giveAccess=true) : array {
+    $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
+    $lines = csvFileToArr2D($file);
+
+    if ($giveAccess) {
+        $appts = $lines;
+    } else {
+        $max = count($lines);
+        $i = 0;
+        while ($max > $i) {
+            $appts[$i] = $lines[$i][0];
+            $i++;
+        }
+    }
+
+    return $appts;
+}
+
+function getPlatoonStructure (string $platoon=NULL) : array {
+    // Returns a two-dimensional array if no argument is provided, returns a one-dimensional array if an argument is given.
+    $myfile = fopen("../unitStructure/PLsStructure.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../unitStructure/PLsStructure.csv"));
+
+    if ($platoon === NULL) {
+        $lines = csvFileToArr2D($file);
+        $max = count($lines);
+        $i = 0;
+        while ($max > $i) {
+            $pl = $lines[$i][0];
+            $struct = $lines[$i];
+            array_splice($struct, 0, 1);
+            $structure[$pl] = $struct;
+            $i++;
+        }
+    } else if (gettype($platoon) == "string") {
+        $structure = csvFileToArr2D($file);
+        $i = count($structure);
+        while ($i > 0) {
+            $i--;
+            if ($structure[$i][0] == $platoon) {
+                $structure = $structure[$i];
+                array_splice($structure, 0, 1);
+                break;
+            }
+        }
+    } else {
+        die("Error! The provided platoon argument was not a string.");
+    }
+
+    fclose($myfile);
+    return $structure;
+}
+
+
+// Issuement
+function getPredefSetsJSArr (string $setname) : string {
+    $row = "";
+    $results = retrieveIssuedItems($setname);
+    $items = retrieveAllIssuedItemsOnStock();
+
+    $i = $items->num_rows;
+    $num = $results->fetch_assoc();
+    while($i > 0) { 
+        $item = $items->fetch_assoc();
+        $name = $item["item"];
+        $row = $row . ", " . $num[$name];
+        $i--;
+    }
+    $row = substr($row, 2);
+    return "[" . $row . "]";
+}
+
+function issueEquipment (string $id, $listOfIssues) {
+    // Issues a list of items to a user and only allows the issues if every item has enough items on shelf on record. It also makes a record of this transaction.
+    establishConnection();
+
+    $formattedMods =  "";
+    $formattedReceipt = "";
+    $sqlStock = "";
+
+    $id = formatVarToSQL($id);
+    $time = date_format(date_create(), "Y/m/d H:i:s");
+    $time = formatVarToSQL($time);
+
+    // Creates the different SQL queries
+    $i = count($listOfIssues);
+    while ($i > 0) {
+        $i--;
+        $item = formatVarToSQL($listOfIssues[$i][0]);
+        $value = formatVarToSQL($listOfIssues[$i][1]);
+        if ($listOfIssues[$i][1] > 0) { // Do nothing if the modification is a value of 0
+            $formattedMods = $formattedMods . ", `" . $listOfIssues[$i][0] . "` = `" . $listOfIssues[$i][0] . "` + " . $value;
+            $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", " . $value . ", " . $time . ", '" . $_SESSION["currentUserId"] . "')";
+            $sqlStock = $sqlStock . "UPDATE `stock` SET `onShelf` = `onShelf` - " . $value . ", `onLoan` = `onLoan` + " . $value . " WHERE `item` = " . $item . ";";
+        }
+    }
+
+    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
+    $formattedMods = substr($formattedMods, 2);
+    $formattedReceipt = substr($formattedReceipt, 2);
+
+    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+
+    $sql = "INSERT INTO equipmentReceipts (`id`, `item`, `changeInNum`, `time`, `serverId`) VALUES " . $formattedReceipt;
+    $result = $_SESSION['conn'] -> query($sql);
+
+    $result = $_SESSION['conn'] -> multi_query($sqlStock);
+}
+
+function returnEquipment (string $id, $listOfReturns) {
+    // Returns a list of items from a user and only allows the returns if every item has enough on issue to the user. It also makes a record of this transaction.
+    establishConnection();
+
+    $formattedMods =  "";
+    $formattedReceipt = "";
+    $sqlStock = "";
+
+    $id = formatVarToSQL($id);
+    $time = date_format(date_create(), "Y/m/d H:i:s");
+    $time = formatVarToSQL($time);
+
+    // Creates the different SQL queries
+    $i = count($listOfReturns);
+    while ($i > 0) {
+        $i--;
+        $item = formatVarToSQL($listOfReturns[$i][0]);
+        $value = formatVarToSQL($listOfReturns[$i][1]);
+        if ($listOfReturns[$i][1] > 0) { // Do nothing if the modification is a value of 0
+            $formattedMods = $formattedMods . ", `" . $listOfReturns[$i][0] . "` = `" . $listOfReturns[$i][0] . "` - " . $value;
+            $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", '-" . $listOfReturns[$i][1] . "', " . $time . ", '" . $_SESSION["currentUserId"] . "')";
+            $sqlStock = $sqlStock . "UPDATE `stock` SET `onShelf` = `onShelf` + " . $value . ", `onLoan` = `onLoan` - " . $value . " WHERE `item` = " . $item . ";";
+        }
+    }
+
+    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
+    $formattedMods = substr($formattedMods, 2);
+    $formattedReceipt = substr($formattedReceipt, 2);
+
+    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+
+    $sql = "INSERT INTO equipmentReceipts (`id`, `item`, `changeInNum`, `time`, `serverId`) VALUES " . $formattedReceipt;
+    $result = $_SESSION['conn'] -> query($sql);
+
+    $result = $_SESSION['conn'] -> multi_query($sqlStock);
+}
+
+function declareLostOrDamaged (string $id, $listOfLost) {
+    // Declares a list of items as lost or damaged from the user and makes a record of this transaction.
+    establishConnection();
+
+    $formattedMods =  "";
+    $formattedReceipt = "";
+    $sqlStock = "";
+
+    $id = formatVarToSQL($id);
+    $time = date_format(date_create(), "Y/m/d H:i:s");
+    $time = formatVarToSQL($time);
+
+    // Creates the different SQL queries
+    $i = count($listOfLost);
+    while ($i > 0) {
+        $i--;
+        $item = formatVarToSQL($listOfLost[$i][0]);
+        $value = formatVarToSQL($listOfLost[$i][1]);
+        if ($listOfLost[$i][1] > 0) { // Do nothing if the modification is a value of 0
+            $formattedMods = $formattedMods . ", `" . $listOfLost[$i][0] . "` = `" . $listOfLost[$i][0] . "` - " . $value;
+            $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", '-" . $listOfLost[$i][1] . "', " . $time . ", 1, '" . $_SESSION["currentUserId"] . "')";
+            $sqlStock = $sqlStock . "UPDATE `stock` SET `lostOrDamaged` = `lostOrDamaged` + " . $value . ", `onLoan` = `onLoan` - " . $value . ", `total` = `total` - " . $value . " WHERE `item` = " . $item . ";";
+        }
+    }
+
+    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
+    $formattedMods = substr($formattedMods, 2);
+    $formattedReceipt = substr($formattedReceipt, 2);
+
+    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+
+    $sql = "INSERT INTO equipmentReceipts (`id`, `item`, `changeInNum`, `time`, `lostOrDamaged`, `serverId`) VALUES " . $formattedReceipt;
+    $result = $_SESSION['conn'] -> query($sql);
+
+    $result = $_SESSION['conn'] -> multi_query($sqlStock);
+}
+
+function setIssue (string $id, $listOfItems) {
+    // Redefines the set of equipment issued to a user. Does not create a record of transaction.
+    establishConnection();
+
+    $formattedMods =  "";
+
+    $id = formatVarToSQL($id);
+    $time = date_format(date_create(), "Y/m/d H:i:s");
+    $time = formatVarToSQL($time);
+
+    // Creates the different SQL queries
+    $i = count($listOfItems);
+    while ($i > 0) {
+        $i--;
+        $value = formatVarToSQL($listOfItems[$i][1]);
+        $formattedMods = $formattedMods . ", `" . $listOfItems[$i][0] . "` = " . $value;
+    }
+
+    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
+    $formattedMods = substr($formattedMods, 2);
+
+    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+
+}
+
+
+// OLD
+function formatNullAndStringToSQL($variable) { // Obsolete
     // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
     if ($variable === "" or $variable === "NULL" or $variable === null) {
         return "NULL";
@@ -14,8 +361,8 @@ function formatNullAndStringToSQL($variable) {
 
 function retrieveAccessLevel(string $appointment, string $platoon) : string {
     // Returns the access level for the given appointment from the defining document stored on the server.
-    $myfile = fopen("../appointmentAccessRoles.aars", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../appointmentAccessRoles.aars"));
+    $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
 
     // Retrieves everything beyond the appointment, the ":" is to ensure that the appointment of 'recruit' does retrieve the correct line.
     $line = strstr($file, $appointment . ":");
@@ -62,7 +409,7 @@ function getUserValue(string $id, string $uservalue, string $table) {
     }
 }
 
-function getMultiUserValues(string $id, array $uservalues, string $table) { // TO BE IMPLEMENTED WHERE NECESSARY
+function getMultiUserValues(string $id, array $uservalues, string $table) { // Was "getMultiUserValues"
     // Given user ID and values that are desired to be used, will return the respective values in the form of an array.
     establishConnection();
 
@@ -98,28 +445,6 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // T
     }
 }
 
-function getContacts() {
-    // Returns an array of the the appointments and contacts for Q Store from the contacts.txt file
-    $myfile = fopen("../contacts.txt", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../contacts.txt"));
-    $lines = explode("|", $file);
-    
-    // Iterates through all of the lines of contacts in the file
-    $i = 0;
-    $max = count($lines);
-    while ($i < $max) {
-        $lines[$i] = trim($lines[$i]);
-        if ($lines[$i] == "") {
-            $i++;
-            continue;
-        }
-        $lines[$i] = explode(":", $lines[$i]);
-        $i++;
-    }
-
-    return $lines;
-}
-
 function establishSessionVars() {
     // Defines the session variables
     $id = $_SESSION["currentUserId"]; // ID is the only one to not assign to the session var as it is what is used as the credential for the user.
@@ -131,13 +456,13 @@ function establishSessionVars() {
 
 function establishProfilePageVars(string $id) { // CAN BE OPTIMISED AND MADE REDUNDANT
     // Returns the variables that the profile page desires.
-    $values = array("firstName", "lastName", "appointment", "rank");
+    $values = ["firstName", "lastName", "appointment", "rank"];
     $result = getMultiUserValues($id, $values, "users");
     $firstname =    $result["firstName"];
     $lastname =     $result["lastName"];
     $appointment =  $result["appointment"];
     $rank =         $result["rank"];
-    return array($firstname, $lastname, $appointment, $rank);
+    return [$firstname, $lastname, $appointment, $rank];
 }
 
 function addUser(string $firstName, string $lastName, string $id, string $username, string $userpass, string $rank, string $appointment, string $company, string $platoon, string $section, int $yearLevel) {
@@ -405,161 +730,6 @@ function retrieveStockHistory() {
     $sql = "SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC";
     $result = $_SESSION['conn'] -> query($sql);
     return $result;
-}
-
-function issueEquipment (string $id, $listOfIssues) {
-    // Issues a list of items to a user and only allows the issues if every item has enough items on shelf on record. It also makes a record of this transaction.
-    establishConnection();
-
-    $formattedMods =  "";
-    $formattedReceipt = "";
-    $sqlStock = "";
-
-    $id = formatNullAndStringToSQL($id);
-    $time = date_format(date_create(), "Y/m/d H:i:s");
-    $time = formatNullAndStringToSQL($time);
-    $stock = retrieveStock();
-    
-    $max = count($listOfIssues);
-    $i = 0;
-    while ($max > $i) {
-        // Goes through the list of items on stock until it selects the one that is currently the point of issue.
-        $item = $stock->fetch_assoc();
-        while (! ($item["item"] == $listOfIssues[$i][0])) {
-            $item = $stock->fetch_assoc();
-        }
-
-        // If there are not enough items on shelf, it alerts the user of the problem and cancels the issue.
-        if ($listOfIssues[$i][1] > $item["onShelf"]) {
-            echo '<script language="javascript">';
-            echo 'alert("Not enough of ' . $listOfIssues[$i][0] . ' has been counted on the shelf.");';
-            echo 'window.location.href="../stock/";';
-            echo '</script>';
-            die();
-        }
-        $i++;
-    }
-
-    // Creates the different SQL queries
-    $i = count($listOfIssues);
-    while ($i > 0) {
-        $i--;
-        $item = formatNullAndStringToSQL($listOfIssues[$i][0]);
-        $value = formatNullAndStringToSQL($listOfIssues[$i][1]);
-        $formattedMods = $formattedMods . ", `" . $listOfIssues[$i][0] . "` = `" . $listOfIssues[$i][0] . "` + " . $value;
-        $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", " . $value . ", " . $time . ", '" . $_SESSION["currentUserId"] . "')";
-        $sqlStock = $sqlStock . "UPDATE `stock` SET `onShelf` = `onShelf` - " . $value . ", `onLoan` = `onLoan` + " . $value . " WHERE `item` = " . $item . ";";
-    }
-
-    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
-    $formattedMods = substr($formattedMods, 2);
-    $formattedReceipt = substr($formattedReceipt, 2);
-
-    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
-    $result = $_SESSION['conn'] -> query($sql);
-
-    $sql = "INSERT INTO equipmentReceipts (`id`, `item`, `changeInNum`, `time`, `serverId`) VALUES " . $formattedReceipt;
-    $result = $_SESSION['conn'] -> query($sql);
-
-    $result = $_SESSION['conn'] -> multi_query($sqlStock);
-}
-
-function returnEquipment (string $id, $listOfReturns) {
-    // Returns a list of items from a user and only allows the returns if every item has enough on issue to the user. It also makes a record of this transaction.
-    establishConnection();
-
-    $formattedMods =  "";
-    $formattedReceipt = "";
-    $sqlStock = "";
-
-    $id = formatNullAndStringToSQL($id);
-    $time = date_format(date_create(), "Y/m/d H:i:s");
-    $time = formatNullAndStringToSQL($time);
-
-    // Creates the different SQL queries
-    $i = count($listOfReturns);
-    while ($i > 0) {
-        $i--;
-        $item = formatNullAndStringToSQL($listOfReturns[$i][0]);
-        $value = formatNullAndStringToSQL($listOfReturns[$i][1]);
-        $formattedMods = $formattedMods . ", `" . $listOfReturns[$i][0] . "` = `" . $listOfReturns[$i][0] . "` - " . $value;
-        $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", '-" . $listOfReturns[$i][1] . "', " . $time . ", '" . $_SESSION["currentUserId"] . "')";
-        $sqlStock = $sqlStock . "UPDATE `stock` SET `onShelf` = `onShelf` + " . $value . ", `onLoan` = `onLoan` - " . $value . " WHERE `item` = " . $item . ";";
-    }
-
-    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
-    $formattedMods = substr($formattedMods, 2);
-    $formattedReceipt = substr($formattedReceipt, 2);
-
-    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
-    $result = $_SESSION['conn'] -> query($sql);
-
-    $sql = "INSERT INTO equipmentReceipts (`id`, `item`, `changeInNum`, `time`, `serverId`) VALUES " . $formattedReceipt;
-    $result = $_SESSION['conn'] -> query($sql);
-
-    $result = $_SESSION['conn'] -> multi_query($sqlStock);
-}
-
-function declareLostOrDamaged (string $id, $listOfLost) {
-    // Declares a list of items as lost or damaged from the user and makes a record of this transaction.
-    establishConnection();
-
-    $formattedMods =  "";
-    $formattedReceipt = "";
-    $sqlStock = "";
-
-    $id = formatNullAndStringToSQL($id);
-    $time = date_format(date_create(), "Y/m/d H:i:s");
-    $time = formatNullAndStringToSQL($time);
-
-    // Creates the different SQL queries
-    $i = count($listOfLost);
-    while ($i > 0) {
-        $i--;
-        $item = formatNullAndStringToSQL($listOfLost[$i][0]);
-        $value = formatNullAndStringToSQL($listOfLost[$i][1]);
-        $formattedMods = $formattedMods . ", `" . $listOfLost[$i][0] . "` = `" . $listOfLost[$i][0] . "` - " . $value;
-        $formattedReceipt = $formattedReceipt . ", ($id, " . $item . ", '-" . $listOfLost[$i][1] . "', " . $time . ", 1, '" . $_SESSION["currentUserId"] . "')";
-        $sqlStock = $sqlStock . "UPDATE `stock` SET `lostOrDamaged` = `lostOrDamaged` + " . $value . ", `onLoan` = `onLoan` - " . $value . ", `total` = `total` - " . $value . " WHERE `item` = " . $item . ";";
-    }
-
-    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
-    $formattedMods = substr($formattedMods, 2);
-    $formattedReceipt = substr($formattedReceipt, 2);
-
-    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
-    $result = $_SESSION['conn'] -> query($sql);
-
-    $sql = "INSERT INTO equipmentReceipts (`id`, `item`, `changeInNum`, `time`, `lostOrDamaged`, `serverId`) VALUES " . $formattedReceipt;
-    $result = $_SESSION['conn'] -> query($sql);
-
-    $result = $_SESSION['conn'] -> multi_query($sqlStock);
-}
-
-function setIssue (string $id, $listOfItems) {
-    // Redefines the set of equipment issued to a user. Does not create a record of transaction.
-    establishConnection();
-
-    $formattedMods =  "";
-
-    $id = formatNullAndStringToSQL($id);
-    $time = date_format(date_create(), "Y/m/d H:i:s");
-    $time = formatNullAndStringToSQL($time);
-
-    // Creates the different SQL queries
-    $i = count($listOfItems);
-    while ($i > 0) {
-        $i--;
-        $value = formatNullAndStringToSQL($listOfItems[$i][1]);
-        $formattedMods = $formattedMods . ", `" . $listOfItems[$i][0] . "` = " . $value;
-    }
-
-    // Removes the initial characters used to conjoin multiple statements, the first use of conjoing characters is unnecessary as it has nothing to join to.
-    $formattedMods = substr($formattedMods, 2);
-
-    $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
-    $result = $_SESSION['conn'] -> query($sql);
-
 }
 
 ?>

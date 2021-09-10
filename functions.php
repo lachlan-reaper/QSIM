@@ -1,6 +1,33 @@
 <?php
 date_default_timezone_set('Australia/Sydney');
 
+// NEW
+function userIdentification (string $username, string $password) {
+    $sql = "SELECT `userpass`, `id`, `access` FROM `users` WHERE `username` = '$username'";
+    $result = $_SESSION['conn'] -> query($sql);
+
+    $num = $result->num_rows;
+    $idResult = NULL;
+    
+    if ($num >= 1) {
+        while ($num > 0) {
+            $row = $result->fetch_assoc();
+
+            if (password_verify($password, $row["userpass"])) {
+                if ($idResult != NULL) {
+                    die("Error: Duplicate Username and Password.");
+                }
+                $idResult = $row["id"];
+            }
+
+            $num--;
+        }
+    }
+
+    return $idResult;
+}
+
+// OLD
 function establishConnection() {
     // Establishes a connection with the server and sets up any necessary $SESSION variables
     $host = $_SERVER['HTTP_HOST'];

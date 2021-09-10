@@ -28,17 +28,30 @@
         Filters: 
 
         <?php 
-        $filterBoxFormat = '<span class="filterBox">ITEM COMPARATOR VALUE  <button type="button" onClick="removeFilter(\'ITEM_COMPARATOR_VALUE\')" ><b>X</b></button></span> ';
-
-        $searchFilters = urldecode($_GET['searchFilters']);
-        if ($searchFilters == NULL) {
-            $searchFilters = "";
+        // For use in other PHP parts as well
+        if (isset($_GET["searchQuery"])) {
+            $userQuery = $_GET["searchQuery"];
         } else {
-            $items = formatSearchFilters($searchFilters);
+            $userQuery = "";
+        }
+        
+        if (isset($_GET["searchFilters"])) {
+            $searchFilters = $_GET["searchFilters"];
+        } else {
+            $searchFilters = "";
+        }
+
+        if ($searchFilters != "") {
+            $filterBoxFormat = '<span class="filterBox">ITEM COMPARATOR VALUE  <button type="button" onClick="removeFilter(\'ITEM_COMPARATOR_VALUE\')" ><b>X</b></button></span> ';
+        
+            $searchFilterBoxes = urldecode($searchFilters);
+            $searchFilterBoxes = str_replace("-", " ", $searchFilterBoxes);
+        
+            $items = formatSearchFilters($searchFilterBoxes);
             
-            $x = count($items);
+            $num = count($items);
             $i = 0;
-            while ($i < $x) { // Formats and displays the filter boxes
+            while ($i < $num) { // Formats and displays the filter boxes
                 $row = $filterBoxFormat;
                 $id = str_replace("-", " ", $items[$i][0]);
                 $row = str_replace("ITEM", $id, $row);
@@ -53,27 +66,14 @@
         <br> <br> 
 
         <form>
-            <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult">
+            <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult" placeholder="Name or ID Number">
             <input type="hidden" id="searchFilters" name="searchFilters" value="">
             <span style="text-align:center;">
-                <input type="submit" class="searchButtonResult" onCLick="addSearchFilters()" value="Search"></input>
+                <input type="submit" class="searchButtonResult" onClick="addSearchFilters()" value="Search"></input>
             </span>
         </form> <br> <br> <br>
-
-        <script>
-        bar = document.getElementById("searchQuery");
-        URL = window.location.href;
-        pos1 = URL.indexOf("searchQuery=");
-        pos2 = URL.indexOf("&searchFilters=");
-        query = URL.slice(pos1+12, pos2);
-        query = decodeURIComponent(query);
-        query = query.replace(/\+/g, " ");
-        if (isNaN(query.trim())) {
-            bar.value = query.trim();
-        }
-        </script>
         
-        <a href="downloadProcessing.php?searchQuery=<?php echo $_GET["searchQuery"];?>&searchFilters=<?php echo $_GET["searchFilters"];?>">Export List</a> 
+        <a href="downloadProcessing.php?searchQuery=<?php echo $searchQuery; ?>&searchFilters=<?php echo $searchFilters; ?>">Export List</a> 
         <span style="float:right"><a href="../advancedSearch/">Advanced Search</a></span> <br> <br>
 
         <table id="tableSearch" style="width: 85%; margin-left: 7.5%;">
@@ -86,21 +86,14 @@
             </tr>
 
             <?php
-                $userQuery = $_GET["searchQuery"];
-                $searchFilters = str_replace("-", " ", urldecode($_GET["searchFilters"]));
-
-                if ($userQuery == NULL) {
-                    $userQuery = "";
-                }
-                if ($searchFilters == NULL) {
-                    $searchFilters = "";
-                }
+                $searchFilters = urldecode($searchFilters);
+                $searchFilters = str_replace("-", " ", $searchFilters);
 
                 $searchFilters = formatSearchFilters($searchFilters);
                 $results = retrieveSearchQueryResults($userQuery, $searchFilters);
 
                 $i = $results->num_rows;
-                if ($i === 0) {
+                if ($i <= 0) {
                     echo "<tr><td colspan=6 style='text-align:center;color:red;'>NO USERS FOUND</td></tr>";
                 } else {
                     while($i > 0) { // Displays all of the searched for users
@@ -114,6 +107,20 @@
 
         </table>
         <script>
+            bar = document.getElementById("searchQuery");
+            URL = window.location.href;
+
+            pos1 = URL.indexOf("searchQuery=");
+            pos2 = URL.indexOf("&searchFilters=");
+
+            query = URL.slice(pos1+12, pos2);
+            query = decodeURIComponent(query);
+            query = query.replace(/\+/g, " ");
+
+            if (isNaN(query.trim())) {
+                bar.value = query.trim();
+            }
+
             function removeFilter(filter) {
                 URL = window.location.href;
                 filter = filter.replace(/ /g, "-");

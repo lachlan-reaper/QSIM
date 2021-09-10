@@ -1,7 +1,10 @@
 <?php
 
 require '../databaseFunctions.php';
+// NEW
 
+
+// OLD
 function refreshUserAccess(string $id) {
     // Given the ID num of a user, it will check the user's access level as defined by their appointment and thusly correct any discrepancies automatically.
     establishConnection();
@@ -39,48 +42,6 @@ function refreshUserAccess(string $id) {
     } else {
         echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error;
     }
-}
-
-function commaRemoval($matches) {
-    // Reformats csv lines into strings without actual commas that would otherwise interrupt the csv formatting process
-    $line = $matches[0];
-    $line = str_replace('"', '', $line);
-    $line = str_replace(',', '&comm;', $line);
-    return $line;
-}
-
-function csvLineToArr(string $line) {
-    // 1. Replace all [""] with [&dbqt;]
-    // 2. Preg-replace [/"(.*),(.*)"/] with [$1&comm;$2]
-    // 3. Explode the string with [,]
-    // 4. Iterate through the array, replacing each [&dbqt;] and [&comm;] with ["] and [,] respectively
-    
-    $line = str_replace('""', '&dbqt;', $line);
-
-    // Replaces commas inside of a pair of double quotes
-    $line = preg_replace_callback('|"[^"]+"|', 'commaRemoval', $line);
-    
-    $arr = explode(",", $line);
-    $i = count($arr);
-    $parameters = array('&comm;', '&dbqt;');
-    $replacements = array(',', '"');
-    while ($i > 0) { // For each item in the new array, replace the substituting identifiers into their respective characters
-        $i--;
-        $arr[$i] = str_replace($parameters, $replacements, $arr[$i]);
-    }
-
-    $arr[count($arr)-1] = trim($arr[count($arr)-1]);
-
-    return $arr;
-}
-
-function strToCsv (string $line) {
-    // Converts a str into a csv safe format, does only one item at a time
-    $line = str_replace('"', '""', $line);
-    if (str_contains($line, ",")) {
-        $line = '"' . $line . '"';
-    }
-    return $line;
 }
 
 function addUserArr(array $userValues) {

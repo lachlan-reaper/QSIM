@@ -29,7 +29,7 @@
                 <div style="float:right"><a href="../advancedSearch/">Advanced Search</a></div> <br>
             </div> <br>
             <form action="../searchResult/" method="get">
-                <input type="text" id="searchQuery" name="searchQuery" class="searchBarMain"> <br> <br>
+                <input type="text" id="searchQuery" name="searchQuery" class="searchBarMain" placeholder="Name or ID Number"> <br> <br>
                 <input type="hidden" id="searchFilters" name="searchFilters" value="">
                 <div style="text-align:center;">
                     <input type="submit" class="searchButtonMain" value="Search"></input>

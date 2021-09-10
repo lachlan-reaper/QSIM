@@ -151,19 +151,13 @@
                 <td style="height:150px">
                     <profilePageBox>
                         <?php
-                            $rowsFormat = "<b><i>If you have any questions or queries please contact the APPT1 at:</i></b> <br>
+                            $rowsFormat = "<b><i>If you have any questions or queries please contact the RQMS at:</i></b> <br>
                             EMAIL1 <br>
-                            <b><i>Or the APPT2 at:</i></b> <br>
+                            <b><i>Or the QM at:</i></b> <br>
                             EMAIL2";
                             $contacts = getContacts();
-
-                            // Format the RQMS's contact details
-                            $rowsFormat = str_replace("APPT1", strtoupper($contacts[0][0]), $rowsFormat);
-                            $rowsFormat = str_replace("EMAIL1", $contacts[0][1], $rowsFormat);
-                            
-                            // Format the QM's contact details
-                            $rowsFormat = str_replace("APPT2", strtoupper($contacts[1][0]), $rowsFormat);
-                            $rowsFormat = str_replace("EMAIL2", $contacts[1][1], $rowsFormat);
+                            $rowsFormat = str_replace("EMAIL1", $contacts["RQMS"], $rowsFormat);
+                            $rowsFormat = str_replace("EMAIL2", $contacts["QM"], $rowsFormat);
 
                             echo $rowsFormat;
                         ?>

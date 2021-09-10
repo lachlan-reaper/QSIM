@@ -22,89 +22,92 @@
     <maincontents>
         <div style="vertical-align:text-top;text-align:center">
             <div style="display:inline-block;width:45%">
-                <table style="min-width:0;">
-                    <tr>
-                        <th style="width:60%">Appointment</th>
-                        <th style="width:40%">Access</th>
-                    </tr>
-                    <?php 
-                        if (isset($_GET["extra"])) {
-                            $extraNum = $_GET["extra"];
-                        } else {
-                            $extraNum = 0;
-                        }
-                        $rowFormat = "<tr>
-                        <td><input class='appointment' type='text' value='APPT'></td>
-                        <td><select class='access'>
-                            <option value='admin'>Admin</option>
-                            <option value='qstore'>Q Store</option>
-                            <option value='rank'>Rank</option>
-                            <option value='recruit'>Recruit</option>
-                        </select></td>
-                        </tr>";
-                        $myfile = fopen("../appointmentAccessRoles.aars", "r") or die("Internal server error: Unable to open file!");
-                        $file = fread($myfile, filesize("../appointmentAccessRoles.aars"));
-                        $lines = explode("|", $file);
-                        
-                        $i = 0;
-                        $max = count($lines);
-                        while ($i < $max) { // For each appointment, display a new row
-                            $row = $rowFormat;
-                            $lines[$i] = trim($lines[$i]);
-
-                            if ($lines[$i] == "") {
-                                $i++;
-                                continue;
+                <form action="setInfo.php" id="apptAccess" method="POST">
+                    <input type="hidden" form="apptAccess" name="func" value="appointments">
+                    <table style="min-width:0;" id="accessTable">
+                        <tr>
+                            <th style="width:60%">Appointment</th>
+                            <th style="width:40%">Access</th>
+                        </tr>
+                        <?php 
+                            if (isset($_GET["extra"])) {
+                                $extraNum = $_GET["extra"];
+                            } else {
+                                $extraNum = 0;
                             }
+                            $rowFormat = "<tr name='row'>
+                            <td><input class='appointment' form='apptAccess' id='appt' name='APPT' type='text' value='APPT'></td>
+                            <td><select class='access' form='apptAccess' id='access' name='APPTAccess'>
+                                <option value='admin'>Admin</option>
+                                <option value='qstore'>Q Store</option>
+                                <option value='rank'>Rank</option>
+                                <option value='recruit'>Recruit</option>
+                            </select></td>
+                            </tr>";
+                            
+                            $lines = getAppointments();
+                            
+                            $i = 0;
+                            $max = count($lines);
+                            while ($i < $max) { // For each appointment, display a new row
+                                $row = $rowFormat;
 
-                            $lines[$i] = explode(":", $lines[$i]);
-                            $appt = $lines[$i][0];
-                            $access = $lines[$i][1];
-                            $row = str_replace("APPT", $appt, $row);
-                            $row = str_replace("value='$access'", "value='$access' selected", $row);
-                            echo $row;
-                            $i++;
-                        }
-                        $i = 0;
-                        while ($i < $extraNum) { // For each extra appointment, display a new row
-                            $row = $rowFormat;
-                            $row = str_replace("APPT", "", $row);
-                            $row = str_replace("value='recruit'", "value='recruit' selected", $row);
-                            echo $row;
-                            $i++;
-                        }
-                        
-                    ?>
-                    <tr>
-                        <td colspan=2>
-                            <form action="">
-                                <input type="Hidden" id="extra" name="extra" value=<?php echo $extraNum+1 ?>>
-                                <input type="Submit" value="Add Appointment">
-                            </form>
-                        </td>
-                    </tr>
-                </table> <br>
-                <div style="text-align:right">
-                    <button type='button' class='searchButtonResult' onClick='process()' value='Set'>Set</button>
-                </div>
+                                $appt = $lines[$i][0];
+                                $access = $lines[$i][1];
+                                $row = str_replace("APPT", $appt, $row);
+                                $row = str_replace("value='$access'", "value='$access' selected", $row);
+                                echo $row;
+                                $i++;
+                            }
+                            $i = 0;
+                            while ($i < $extraNum) { // For each extra appointment, display a new row
+                                $row = $rowFormat;
+                                $row = str_replace("APPT", "", $row);
+                                $row = str_replace("value='recruit'", "value='recruit' selected", $row);
+                                echo $row;
+                                $i++;
+                            }
+                        ?>
+                        <tr id="extraRow">
+                            <td>
+                                <button type="button" id="extra" name="extra" onClick="addRow(1)">Add Rows</button>
+                            </td>
+                            <td>
+
+                            </td>
+                        </tr>
+                    </table> <br>
+                    <div style="text-align:right">
+                        <input type='submit' class='searchButtonResult' value='Set'>
+                    </div>
+                </form>
             </div>
         </div> 
-        <script>
-        function process() {
-            var file = "";
-            var el;
-            var appointmentEls = document.getElementsByClassName("appointment");
-            var accessEls = document.getElementsByClassName("access");
-            
-            for (i = 0; i < appointmentEls.length; i++) {
-                file += "|" + appointmentEls[i].value + ":" + accessEls[i].value;
-            }
-
-            file = file.slice(1);
-            window.location.href = "setInfo.php?func=appointments&file=" + file.replace(/ /g, "_");
-        }
-        </script>
     </maincontents>
+
+    <script>
+        function addRow(num) {
+            table = document.getElementById("accessTable");
+            row = document.getElementsByName("row")[0];
+            clone = row.cloneNode(true);
+
+            btnRow = document.getElementById("extraRow");
+            btnRow.remove();
+
+            el1 = clone.cells[0];
+            el1.firstElementChild.name = num;
+            el1.firstElementChild.value = num;
+            el2 = clone.cells[1];
+            el2.firstElementChild.name = num + "Access";
+            el2.firstElementChild.value = "admin";
+            
+            table.appendChild(clone);
+            table.appendChild(btnRow);
+
+            btn = document.getElementById("extra");
+            btn.setAttribute("onClick", "addRow(" + (num + 1) + ")");
+        }
+    </script>
 
     <footer>
         Lachlan Muir ®2021

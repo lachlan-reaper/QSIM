@@ -18,12 +18,12 @@
                 require "../databaseFunctions.php";
                 session_start();
                 if(empty($_SESSION) or ! isset($_SESSION["currentUserId"])){
-                    $x=1;
+                    // Pass
                 } else if ($_SESSION["currentUserId"] === "Invalid") {
                     echo "<div id='invalidLogin'>Invalid Username or Password</div>";
                 }
             ?>
-            <span style="float:right;font-size:medium;"><a href="" onClick="return displayContact()">Forgot Password?</a></span>
+            <span style="float:right;font-size:medium;"><a href="" onClick="displayContact()">Forgot Password?</a></span>
             <form action="loginVerification.php" method="post">
                 <input type="text" id="username" name="user" placeholder="Username" required> <br>
                 <input type="password" id="password" name="pass" placeholder="Password" required> <br>
@@ -33,8 +33,7 @@
     </loginbox>
     <script>
         function displayContact () {
-            alert("Please contact the QM at <?php echo getContacts()[1][1]; ?> and ask for your password to be reset.");
-            return false;
+            alert("Please contact the QM at <?php echo getContacts()["QM"]; ?> and ask for your password to be reset.");
         }
     </script>
 </body>

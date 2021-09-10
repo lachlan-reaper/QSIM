@@ -4,13 +4,17 @@
     establishConnection();
     $mfile = fopen("searchResult.csv", "w+");
 
-    $userQuery = $_GET["searchQuery"];
-    $searchFilters = str_replace("-", " ", urldecode($_GET["searchFilters"]));
-
-    if ($userQuery == NULL) {
+    if (isset($_GET["searchQuery"])) {
+        $userQuery = $_GET["searchQuery"];
+    } else {
         $userQuery = "";
     }
-    if ($searchFilters == NULL) {
+    
+    if (isset($_GET["searchFilters"])) {
+        $searchFilters = $_GET["searchFilters"];
+        $searchFilters = urldecode($searchFilters);
+        $searchFilters = str_replace("-", " ", $searchFilters);
+    } else {
         $searchFilters = "";
     }
 
