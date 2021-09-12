@@ -14,9 +14,26 @@ function convertDBToCsvFile ($dbname) {
     $i = $results->num_rows;
     while ($i > 0) {
         $item = $results->fetch_assoc();
+
         $name = $item["Field"];
         $cols[] = $name;
-        $row = $row . "," . strToCsv($name);
+
+        $type = strToCsv($item["Type"]);
+        $null = strToCsv($item["Null"]);
+        if (isset($item["Default"])) {
+            $default = strToCsv($item["Default"]);
+        } else {
+            $default = "";
+        }
+        if (isset($item["Key"])) {
+            $key = strToCsv($item["Key"]);
+        } else {
+            $key = "";
+        }
+
+        $name = strToCsv($name);
+        $colInfo = "$name,$type,$null,$default,$key";
+        $row = $row . "," . strToCsv($colInfo);
         $i--;
     }
     $row = substr($row, 1) . "\n";
@@ -61,7 +78,7 @@ $zip->addFile("users.csv");
 $zip->addFile("inventory.csv");
 $zip->addFile("stock.csv");
 $zip->addFile("equipmentReceipts.csv");
-$zip->addFile("../pageAccessLevels.pal");
+$zip->addFile("../pageAccessLevels.csv");
 $zip->addFile("../appointmentAccessRoles.csv");
 $zip->addFile("../contacts.csv");
 

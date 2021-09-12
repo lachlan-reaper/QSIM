@@ -1,15 +1,16 @@
 <?php
 
 require 'functions.php';
-require 'csvFunctions.php';
 
 // NEW
-function formatVarToSQL ($variable) : string { // Was "formatNullAndStringToSQL"
+function formatVarToSQL ($variable) : string { // Was "formatVarToSQL"
     // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
     if ($variable === "" or $variable === "NULL" or $variable === null) {
         return "NULL";
     }
     if (gettype($variable) === "string") {
+        return "'" . $variable . "'";
+    } else if (substr($variable, 0, 1) == "0") {
         return "'" . $variable . "'";
     }
     return $variable;
@@ -247,186 +248,6 @@ function formatRowSearchResult (array $row) : string {
     return $rowFormat;
 }
 
-
-// Unit Structure
-function getContacts () : array {
-    // Returns an array of the the appointments and contacts for Q Store from the contacts.csv file indexed by their appointment
-    $myfile = fopen("../contacts.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../contacts.csv"));
-    $lines = csvFileToArr2D($file);
-    $contacts = [];
-
-    // Iterates through all of the lines of contacts in the file
-    $i = count($lines);
-    while ($i > 0) {
-        $i--;
-        $contacts[$lines[$i][0]] = $lines[$i][1];
-    }
-
-    fclose($myfile);
-    return $contacts;
-}
-
-function getCompanies () : array {
-    // Returns a one dimesional array of all companies
-    $myfile = fopen("../unitStructure/COY-PL.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../unitStructure/COY-PL.csv"));
-    $lines = csvFileToArr2D($file);
-    $companies = [];
-
-    $i = count($lines);
-    while ($i > 0) {
-        $i--;
-        $companies[$i] = $lines[$i][0];
-    }
-    
-    fclose($myfile);
-    return $companies;
-}
-
-function getCompanyStructure () : array {
-    // Returns a two-dimensional array indexed to each of the coys
-    $myfile = fopen("../unitStructure/COY-PL.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../unitStructure/COY-PL.csv"));
-    $lines = csvFileToArr2D($file);
-    $structure = [];
-
-    $i = count($lines);
-    while ($i > 0) {
-        $i--;
-        $coy = $lines[$i][0];
-        $pls = $lines[$i];
-        array_splice($pls, 0, 1);
-        $structure[$coy] = $pls;
-    }
-    
-    fclose($myfile);
-    return $structure;
-}
-
-function getPlatoons (string $company=NULL) : array {
-    // Returns a one dimensional array of all the plattons, limited to just the company if the argument is provided
-    $myfile = fopen("../unitStructure/COY-PL.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../unitStructure/COY-PL.csv"));
-    $lines = csvFileToArr2D($file);
-    $platoons = [];
-    
-    $coys = count($lines);
-    $i = 0;
-    $num = 0;
-    if ($company === NULL) {
-        while ($coys > $i) {
-            $pls = count($lines[$i]);
-            $x = 1; // First in the line is the coy not a platoon
-            while ($pls > $x) {
-                $platoons[$num] = $lines[$i][$x];
-                $num++;
-                $x++;
-            }
-            $i++;
-        }
-    } else if (gettype($company) == "string") {
-        while ($coys > $i) {
-            if (!($lines[$i][0] == $company)) {
-                $i++;
-                continue;
-            }
-
-            $pls = count($lines[$i]);
-            $x = 1; // First in the line is the coy not a platoon
-            while ($pls > $x) {
-                $platoons[$num] = $lines[$i][$x];
-                $num++;
-                $x++;
-            }
-            $i++;
-        }
-    } else {
-        die("Error! The provided company argument was not a string.");
-    }
-    
-    fclose($myfile);
-    return $platoons;
-}
-
-function getAppointments (bool $giveAccess=true) : array {
-    $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
-    $lines = csvFileToArr2D($file);
-
-    if ($giveAccess) {
-        $appts = $lines;
-    } else {
-        $max = count($lines);
-        $i = 0;
-        while ($max > $i) {
-            $appts[$i] = $lines[$i][0];
-            $i++;
-        }
-    }
-
-    fclose($myfile);
-    return $appts;
-}
-
-function getPlatoonStructure (string $platoon=NULL) : array {
-    // Returns a two-dimensional array if no argument is provided, returns a one-dimensional array if an argument is given.
-    $myfile = fopen("../unitStructure/PLsStructure.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../unitStructure/PLsStructure.csv"));
-
-    if ($platoon === NULL) {
-        $lines = csvFileToArr2D($file);
-        $max = count($lines);
-        $i = 0;
-        while ($max > $i) {
-            $pl = $lines[$i][0];
-            $struct = $lines[$i];
-            array_splice($struct, 0, 1);
-            $structure[$pl] = $struct;
-            $i++;
-        }
-    } else if (gettype($platoon) == "string") {
-        $structure = csvFileToArr2D($file);
-        $i = count($structure);
-        while ($i > 0) {
-            $i--;
-            if ($structure[$i][0] == $platoon) {
-                $structure = $structure[$i];
-                array_splice($structure, 0, 1);
-                break;
-            }
-        }
-    } else {
-        die("Error! The provided platoon argument was not a string.");
-    }
-
-    fclose($myfile);
-    return $structure;
-}
-
-function getRanks () : array {
-    $myfile = fopen("../unitStructure/ranks.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../unitStructure/ranks.csv"));
-
-    $lines = csvFileToArr2D($file);
-    fclose($myfile);
-
-    $ranks = $lines[0];
-    return $ranks;
-}
-
-function getYears () : array {
-    $myfile = fopen("../unitStructure/years.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../unitStructure/years.csv"));
-
-    $lines = csvFileToArr2D($file);
-    fclose($myfile);
-
-    $years = $lines[0];
-    return $years;
-}
-
-
 // Issuement
 function getPredefSetsJSArr (string $setname) : string {
     $row = "";
@@ -587,17 +408,6 @@ function setIssue (string $id, array $listOfItems) {
 
 
 // OLD
-function formatNullAndStringToSQL($variable) { // Obsolete
-    // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
-    if ($variable === "" or $variable === "NULL" or $variable === null) {
-        return "NULL";
-    }
-    if (gettype($variable) === "string") {
-        return "'" . $variable . "'";
-    }
-    return $variable;
-}
-
 function retrieveAccessLevel(string $appointment, string $platoon) : string {
     // Returns the access level for the given appointment from the defining document stored on the server.
     $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
@@ -626,7 +436,7 @@ function getUserValue(string $id, string $uservalue, string $table) {
     // Given user ID and a value that is desired to be used, will return the respective value.
     establishConnection();
 
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
     $sql = "SELECT `$uservalue` FROM `$table` WHERE `id` LIKE $id";
     
     $result = $_SESSION['conn'] -> query($sql);
@@ -652,7 +462,7 @@ function getMultiUserValues(string $id, array $uservalues, string $table) { // W
     // Given user ID and values that are desired to be used, will return the respective values in the form of an array.
     establishConnection();
 
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
 
     // Formats and adds the values to a SQL query
     $i = count($uservalues);
@@ -710,17 +520,17 @@ function addUser(string $firstName, string $lastName, string $id, string $userna
     $hasheduserpass = password_hash($userpass, PASSWORD_BCRYPT);
     $access = retrieveAccessLevel($appointment, strtoupper($platoon));
 
-    $firstName =                formatNullAndStringToSQL($firstName);
-    $lastName =                 formatNullAndStringToSQL($lastName);
-    $id =                       formatNullAndStringToSQL($id);
-    $access =                   formatNullAndStringToSQL($access);
-    $username =                 formatNullAndStringToSQL($username);
-    $hasheduserpass =           formatNullAndStringToSQL($hasheduserpass);
-    $rank =         strtoupper( formatNullAndStringToSQL($rank));
-    $appointment =  strtolower( formatNullAndStringToSQL($appointment));
-    $company =      strtoupper( formatNullAndStringToSQL($company));
-    $platoon =      strtoupper( formatNullAndStringToSQL($platoon));
-    $section =                  formatNullAndStringToSQL($section);
+    $firstName =                formatVarToSQL($firstName);
+    $lastName =                 formatVarToSQL($lastName);
+    $id =                       formatVarToSQL($id);
+    $access =                   formatVarToSQL($access);
+    $username =                 formatVarToSQL($username);
+    $hasheduserpass =           formatVarToSQL($hasheduserpass);
+    $rank =         strtoupper( formatVarToSQL($rank));
+    $appointment =  strtolower( formatVarToSQL($appointment));
+    $company =      strtoupper( formatVarToSQL($company));
+    $platoon =      strtoupper( formatVarToSQL($platoon));
+    $section =                  formatVarToSQL($section);
     if ($yearLevel === 0) {
         $yearLevel = '0';
     }
@@ -778,7 +588,7 @@ function retrieveStock() {
 function retrieveIssuedItems(string $id) {
     // Retrieves a MySQLi object of all of the items on issue to a certain user.
     establishConnection();
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
     $sql = "SELECT * FROM `inventory` WHERE `id` = $id";
     $result = $_SESSION['conn'] -> query($sql);
     return $result;
@@ -787,7 +597,7 @@ function retrieveIssuedItems(string $id) {
 function retrieveIssueHistory(string $id) {
     // Retrieves a MySQLi object of the history of item issuements and returns for a certain user.
     establishConnection();
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
     $sql = "SELECT * FROM `equipmentReceipts` WHERE `id` = $id ORDER BY `receiptNum` DESC";
     $result = $_SESSION['conn'] -> query($sql);
     return $result;

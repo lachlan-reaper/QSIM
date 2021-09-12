@@ -1,6 +1,6 @@
 <?php
 
-require '../databaseFunctions.php';
+require 'databaseFunctions.php';
 // NEW
 
 
@@ -10,7 +10,7 @@ function refreshUserAccess(string $id) {
     establishConnection();
 
     // Retrieve User information
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
     $sql = "SELECT `platoon`, `appointment` FROM `users` WHERE `id` LIKE $id";
     $result = $_SESSION['conn'] -> query($sql);
 
@@ -32,8 +32,8 @@ function refreshUserAccess(string $id) {
     }
 
     $access = retrieveAccessLevel($appointment, $platoon);
-    $id =       formatNullAndStringToSQL($id);
-    $access =   formatNullAndStringToSQL($access);
+    $id =       formatVarToSQL($id);
+    $access =   formatVarToSQL($access);
 
     // Update User information
     $sql = "UPDATE `users` SET `access` = $access WHERE `users`.`id` = $id;";
@@ -50,17 +50,17 @@ function addUserArr(array $userValues) {
     $hasheduserpass = password_hash($userValues["userpass"], PASSWORD_BCRYPT);
     $access = retrieveAccessLevel($userValues["appointment"], strtoupper($userValues["platoon"]));
 
-    $firstName =                formatNullAndStringToSQL($userValues["firstName"]);
-    $lastName =                 formatNullAndStringToSQL($userValues["lastName"]);
-    $id =                       formatNullAndStringToSQL($userValues["id"]);
-    $access =                   formatNullAndStringToSQL($access);
-    $username =                 formatNullAndStringToSQL($userValues["username"]);
-    $hasheduserpass =           formatNullAndStringToSQL($hasheduserpass);
-    $rank =         strtoupper( formatNullAndStringToSQL($userValues["rank"]));
-    $appointment =  strtolower( formatNullAndStringToSQL($userValues["appointment"]));
-    $company =      strtoupper( formatNullAndStringToSQL($userValues["company"]));
-    $platoon =      strtoupper( formatNullAndStringToSQL($userValues["platoon"]));
-    $section =                  formatNullAndStringToSQL($userValues["section"]);
+    $firstName =                formatVarToSQL($userValues["firstName"]);
+    $lastName =                 formatVarToSQL($userValues["lastName"]);
+    $id =                       formatVarToSQL($userValues["id"]);
+    $access =                   formatVarToSQL($access);
+    $username =                 formatVarToSQL($userValues["username"]);
+    $hasheduserpass =           formatVarToSQL($hasheduserpass);
+    $rank =         strtoupper( formatVarToSQL($userValues["rank"]));
+    $appointment =  strtolower( formatVarToSQL($userValues["appointment"]));
+    $company =      strtoupper( formatVarToSQL($userValues["company"]));
+    $platoon =      strtoupper( formatVarToSQL($userValues["platoon"]));
+    $section =                  formatVarToSQL($userValues["section"]);
     
     if ($userValues["yearLevel"] === 0) {
         $yearLevel = '0';
@@ -99,7 +99,7 @@ function removeUserArr(array $userValues) {
     establishConnection();
 
     $id = $userValues["id"];
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
     $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";
     $sqlInventory = "DELETE FROM `inventory` WHERE `id` = $id;";
     $sqlHistory = "DELETE FROM `equipmentreceipts` WHERE `id` = $id;";
@@ -115,44 +115,44 @@ function updateUserArr(array $userValues) {
     
     // If each value is set, then it can be added to the set of variables to modify
     if (isset($userValues["firstName"])) {
-        $firstName = formatNullAndStringToSQL($userValues["firstName"]);
+        $firstName = formatVarToSQL($userValues["firstName"]);
         $variables = $variables . ", `firstName` = $firstName";
     }
     if (isset($userValues["lastName"])) {
-        $lastName = formatNullAndStringToSQL($userValues["lastName"]);
+        $lastName = formatVarToSQL($userValues["lastName"]);
         $variables = $variables . ", `lastName` = $lastName";
     }
     if (isset($userValues["id"])) {
-        $id = formatNullAndStringToSQL($userValues["id"]);
+        $id = formatVarToSQL($userValues["id"]);
         $variables = $variables . ", `id` = $id";
     }
     if (isset($userValues["appointment"]) and isset($userValues["platoon"])) {
         $access = retrieveAccessLevel($userValues["appointment"], strtoupper($userValues["platoon"]));
-        $access = formatNullAndStringToSQL($access);
+        $access = formatVarToSQL($access);
         $variables = $variables . ", `access` = $access";
     }
     if (isset($userValues["username"])) {
-        $username =                 formatNullAndStringToSQL($userValues["username"]);
+        $username =                 formatVarToSQL($userValues["username"]);
         $variables = $variables . ", `username` = $username";
     }
     if (isset($userValues["rank"])) {
-        $rank = strtoupper( formatNullAndStringToSQL($userValues["rank"]));
+        $rank = strtoupper( formatVarToSQL($userValues["rank"]));
         $variables = $variables . ", `rank` = $rank";
     }
     if (isset($userValues["appointment"])) {
-        $appointment = strtolower( formatNullAndStringToSQL($userValues["appointment"]));
+        $appointment = strtolower( formatVarToSQL($userValues["appointment"]));
         $variables = $variables . ", `appointment` = $appointment";
     }
     if (isset($userValues["company"])) {
-        $company = strtoupper( formatNullAndStringToSQL($userValues["company"]));
+        $company = strtoupper( formatVarToSQL($userValues["company"]));
         $variables = $variables . ", `company` = $company";
     }
     if (isset($userValues["platoon"])) {
-        $platoon = strtoupper( formatNullAndStringToSQL($userValues["platoon"]));
+        $platoon = strtoupper( formatVarToSQL($userValues["platoon"]));
         $variables = $variables . ", `platoon` = $platoon";
     }
     if (isset($userValues["section"])) {
-        $section = formatNullAndStringToSQL($userValues["section"]);
+        $section = formatVarToSQL($userValues["section"]);
         $variables = $variables . ", `section` = $section";
     }
     
@@ -188,8 +188,8 @@ function refreshAllAccess() {
         $id = $row["id"];
 
         $access = retrieveAccessLevel($appointment, $platoon);
-        $id = formatNullAndStringToSQL($id);
-        $access = formatNullAndStringToSQL($access);
+        $id = formatVarToSQL($id);
+        $access = formatVarToSQL($access);
 
         $sql = $sql . "UPDATE `users` SET `access` = $access WHERE `id` = $id;";
         

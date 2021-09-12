@@ -11,7 +11,7 @@ while ($i < $max) {
     $id = "$i";
     $unfId = $id;
 
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
 
     // Remove from the database
     $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";

@@ -28,7 +28,7 @@ function csvLineToArr (string $line) : array {
         $arr[$i] = str_replace($parameters, $replacements, $arr[$i]);
     }
 
-    $arr[count($arr)-1] = trim($arr[count($arr)-1]);
+    $arr[count($arr)-1] = trim($arr[count($arr)-1], " \t\n\r");
 
     return $arr;
 }
@@ -49,6 +49,8 @@ function strToCsv (string $line) : string {
     // Converts a str into a csv safe format, does only one item at a time
     $line = str_replace('"', '""', $line);
     if (str_contains($line, ",")) {
+        $line = '"' . $line . '"';
+    } else if (substr($line, 0, 1) == "0") {
         $line = '"' . $line . '"';
     }
     return $line;

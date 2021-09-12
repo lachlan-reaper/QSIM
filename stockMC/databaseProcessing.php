@@ -4,7 +4,16 @@ require '../databaseMaintenanceFunctions.php';
 session_start();
 redirectingUnauthUsers("stockMC");
 
-$function = $_GET["function"];
+if (isset($_POST["function"])) {
+    $function = $_POST["function"];
+} else if (isset($_GET["function"])) {
+    $function = $_GET["function"];
+} else {
+    echo '<script language="javascript">';
+    echo 'alert("Input \'function\' error")';
+    echo 'window.location.href = "http://' . $_SESSION["websiteLoc"] . '/stockMC/";';
+    echo '</script>';
+}
 
 if ($function == "manualModifyStock") {
     manualModifyStock();
@@ -32,6 +41,10 @@ if ($function == "manualModifyStock") {
     graduateAllCadets();
 } else {
     die("I SPECIFICALLY SAID DON'T TOUCH THE URL! <br><br><i>Gosh.... Kids these days....</i>"); // Easter Egg
+    echo '<script language="javascript">';
+    echo 'alert("Input \'function\' error");';
+    echo 'window.location.href = "http://' . $_SESSION["websiteLoc"] . '/stockMC/";';
+    echo '</script>';
 }
 
 header("Location: http://" . $_SESSION["websiteLoc"] . "/stockMC/");
@@ -42,26 +55,46 @@ function manualModifyStock () {
     // Allows for the changing of stock, adding or writing off stock
     establishConnection();
 
+    // Collects all of the post vars into an array
+    $listOfMods = [];
+    $post_keys = array_keys($_POST);
+    $i = count($post_keys);
+    $num = 2; // The number of POST vars that are not items of issue
+    while($i > 0) {
+        $i--;
+        $key = $post_keys[$i];
+        switch ($key) {
+            case "function":
+                $num--;
+                break;
+            case "action":
+                $num--;
+                break;
+            default:
+                $amount = urldecode($_POST[$key]);
+                $amount = str_replace("_", " ", $amount);
+
+                $item = urldecode($key);
+                $item = str_replace("_", " ", $item);
+
+                $listOfMods[$i-$num] = [$item, $amount]; // '-$num' adjusts for the removal of action, id and prev.
+        }
+    }
+
     $sql = "";
 
     $time = date_format(date_create(), "Y/m/d H:i:s");
-    $time = formatNullAndStringToSQL($time);
+    $time = formatVarToSQL($time);
 
-    $action = $_GET["action"];
-    $listOfMods = $_GET["mods"];
-
-    // Converts the URL safe string into the intended array of stock modifications.
-    $listOfMods = str_replace("-", " ", $listOfMods);
-    $listOfMods = explode("|", $listOfMods);
+    $action = $_POST["action"];
 
     if ($action == "Add") {
         // Iterates through all of the new stock and formats a SQL query to update the table
         $i = count($listOfMods);
         while($i > 0) {
             $i--;
-            $listOfMods[$i] = explode("_", $listOfMods[$i]);
-            $item = formatNullAndStringToSQL($listOfMods[$i][0]);
-            $value = formatNullAndStringToSQL($listOfMods[$i][1]);
+            $item = formatVarToSQL($listOfMods[$i][0]);
+            $value = formatVarToSQL($listOfMods[$i][1]);
             $sql = $sql . "UPDATE `stock` SET `total` = `total` + " . $value . ", `onShelf` = `onShelf` + " . $value . " WHERE `item` = " . $item . ";";
         }
     } else if ($action == "Remove") {
@@ -74,7 +107,6 @@ function manualModifyStock () {
         $max = count($listOfMods);
         $i = 0;
         while($i < $max) {
-            $listOfMods[$i] = explode("_", $listOfMods[$i]);
             $item = $listOfMods[$i][0];
             $value = $listOfMods[$i][1];
             
@@ -93,8 +125,8 @@ function manualModifyStock () {
                 echo "<script> alert('There is not enough $item on shelf. Please make sure you have provide the correct inputs.');</script>";
                 $error = TRUE;
             } else {
-                $item = formatNullAndStringToSQL($item);
-                $value = formatNullAndStringToSQL($value);
+                $item = formatVarToSQL($item);
+                $value = formatVarToSQL($value);
                 $sql = $sql . "UPDATE `stock` SET `total` = `total` - " . $value . ", `onShelf` = `onShelf` - " . $value . " WHERE `item` = " . $item . ";";
             }
             $i++;
@@ -115,49 +147,53 @@ function manualAddItems () {
     // Adds an item to stock to be issued to users
     establishConnection();
 
-    $sqlStock = "";
-    $sqlInventory = "";
+    $unfItem = $_POST["name"];
+    $item = formatVarToSQL($unfItem);
+    $value = $_POST["num"];
 
-    // Converts the URL safe string into the intended array of stock modifications.
-    $listOfMods = $_GET["mods"];
-    $listOfMods = str_replace("-", " ", $listOfMods);
-    $listOfMods = explode("|", $listOfMods);
+    $sqlStock = "INSERT INTO `stock` (`item`, `total`, `onShelf`) VALUES ($item, $value, $value);";
+    $sqlInventory = "ALTER TABLE `inventory` ADD `$unfItem` int(6) NOT NULL DEFAULT 0;";
 
-    // Iterates through each of the new items of stock and formats a SQL query to modify the tables
-    $i = count($listOfMods);
-    while($i > 0) {
-        $i--;
-        $listOfMods[$i] = explode("_", $listOfMods[$i]);
-        $unfItem = $listOfMods[$i][0];
-        $item = formatNullAndStringToSQL($listOfMods[$i][0]);
-        $value = $listOfMods[$i][1];
-        $sqlStock = $sqlStock . "INSERT INTO `stock` (`item`, `total`, `onShelf`) VALUES ($item, $value, $value);";
-        $sqlInventory = $sqlInventory . "ALTER TABLE `inventory` ADD `$unfItem` int(6) NOT NULL DEFAULT 0;";
-    }
-
-    $result = $_SESSION['conn'] -> multi_query($sqlStock);
-    $result = $_SESSION['conn'] -> multi_query($sqlInventory);
+    $result = $_SESSION['conn'] -> query($sqlStock);
+    $result = $_SESSION['conn'] -> query($sqlInventory);
 }
 
 function manualRemoveItems () {
     // Removes an item from stock
     establishConnection();
 
+    // Collects all of the post vars into an array
+    $listOfMods = [];
+    $post_keys = array_keys($_POST);
+    $i = count($post_keys);
+    $num = 1; // The number of POST vars that are not items of issue
+    while($i > 0) {
+        $i--;
+        $key = $post_keys[$i];
+        switch ($key) {
+            case "function":
+                $num--;
+                break;
+            default:
+                $amount = urldecode($_POST[$key]);
+                $amount = str_replace("_", " ", $amount);
+
+                $item = urldecode($key);
+                $item = str_replace("_", " ", $item);
+
+                $listOfMods[$i-$num] = [$item, $amount]; // '-$num' adjusts for the removal of action, id and prev.
+        }
+    }
+
     $sqlStock = "";
     $sqlInventory = "";
-
-    // Converts the URL safe string into the intended array of stock modifications.
-    $listOfMods = $_GET["mods"];
-    $listOfMods = str_replace("-", " ", $listOfMods);
-    $listOfMods = explode("|", $listOfMods);
 
     // Iterates through each of the old items of stock and formats a SQL query to modify the tables
     $i = count($listOfMods);
     while($i > 0) {
         $i--;
-        $listOfMods[$i] = explode("_", $listOfMods[$i]);
         $unfItem = $listOfMods[$i][0];
-        $item = formatNullAndStringToSQL($listOfMods[$i][0]);
+        $item = formatVarToSQL($listOfMods[$i][0]);
         $value = $listOfMods[$i][1];
         if ($value) {
             $sqlStock = $sqlStock . "DELETE FROM `stock` WHERE `item` = $item;";
@@ -218,7 +254,7 @@ function manualRemoveUser () {
         unlink($filename);
     }
 
-    $id = formatNullAndStringToSQL($id);
+    $id = formatVarToSQL($id);
     $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";
     $sqlInventory = "DELETE FROM `inventory` WHERE `id` = $id;";
     $sqlHistory = "DELETE FROM `equipmentreceipts` WHERE `id` = $id;";
@@ -253,17 +289,17 @@ function manualModifyUser () {
         }
     }
 
-    $oldId = formatNullAndStringToSQL($oldId);
-    $newId = formatNullAndStringToSQL($newId);
-    $firstName = formatNullAndStringToSQL($_POST["firstName"]);
-    $lastName = formatNullAndStringToSQL($_POST["lastName"]);
-    $username = formatNullAndStringToSQL($_POST["username"]);
-    $rank = strtoupper(formatNullAndStringToSQL($_POST["rank"]));
-    $appointment = strtoupper(formatNullAndStringToSQL($_POST["appointment"]));
-    $company = strtoupper(formatNullAndStringToSQL($_POST["company"]));
-    $platoon = strtoupper(formatNullAndStringToSQL($_POST["platoon"]));
-    $section = formatNullAndStringToSQL($_POST["section"]);
-    $yearLevel = formatNullAndStringToSQL($_POST["yearLevel"]);
+    $oldId = formatVarToSQL($oldId);
+    $newId = formatVarToSQL($newId);
+    $firstName = formatVarToSQL($_POST["firstName"]);
+    $lastName = formatVarToSQL($_POST["lastName"]);
+    $username = formatVarToSQL($_POST["username"]);
+    $rank = strtoupper(formatVarToSQL($_POST["rank"]));
+    $appointment = strtoupper(formatVarToSQL($_POST["appointment"]));
+    $company = strtoupper(formatVarToSQL($_POST["company"]));
+    $platoon = strtoupper(formatVarToSQL($_POST["platoon"]));
+    $section = formatVarToSQL($_POST["section"]);
+    $yearLevel = formatVarToSQL($_POST["yearLevel"]);
     
     // Creates a SQL query to update the user information
     $sqlUser = "UPDATE `users` SET `firstName` = $firstName, `lastName` = $lastName, `username` = $username, `rank` = $rank, `appointment` = $appointment, `company` = $company, `platoon` = $platoon, `section` = $section, `yearLevel` = $yearLevel, `id` = $newId WHERE `id` = $oldId;";

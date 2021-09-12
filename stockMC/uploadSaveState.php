@@ -4,27 +4,61 @@ establishConnection();
 
 function convertCsvToDBSave($dbname) {
     $mfile = fopen("saveState/$dbname.csv", "r");
-    $line = fgets($mfile);
-    $cols = csvLineToArr($line);
     
     // Wipe table
-    $sql = "TRUNCATE TABLE `$dbname`;";
+    $sql = "DROP TABLE `$dbname`;";
     $results = $_SESSION["conn"]->query($sql);
     if (! $results) {
         echo "bad!<br>";
         echo $_SESSION["conn"]->error;
         echo $sql;
     }
-
+    
+    $line = fgets($mfile);
+    $cols = csvLineToArr($line);
     // Format cols to SQL
-    $colsStr = $cols;
-    $i = count($colsStr);
-    while ($i > 0) {
-        $i--;
-        $colsStr[$i] = "`" . $colsStr[$i] . "`";
+    $colsStr = [];
+    $colInfo = [];
+    $keySql = "";
+    $max = count($cols);
+    $i = 0;
+    while ($max > $i) {
+        $col = csvLineToArr($cols[$i]);
+        $cols[$i] = $col;
+        $name = $col[0];
+        $type = $col[1];
+        
+        $null = $col[2];
+        if ($null == "NO") {
+            $null = "NOT NULL";
+        } else {
+            $null = "";
+        }
+        
+        $default = $col[3];
+        if ($default == "") {
+            $default = "";
+        } else {
+            $default = "DEFAULT $default";
+        }
+        
+        $key = $col[4];
+        if ($key == "") {
+            $key = "";
+        } else {
+            $keySql = ", PRIMARY KEY (`$name`)";
+        }
+        
+        $colsStr[$i] = "`" . $name . "`";
+        $colInfo[$i] = "`$name` $type $null $default";
+        $i++;
     }
     $colsStr = implode(", ", $colsStr);
-
+    $colInfo = implode(", ", $colInfo);
+    
+    $sql = "CREATE TABLE `$dbname` ($colInfo$keySql)";
+    $results = $_SESSION["conn"]->query($sql);
+    
     // Convert CSV into SQL DB
     $numOfLines = count(file("saveState/$dbname.csv")) - 1;
     while ($numOfLines > 0) {
@@ -34,11 +68,11 @@ function convertCsvToDBSave($dbname) {
         while ($i > 0) { // For each item in the line array, formats the items into a SQL query
             $i--;
             if (is_numeric($lineSql[$i])) {
-                if ($cols[$i] == "id" or $cols[$i] == "serverId" or $cols[$i] == "platoon" or $cols[$i] == "section" or $cols[$i] == "username" or $cols[$i] == "company") {
-                    $lineSql[$i] = formatNullAndStringToSQL($lineSql[$i]);
+                if ($cols[$i][0] == "id" or $cols[$i][0] == "serverId" or $cols[$i][0] == "platoon" or $cols[$i][0] == "section" or $cols[$i][0] == "username" or $cols[$i][0] == "company") {
+                    $lineSql[$i] = formatVarToSQL($lineSql[$i]);
                 }
             } else {
-                $lineSql[$i] = formatNullAndStringToSQL($lineSql[$i]);
+                $lineSql[$i] = formatVarToSQL($lineSql[$i]);
             }
         }
         $lineSql = implode(", ", $lineSql); // Recombines the array back into a SQL safe string
@@ -65,9 +99,12 @@ move_uploaded_file($zipTMPFile, $zipFile);
 // Unzip file
 mkdir($zipFolder);
 $zip = new ZipArchive;
-if ($zip->open($zipFile) === TRUE) {
+$res =  $zip->open($zipFile);
+if ($res === TRUE) {
     $zip->extractTo($zipFolder . '/');
     $zip->close();
+} else {
+    die("Error: " . $res);
 }
 
 // Save photos
@@ -80,10 +117,10 @@ while (false !== ($entry = readdir($handle))) {
 closedir($handle);
 
 // Overwrite server files
-unlink("../pageAccessLevels.pal");
+unlink("../pageAccessLevels.csv");
 unlink("../appointmentAccessRoles.csv");
 unlink("../contacts.csv");
-copy($zipFolder . '/pageAccessLevels.pal', "../pageAccessLevels.pal");
+copy($zipFolder . '/pageAccessLevels.csv', "../pageAccessLevels.csv");
 copy($zipFolder . '/appointmentAccessRoles.csv', "../appointmentAccessRoles.csv");
 copy($zipFolder . '/contacts.csv', "../contacts.csv");
 
@@ -109,7 +146,7 @@ unlink($zipFolder . '/users.csv');
 unlink($zipFolder . '/inventory.csv');
 unlink($zipFolder . '/stock.csv');
 unlink($zipFolder . '/equipmentReceipts.csv');
-unlink($zipFolder . '/pageAccessLevels.pal');
+unlink($zipFolder . '/pageAccessLevels.csv');
 unlink($zipFolder . '/appointmentAccessRoles.csv');
 unlink($zipFolder . '/contacts.csv');
 rmdir($zipFolder);

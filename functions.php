@@ -1,7 +1,28 @@
 <?php
 date_default_timezone_set('Australia/Sydney');
 
+require 'fileFunctions.php';
+
 // NEW
+function establishConnection() {
+    // Establishes a connection with the server and sets up any necessary $SESSION variables
+    $host = $_SERVER['HTTP_HOST'];
+    $_SESSION["websiteLoc"] = $host . "/QSIM";
+
+    $servername = "localhost"; // The server name containing the database
+    $username = "lmuir2021";
+    $password = "riddles";
+    $databaseName = "QSIMDB";
+
+    // Create connection
+    $_SESSION['conn'] = new mysqli($servername, $username, $password, $databaseName);
+
+    // Check connection
+    if ($_SESSION['conn']->connect_error) {
+        die("Connection failed: " . $_SESSION['conn']->connect_error);
+    }
+}
+
 function userIdentification (string $username, string $password) {
     $sql = "SELECT `userpass`, `id`, `access` FROM `users` WHERE `username` = '$username'";
     $result = $_SESSION['conn'] -> query($sql);
@@ -27,47 +48,54 @@ function userIdentification (string $username, string $password) {
     return $idResult;
 }
 
-// OLD
-function establishConnection() {
-    // Establishes a connection with the server and sets up any necessary $SESSION variables
-    $host = $_SERVER['HTTP_HOST'];
-    $_SESSION["websiteLoc"] = $host . "/QSIM";
-
-    $servername = "localhost"; // The server name containing the database
-    $username = "lmuir2021";
-    $password = "riddles";
-    $databaseName = "QSIMDB";
-
-    // Create connection
-    $_SESSION['conn'] = new mysqli($servername, $username, $password, $databaseName);
-
-    // Check connection
-    if ($_SESSION['conn']->connect_error) {
-        die("Connection failed: " . $_SESSION['conn']->connect_error);
-    }
-}
-
+// File page access
 function validUser(string $pagename, string $accessLevel) : bool {
     // Given the page name and user's access level, will return a boolean value signalling whether the user has access to this page.
-    $myfile = fopen("../pageAccessLevels.pal", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../pageAccessLevels.pal"));
-    $line = strstr($file, $pagename);
+    $myfile = fopen("../pageAccessLevels.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../pageAccessLevels.csv"));
+    $lines = csvFileToArr2D($file);
     fclose($myfile);
 
-    $start = strpos($line, ':');
-    $end = strpos($line, '|');
-    $allowedAccessLevels = substr($line, $start+1, $end-$start-1);
+    $max = count($lines);
+    $i = 0;
+    while (!($lines[$i][0] == $pagename)) {
+        $i++;
+        if ($i >= $max) {
+            return FALSE;
+        }
+    }
 
-    if (str_contains($allowedAccessLevels, "all")) {
+    if ($lines[$i][1] == "all") {
         // If the access restriction has been defined as "all" then anyone is allowed to access this page.
         return TRUE;
-    } else if (str_contains($allowedAccessLevels, $accessLevel)) {
-        return TRUE;
     } else {
+        $num = count($lines[$i]);
+        $x = 1;
+        while ($num > $x) {
+            if ($lines[$i][$x] == $accessLevel) {
+                return TRUE;
+            }
+        }
         return FALSE;
     }
 }
 
+function redirectingUnauthUsers(string $pagename) {
+    // Given the page name, it will check if the current user has access to the webpage.
+    establishConnection();
+    if ($_SESSION["currentUserId"] === 0 or $_SESSION["currentUserId"] === NULL) {
+        // If the user has not logged in.
+        header("Location: http://" . $_SESSION["websiteLoc"] . "/login/");
+        die();
+    }
+    if (! validUser($pagename, $_SESSION["currentUserAccess"])) {
+        // If the user does not have access to the current page they are trying to access, this will redirect them to the home page.
+        header("Location: http://" . $_SESSION["websiteLoc"] . "/home/");
+        die();
+    }
+}
+
+// OLD
 function formatProfileBox(string $strHTMLFile) : string {
     // Given the HTML format of the Profile Box in theupper left of the screen, it will output the HTML lines of the box as customised to the user.
     $firstname = ucfirst($_SESSION["currentUserFirstName"]);
@@ -110,21 +138,6 @@ function displayHeader() {
     $file = formatNavbarToUserAccess($file, $_SESSION["currentUserAccess"]);
     echo $file;
     fclose($header);
-}
-
-function redirectingUnauthUsers(string $pagename) {
-    // Given the page name, it will check if the current user has access to the webpage.
-    establishConnection();
-    if ($_SESSION["currentUserId"] === 0 or $_SESSION["currentUserId"] === NULL) {
-        // If the user has not logged in.
-        header("Location: http://" . $_SESSION["websiteLoc"] . "/login/");
-        die();
-    }
-    if (! validUser($pagename, $_SESSION["currentUserAccess"])) {
-        // If the user does not have access to the current page they are trying to access, this will redirect them to the home page.
-        header("Location: http://" . $_SESSION["websiteLoc"] . "/home/");
-        die();
-    }
 }
 
 ?>
