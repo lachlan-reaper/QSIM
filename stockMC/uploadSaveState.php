@@ -14,8 +14,7 @@ function convertCsvToDBSave($dbname) {
         echo $sql;
     }
     
-    $line = fgets($mfile);
-    $cols = csvLineToArr($line);
+    $cols = fgetcsv($mfile);
     // Format cols to SQL
     $colsStr = [];
     $colInfo = [];
@@ -23,7 +22,7 @@ function convertCsvToDBSave($dbname) {
     $max = count($cols);
     $i = 0;
     while ($max > $i) {
-        $col = csvLineToArr($cols[$i]);
+        $col = str_getcsv($cols[$i]);
         $cols[$i] = $col;
         $name = $col[0];
         $type = $col[1];
@@ -62,8 +61,10 @@ function convertCsvToDBSave($dbname) {
     // Convert CSV into SQL DB
     $numOfLines = count(file("saveState/$dbname.csv")) - 1;
     while ($numOfLines > 0) {
-        $line = fgets($mfile);
-        $lineSql = csvLineToArr($line);
+        $lineSql = fgetcsv($mfile);
+        if (!$lineSql) {
+            break;
+        }
         $i = count($lineSql);
         while ($i > 0) { // For each item in the line array, formats the items into a SQL query
             $i--;
@@ -112,6 +113,15 @@ $handle = opendir($zipFolder . "/photo/");
 while (false !== ($entry = readdir($handle))) {
     if ($entry != "." && $entry != ".." && !is_dir('../photo/' . $entry)) {
         copy($zipFolder . '/photo/' . $entry, '../photo/' . $entry);
+    }
+}
+closedir($handle);
+
+// Save unitStructure
+$handle = opendir($zipFolder . "/unitStructure/");
+while (false !== ($entry = readdir($handle))) {
+    if ($entry != "." && $entry != ".." && !is_dir('../unitStructure/' . $entry)) {
+        copy($zipFolder . '/unitStructure/' . $entry, '../unitStructure/' . $entry);
     }
 }
 closedir($handle);

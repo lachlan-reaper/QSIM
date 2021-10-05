@@ -66,7 +66,7 @@
                                     // Converting behind the scenes variables to more relevant common words.
                                     if ($name == "userpass") {
                                         $name = "Password";
-                                    } else if ($name == "access") {
+                                    } else if ($name == "access" or $name == "notes") {
                                         continue;
                                     } else {
                                         $name = preg_replace("/[A-Z]/", " $0", $name); // Adds a space in front of every capital letter, since variables in the DB are camel case.
@@ -256,10 +256,10 @@
                                     $name = $item["Field"];
 
                                     $id = $_GET['id'];
-                                    $value = getUserValue($id, $name, "users");
+                                    $value = getUserValues($id, [$name], "users")[$name];
                                     
                                     // Converting behind the scenes variables to more relevant common words and skipping some hidden variables.
-                                    if ($name == "access" or $name == "userpass") {
+                                    if ($name == "access" or $name == "userpass" or $name == "notes") {
                                         continue;
                                     } else {
                                         $name = preg_replace("/[A-Z]/", " $0", $name); // Adds a space in front of every capital letter, since variables in the DB are camel case.
@@ -290,7 +290,7 @@
                                             $x++;
                                         }
 
-                                        $userAppt = getUserValue($id, "appointment", "users");
+                                        $userAppt = getUserValues($id, ["appointment"], "users")["appointment"];
                                         $row = str_replace("OPTIONS", $options, $row);
                                         $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
 
@@ -327,7 +327,7 @@
                                             $x++;
                                         }
 
-                                        $userAppt = getUserValue($id, "company", "users");
+                                        $userAppt = getUserValues($id, ["company"], "users")["company"];
                                         $row = str_replace("OPTIONS", $options, $row);
                                         $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
                                     } else if ($item["Field"] == "platoon") {
@@ -360,7 +360,7 @@
                                             $x++;
                                         }
 
-                                        $userAppt = getUserValue($id, "platoon", "users");
+                                        $userAppt = getUserValues($id, ["platoon"], "users")["platoon"];
                                         $row = str_replace("OPTIONS", $options, $row);
                                         $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
                                     } else if ($item["Field"] == "rank") {
@@ -393,7 +393,7 @@
                                             $x++;
                                         }
 
-                                        $userAppt = getUserValue($id, "rank", "users");
+                                        $userAppt = getUserValues($id, ["rank"], "users")["rank"];
                                         $row = str_replace("OPTIONS", $options, $row);
                                         $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
                                     } else if ($item["Field"] == "yearLevel") {
@@ -426,7 +426,7 @@
                                             $x++;
                                         }
 
-                                        $userAppt = getUserValue($id, "yearLevel", "users");
+                                        $userAppt = getUserValues($id, ["yearLevel"], "users")["yearLevel"];
                                         $row = str_replace("OPTIONS", $options, $row);
                                         $row = str_replace("value='$userAppt'", "value='$userAppt' selected", $row, $count);
                                     } else if (substr($item["Type"], 0, 3) == "int") { // Ignores the rest of the var since that holds the varying size of the variable

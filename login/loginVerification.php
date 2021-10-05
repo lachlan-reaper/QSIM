@@ -9,8 +9,9 @@ $userpassinput = $_POST['pass'];
 
 $userID = userIdentification($usernameinput, $userpassinput);
 
-if ($userID != NULL) {
-    $access = getUserValues($userID, ["access"], "users")["access"];
+if (!($userID === NULL)) {
+    $arr = getUserValues($userID, ["access"], "users");
+    $access = $arr["access"];
 
     $_SESSION["currentUserAccess"] = $access;
     $_SESSION["currentUserId"] = $userID;

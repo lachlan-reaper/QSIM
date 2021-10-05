@@ -47,8 +47,7 @@ function fileAddUsers () {
     $userParameterArrayIndexes = [];
 
     $file = fopen("tmp.csv", "r");
-    $firstLine = fgets($file);
-    $firstLine = csvLineToArr($firstLine);
+    $firstLine = fgetcsv($file);
 
     // Creates an array that will act as key for where each of the variables could be found, i.e. if the first column stores a User's platoon then this array when given the 
     // key of "platoon" will provide the value of 1, pointing to the first index of the array
@@ -81,8 +80,10 @@ function fileAddUsers () {
     $numOfLines = count(file("tmp.csv")) - 1; // -1 is to not include the first line
     $lineNum = 0;
     while ($lineNum < $numOfLines) {
-        $line = fgets($file);
-        $line = csvLineToArr($line);
+        $line = fgetcsv($file);
+        if (!$line) {
+            break;
+        }
 
         // Iterates through each item and assigns in a new array the value of the item to the key of the corresponding column
         // I.e. the value of the user's password is assigned to the key of 'userpass'
@@ -122,8 +123,7 @@ function fileRemoveUsers () {
     $userParameterArrayIndexes = [];
 
     $file = fopen("tmp.csv", "r");
-    $firstLine = fgets($file);
-    $firstLine = csvLineToArr($firstLine);
+    $firstLine = fgetcsv($file);
     
     // Creates an array that will act as key for where each of the variables could be found, i.e. if the first column stores a User's first name then this array when given the 
     // key of "firstName" will provide the value of 1, pointing to the first index of the array
@@ -138,8 +138,10 @@ function fileRemoveUsers () {
     $numOfLines = count(file("tmp.csv")) - 1; // -1 is to not include the first line
     $lineNum = 0;
     while ($lineNum < $numOfLines) {
-        $line = fgets($file);
-        $line = csvLineToArr($line);
+        $line = fgetcsv($file);
+        if (!$line) {
+            break;
+        }
 
         // Iterates through each item and assigns in a new array the value of the item to the key of the corresponding column
         // I.e. the value of the user's password is assigned to the key of 'userpass'
@@ -179,8 +181,7 @@ function fileUpdateUsers () {
     $userParameterArrayIndexes = [];
 
     $file = fopen("tmp.csv", "r");
-    $firstLine = fgets($file);
-    $firstLine = csvLineToArr($firstLine);
+    $firstLine = fgetcsv($file);
 
     // Creates an array that will act as key for where each of the variables could be found, i.e. if the first column stores a User's platoon then this array when given the 
     // key of "platoon" will provide the value of 1, pointing to the first index of the array
@@ -212,8 +213,10 @@ function fileUpdateUsers () {
     $numOfLines = count(file("tmp.csv")) - 1; // -1 is to not include the first line
     $lineNum = 0;
     while ($lineNum < $numOfLines) {
-        $line = fgets($file);
-        $line = csvLineToArr($line);
+        $line = fgetcsv($file);
+        if (!$line) {
+            break;
+        }
 
         // Iterates through each item and assigns in a new array the value of the item to the key of the corresponding column
         // I.e. the value of the user's password is assigned to the key of 'userpass'
@@ -250,14 +253,15 @@ function fileIssueStock () {
     move_uploaded_file($userInfo, "tmp.csv");
 
     $mfile = fopen("tmp.csv", "r");
-    $line = fgets($mfile);
-    $cols = csvLineToArr($line);
+    $cols = fgetcsv($mfile);
 
     // Convert CSV into SQL DB
     $numOfLines = count(file("tmp.csv")) - 1;
     while ($numOfLines > 0) {
-        $line = fgets($mfile);
-        $line = csvLineToArr($line);
+        $line = fgetcsv($mfile);
+        if (!$line) {
+            break;
+        }
 
         // Formats each item in the line into an array
         $i = 0;
@@ -288,14 +292,15 @@ function fileReturnStock () {
     move_uploaded_file($userInfo, "tmp.csv");
 
     $mfile = fopen("tmp.csv", "r");
-    $line = fgets($mfile);
-    $cols = csvLineToArr($line);
+    $cols = fgetcsv($mfile);
 
     // Convert CSV into SQL DB
     $numOfLines = count(file("tmp.csv")) - 1;
     while ($numOfLines > 0) {
-        $line = fgets($mfile);
-        $line = csvLineToArr($line);
+        $line = fgetcsv($mfile);
+        if (!$line) {
+            break;
+        }
 
         // Formats each item in the line into an array
         $i = 0;
@@ -326,14 +331,15 @@ function fileLostStock () {
     move_uploaded_file($userInfo, "tmp.csv");
 
     $mfile = fopen("tmp.csv", "r");
-    $line = fgets($mfile);
-    $cols = csvLineToArr($line);
+    $cols = fgetcsv($mfile);
 
     // Convert CSV into SQL DB
     $numOfLines = count(file("tmp.csv")) - 1;
     while ($numOfLines > 0) {
-        $line = fgets($mfile);
-        $line = csvLineToArr($line);
+        $line = fgetcsv($mfile);
+        if (!$line) {
+            break;
+        }
 
         // Formats each item in the line into an array
         $i = 0;

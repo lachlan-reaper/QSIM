@@ -21,7 +21,7 @@ if ($id != $_SESSION["currentUserId"]) { // Makes sure that anyone trying to cha
     die("This is not your account!!!");
 }
 
-$userpass = getUserValue($id, "userpass", "users");
+$userpass = getUserValues($id, ["userpass"], "users")["userpass"];
 $oldpass = $_POST["oldpass"];
 if(! password_verify($oldpass, $userpass)) { // Makes sure the old password provided is valid
     header("Location: http://" . $_SESSION["websiteLoc"] . "/profile/retrievePassword.php?id=$id&error=true");

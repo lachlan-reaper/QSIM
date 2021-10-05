@@ -27,6 +27,7 @@ $sql1 = "CREATE TABLE users (
     company varchar(10) NOT NULL,
     platoon varchar(10) NOT NULL,
     section varchar(10) NOT NULL,
+    notes text(),
     PRIMARY KEY (id)
 );";
 $sql2 = "CREATE TABLE `inventory` (

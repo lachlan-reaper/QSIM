@@ -3,7 +3,7 @@
 require 'functions.php';
 
 // NEW
-function formatVarToSQL ($variable) : string { // Was "formatVarToSQL"
+function formatVarToSQL ($variable) : string {
     // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
     if ($variable === "" or $variable === "NULL" or $variable === null) {
         return "NULL";
@@ -16,7 +16,7 @@ function formatVarToSQL ($variable) : string { // Was "formatVarToSQL"
     return $variable;
 }
 
-function getUserValues (string $id, array $uservalues, string $table) : array { // Was "getMultiUserValues"
+function getUserValues (string $id, array $uservalues, string $table) : array {
     // Given user ID and values that are desired to be used, will return the respective values in the form of an array.
     establishConnection();
 
@@ -52,8 +52,53 @@ function getUserValues (string $id, array $uservalues, string $table) : array { 
     }
 }
 
+function getAccessLevel (string $appointment, string $platoon) : string {
+    // Returns the access level for the given appointment from the defining document stored on the server.
+    $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
+    $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
+    $lines = csvFileToArr2D($file);
+    fclose($myfile);
+
+    // Finds the starting and sentinel characters for the invidual appointment lines and returns the access level.
+    $i = 0;
+    while (!($lines[$i][0] == $appointment)) {
+        $i++;
+    }
+    $access = $lines[$i][1];
+
+    // If the cadet is in the QM PL they require extra priviledges in order to complete their duties.
+    if ($access !== "admin" and $platoon === "QM") {
+        $access = "qstore";
+    }
+
+    return $access;
+}
+
+// Session
+function establishSessionVars () {
+    // Defines the session variables
+    $id = $_SESSION["currentUserId"]; // ID is the only one to not assign to the session var as it is what is used as the credential for the user.
+    $values = ["firstName", "lastName", "appointment", "rank"];
+    $vars = getUserValues($id, $values, "users");
+    $_SESSION["currentUserFirstName"] = $vars["firstName"];
+    $_SESSION["currentUserLastName"] = $vars["lastName"];
+    $_SESSION["currentUserAppointment"] = $vars["appointment"];
+    $_SESSION["currentUserRank"] = $vars["rank"];
+}
+
+function establishProfilePageVars (string $id) { // CAN BE OPTIMISED AND MADE REDUNDANT
+    // Returns the variables that the profile page desires.
+    $values = ["firstName", "lastName", "appointment", "rank"];
+    $result = getUserValues($id, $values, "users");
+    $firstname =    $result["firstName"];
+    $lastname =     $result["lastName"];
+    $appointment =  $result["appointment"];
+    $rank =         $result["rank"];
+    return [$firstname, $lastname, $appointment, $rank];
+}
+
 // Search Result
-function retrieveSearchQueryResults (string $userQuery, array $parameters) {
+function getSearchQueryResults (string $userQuery, array $parameters) {
     // Returns a MySQLi object of the results after parsing and interpreting the user's query and parameters.
     establishConnection();
     
@@ -66,9 +111,12 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
     } else {
         // 'preg_replace' is used to ensure there is no SQL injections or hacking. This is done by removing all unnesscesssary symbols that could possibly be used.
         $userQuery = preg_replace('/[_+!?=<>≤≥@#$%^&*(){}|~\/]/', '', $userQuery);
+
+        // During searches, the hyphenated names and initials are simply treated as separate words as the below program accounts for this
         $userQuery = str_replace('-', ' ', $userQuery);
         $userQuery = str_replace('.', ' ', $userQuery);
         $userQuery = trim($userQuery);
+        
         $userQueryArr = explode(" ", $userQuery);
 
         // This ginormous collection of statements is used to try all possible permutations of the input as either part of the last name or first name, as seperated by ' ', '-' or '.'.
@@ -184,13 +232,16 @@ function retrieveSearchQueryResults (string $userQuery, array $parameters) {
             if (strlen($rankSql) > 0) {
                 $rankSql = " AND (" . substr($rankSql, 4) . ")";
                 $sql = $sql . $rankSql;
-            } else if (strlen($yearSql) > 0) {
+            } 
+            if (strlen($yearSql) > 0) {
                 $yearSql = " AND (" . substr($yearSql, 4) . ")";
                 $sql = $sql . $yearSql;
-            } else if (strlen($coySql) > 0) {
+            } 
+            if (strlen($coySql) > 0) {
                 $coySql = " AND (" . substr($coySql, 4) . ")";
                 $sql = $sql . $coySql;
-            } else if (strlen($plSql) > 0) {
+            } 
+            if (strlen($plSql) > 0) {
                 $plSql = " AND (" . substr($plSql, 4) . ")";
                 $sql = $sql . $plSql;
             }
@@ -251,7 +302,7 @@ function formatRowSearchResult (array $row) : string {
 // Issuement
 function getPredefSetsJSArr (string $setname) : string {
     $row = "";
-    $results = retrieveIssuedItems($setname);
+    $results = getIssuedItems($setname);
     $items = retrieveAllIssuedItemsOnStock();
 
     $i = $items->num_rows;
@@ -406,119 +457,63 @@ function setIssue (string $id, array $listOfItems) {
 
 }
 
-
-// OLD
-function retrieveAccessLevel(string $appointment, string $platoon) : string {
-    // Returns the access level for the given appointment from the defining document stored on the server.
-    $myfile = fopen("../appointmentAccessRoles.csv", "r") or die("Internal server error: Unable to open file!");
-    $file = fread($myfile, filesize("../appointmentAccessRoles.csv"));
-
-    // Retrieves everything beyond the appointment, the ":" is to ensure that the appointment of 'recruit' does retrieve the correct line.
-    $line = strstr($file, $appointment . ":");
-    fclose($myfile);
-
-    // Finds the starting and sentinel characters for the invidual appointment lines and returns the access level.
-    $start = strpos($line, ':');
-    if (! $end = strpos($line, '|')) {
-        $end = strlen($line);
-    }
-    $access = substr($line, $start+1, $end-$start-1);
-
-    // If the cadet is in the QM PL they require extra priviledges in order to complete their duties.
-    if ($access !== "admin" and $platoon === "QM") {
-        $access = "qstore";
-    }
-
-    return $access;
-}
-
-function getUserValue(string $id, string $uservalue, string $table) {
-    // Given user ID and a value that is desired to be used, will return the respective value.
+// SQL collection
+function retrieveAllUserColumns () {
+    // Returns an array of all of the columns used to define a user
     establishConnection();
-
-    $id = formatVarToSQL($id);
-    $sql = "SELECT `$uservalue` FROM `$table` WHERE `id` LIKE $id";
-    
-    $result = $_SESSION['conn'] -> query($sql);
-    
-    if ($result->num_rows > 1) {
-        echo '<script language="javascript">';
-        echo 'alert("Duplicate user error")';
-        echo '</script>';
-        return NULL;
-    } 
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-        return $row[$uservalue];
-    } else {
-        echo '<script language="javascript">';
-        echo 'alert("No user by the id of: ' . $id . '")';
-        echo '</script>';
-        return NULL;
-    }
+    $sql = "SHOW COLUMNS FROM `users`;";
+    $result = $_SESSION['conn']->query($sql);
+    return $result;
 }
 
-function getMultiUserValues(string $id, array $uservalues, string $table) { // Was "getMultiUserValues"
-    // Given user ID and values that are desired to be used, will return the respective values in the form of an array.
+function retrieveAllIssuedItemsOnStock () {
+    // Returns a MySQLi object of all of the different items that are on stock in QCS
     establishConnection();
-
-    $id = formatVarToSQL($id);
-
-    // Formats and adds the values to a SQL query
-    $i = count($uservalues);
-    $values = "";
-    while ($i > 0) {
-        $i--;
-        $x = $uservalues[$i];
-        $values = $values . ", `$x`";
-    }
-    $values = substr($values, 2);
-    $sql = "SELECT $values FROM `$table` WHERE `id` LIKE $id";
-    
+    $sql = "SELECT `item` FROM `stock`";
     $result = $_SESSION['conn'] -> query($sql);
-
-    if ($result->num_rows > 1) {
-        echo '<script language="javascript">';
-        echo 'alert("Duplicate user error")';
-        echo '</script>';
-        return NULL;
-    } 
-    if ($result->num_rows == 1) {
-        $row = $result->fetch_assoc();
-        return $row;
-    } else {
-        echo '<script language="javascript">';
-        echo 'alert("No user by the id of: ' . $id . '")';
-        echo '</script>';
-        return NULL;
-    }
+    return $result;
 }
 
-function establishSessionVars() {
-    // Defines the session variables
-    $id = $_SESSION["currentUserId"]; // ID is the only one to not assign to the session var as it is what is used as the credential for the user.
-    $_SESSION["currentUserFirstName"] =     getUserValue($id, "firstName", "users");
-    $_SESSION["currentUserLastName"] =      getUserValue($id, "lastName", "users");
-    $_SESSION["currentUserAppointment"] =   getUserValue($id, "appointment", "users");
-    $_SESSION["currentUserRank"] =          getUserValue($id, "rank", "users");
+function retrieveStock () {
+    // Returns a MySQLi object of all of the different items that are on stock in QCS and their numbers on shelf, on loan, total and lost or damaged.
+    establishConnection();
+    $sql = "SELECT * FROM `stock`";
+    $result = $_SESSION['conn'] -> query($sql);
+    return $result;
 }
 
-function establishProfilePageVars(string $id) { // CAN BE OPTIMISED AND MADE REDUNDANT
-    // Returns the variables that the profile page desires.
-    $values = ["firstName", "lastName", "appointment", "rank"];
-    $result = getMultiUserValues($id, $values, "users");
-    $firstname =    $result["firstName"];
-    $lastname =     $result["lastName"];
-    $appointment =  $result["appointment"];
-    $rank =         $result["rank"];
-    return [$firstname, $lastname, $appointment, $rank];
+function getIssuedItems (string $id) {
+    // Retrieves a MySQLi object of all of the items on issue to a certain user.
+    establishConnection();
+    $id = formatVarToSQL($id);
+    $sql = "SELECT * FROM `inventory` WHERE `id` = $id";
+    $result = $_SESSION['conn'] -> query($sql);
+    return $result;
 }
 
+function getIssueHistory (string $id) {
+    // Retrieves a MySQLi object of the history of item issuements and returns for a certain user.
+    establishConnection();
+    $id = formatVarToSQL($id);
+    $sql = "SELECT * FROM `equipmentReceipts` WHERE `id` = $id ORDER BY `receiptNum` DESC";
+    $result = $_SESSION['conn'] -> query($sql);
+    return $result;
+}
+
+function retrieveStockHistory () {
+    // Retrieves a MySQLi object of the history of all item issuements and returns it.
+    establishConnection();
+    $sql = "SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC";
+    $result = $_SESSION['conn'] -> query($sql);
+    return $result;
+}
+
+// OLD - Only used for Setup
 function addUser(string $firstName, string $lastName, string $id, string $username, string $userpass, string $rank, string $appointment, string $company, string $platoon, string $section, int $yearLevel) {
     // Adds a user to the database as well as encrypt the password.
     establishConnection();
     $hasheduserpass = password_hash($userpass, PASSWORD_BCRYPT);
-    $access = retrieveAccessLevel($appointment, strtoupper($platoon));
+    $access = getAccessLevel($appointment, strtoupper($platoon));
 
     $firstName =                formatVarToSQL($firstName);
     $lastName =                 formatVarToSQL($lastName);
@@ -527,7 +522,7 @@ function addUser(string $firstName, string $lastName, string $id, string $userna
     $username =                 formatVarToSQL($username);
     $hasheduserpass =           formatVarToSQL($hasheduserpass);
     $rank =         strtoupper( formatVarToSQL($rank));
-    $appointment =  strtolower( formatVarToSQL($appointment));
+    $appointment =  strtoupper( formatVarToSQL($appointment));
     $company =      strtoupper( formatVarToSQL($company));
     $platoon =      strtoupper( formatVarToSQL($platoon));
     $section =                  formatVarToSQL($section);
@@ -559,56 +554,6 @@ function addUser(string $firstName, string $lastName, string $id, string $userna
             echo "Error: " . $sql . "<br>" . $_SESSION['conn']->error . "<br>";
         }
     }
-}
-
-function retrieveAllUserColumns () {
-    // Returns an array of all of the columns used to define a user
-    establishConnection();
-    $sql = "SHOW COLUMNS FROM `users`;";
-    $result = $_SESSION['conn']->query($sql);
-    return $result;
-}
-
-function retrieveAllIssuedItemsOnStock() {
-    // Returns a MySQLi object of all of the different items that are on stock in QCS
-    establishConnection();
-    $sql = "SELECT `item` FROM `stock`";
-    $result = $_SESSION['conn'] -> query($sql);
-    return $result;
-}
-
-function retrieveStock() {
-    // Returns a MySQLi object of all of the different items that are on stock in QCS and their numbers on shelf, on loan, total and lost or damaged.
-    establishConnection();
-    $sql = "SELECT * FROM `stock`";
-    $result = $_SESSION['conn'] -> query($sql);
-    return $result;
-}
-
-function retrieveIssuedItems(string $id) {
-    // Retrieves a MySQLi object of all of the items on issue to a certain user.
-    establishConnection();
-    $id = formatVarToSQL($id);
-    $sql = "SELECT * FROM `inventory` WHERE `id` = $id";
-    $result = $_SESSION['conn'] -> query($sql);
-    return $result;
-}
-
-function retrieveIssueHistory(string $id) {
-    // Retrieves a MySQLi object of the history of item issuements and returns for a certain user.
-    establishConnection();
-    $id = formatVarToSQL($id);
-    $sql = "SELECT * FROM `equipmentReceipts` WHERE `id` = $id ORDER BY `receiptNum` DESC";
-    $result = $_SESSION['conn'] -> query($sql);
-    return $result;
-}
-
-function retrieveStockHistory() {
-    // Retrieves a MySQLi object of the history of all item issuements and returns it.
-    establishConnection();
-    $sql = "SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC";
-    $result = $_SESSION['conn'] -> query($sql);
-    return $result;
 }
 
 ?>

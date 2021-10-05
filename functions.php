@@ -4,7 +4,7 @@ date_default_timezone_set('Australia/Sydney');
 require 'fileFunctions.php';
 
 // NEW
-function establishConnection() {
+function establishConnection () {
     // Establishes a connection with the server and sets up any necessary $SESSION variables
     $host = $_SERVER['HTTP_HOST'];
     $_SESSION["websiteLoc"] = $host . "/QSIM";
@@ -49,7 +49,7 @@ function userIdentification (string $username, string $password) {
 }
 
 // File page access
-function validUser(string $pagename, string $accessLevel) : bool {
+function validUser (string $pagename, string $accessLevel) : bool {
     // Given the page name and user's access level, will return a boolean value signalling whether the user has access to this page.
     $myfile = fopen("../pageAccessLevels.csv", "r") or die("Internal server error: Unable to open file!");
     $file = fread($myfile, filesize("../pageAccessLevels.csv"));
@@ -75,12 +75,13 @@ function validUser(string $pagename, string $accessLevel) : bool {
             if ($lines[$i][$x] == $accessLevel) {
                 return TRUE;
             }
+            $x++;
         }
         return FALSE;
     }
 }
 
-function redirectingUnauthUsers(string $pagename) {
+function redirectingUnauthUsers (string $pagename) {
     // Given the page name, it will check if the current user has access to the webpage.
     establishConnection();
     if ($_SESSION["currentUserId"] === 0 or $_SESSION["currentUserId"] === NULL) {
@@ -95,8 +96,26 @@ function redirectingUnauthUsers(string $pagename) {
     }
 }
 
-// OLD
-function formatProfileBox(string $strHTMLFile) : string {
+// Profile
+function getProfilePicture (string $id) : string {
+    $folder = "../photo/";
+    
+    if (file_exists($folder . $id . ".jpg")) {
+        $filename = $folder . $id . ".jpg";
+    } else if (file_exists($folder . $id . ".jpeg")) {
+        $filename = $folder . $id . ".jpeg";
+    } else if (file_exists($folder . $id . ".png")) {
+        $filename = $folder . $id . ".png";
+    } else if (file_exists($folder . $id . ".img")) {
+        $filename = $folder . $id . ".img";
+    } else {
+        $filename = "../images/defaultAvatar.png";
+    }
+
+    return $filename;
+}
+
+function formatProfileBox (string $strHTMLFile) : string {
     // Given the HTML format of the Profile Box in theupper left of the screen, it will output the HTML lines of the box as customised to the user.
     $firstname = ucfirst($_SESSION["currentUserFirstName"]);
     $strHTMLFile = str_replace('FIRSTNAME', $firstname, $strHTMLFile);
@@ -110,8 +129,8 @@ function formatProfileBox(string $strHTMLFile) : string {
     $rank = strtoupper($_SESSION["currentUserRank"]);
     $strHTMLFile = str_replace('RANK', $rank, $strHTMLFile);
 
-    $id = strtoupper($_SESSION["currentUserId"]);
-    $strHTMLFile = str_replace('IDNUM', $id, $strHTMLFile);
+    $fileName = getProfilePicture($_SESSION["currentUserId"]);
+    $strHTMLFile = str_replace('FILE', $fileName, $strHTMLFile);
 
     return $strHTMLFile;
 }
@@ -127,7 +146,7 @@ function formatNavbarToUserAccess (string $strHTMLFile, string $accessLevel) : s
     return $strHTMLFile;
 }
 
-function displayHeader() {
+function displayHeader () {
     // This reads the HTML file that contains the format for the entire Header and displays it.
 
     // This could be optimised to save performance at the expense of hand writing the code or saving it in a session variable 

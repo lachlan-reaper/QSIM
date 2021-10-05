@@ -92,6 +92,16 @@ while (false !== ($entry = readdir($handle))) {
 }
 closedir($handle);
 
+// Add unitStructure
+$zip->addEmptyDir('unitStructure');
+$handle = opendir("../unitStructure/");
+while (false !== ($entry = readdir($handle))) {
+    if ($entry != "." && $entry != ".." && !is_dir('../unitStructure/' . $entry)) {
+        $zip->addFile('../unitStructure/' . $entry, 'unitStructure/' . $entry);
+    }
+}
+closedir($handle);
+
 // Save
 $zip->close();
 

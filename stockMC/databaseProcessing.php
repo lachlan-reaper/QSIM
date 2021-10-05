@@ -223,18 +223,8 @@ function refreshStockTotals () {
 
 function manualAddUser () {
     // Adds a user from the HTML form using the method POST
-    $firstName = $_POST["firstName"];
-    $lastName = $_POST["lastName"];
     $id = $_POST["id"];
-    $username = $_POST["username"];
-    $userpass = $_POST["userpass"];
-    $rank = $_POST["rank"];
-    $appointment = $_POST["appointment"];
-    $company = $_POST["company"];
-    $platoon = $_POST["platoon"];
-    $section = $_POST["section"];
-    $yearLevel = $_POST["yearLevel"];
-    addUser($firstName, $lastName, $id, $username, $userpass, $rank, $appointment, $company, $platoon, $section, $yearLevel);
+    addUserArr($_POST);
 
     // Adds the profile picture
     $picture = $_FILES["picture"]["tmp_name"];

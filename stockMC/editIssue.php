@@ -47,7 +47,7 @@
                                 $row = $rowFormat;
                                 $item = $results->fetch_assoc();
                                 $row = str_replace("ITEM", $item["item"], $row);
-                                $num = getUserValue($id, $item["item"], "inventory");
+                                $num = getUserValues($id, [$item["item"]], "inventory")[$item["item"]];
                                 $row = str_replace("VALUES", $num, $row);
                                 echo $row;
                                 $i--;

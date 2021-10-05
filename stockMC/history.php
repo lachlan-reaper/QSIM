@@ -198,11 +198,11 @@
                     }
 
                     // Get the information of the one who served the equipment
-                    $server = getMultiUserValues($receipt["serverId"], ['firstName', 'lastName'], 'users');
+                    $server = getUserValues($receipt["serverId"], ['firstName', 'lastName'], 'users');
                     $server = $server["lastName"] . ", " . $server["firstName"];
                     
                     // Get the information of the one who received the equipment, used same variable name to save memory
-                    $receiver = getMultiUserValues($receipt["id"], ['firstName', 'lastName'], 'users');
+                    $receiver = getUserValues($receipt["id"], ['firstName', 'lastName'], 'users');
                     $receiver = $receiver["lastName"] . ", " . $receiver["firstName"];
                     
                     $row = str_replace("TIMESTAMP", $receipt["time"], $row);

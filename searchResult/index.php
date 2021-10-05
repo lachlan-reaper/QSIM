@@ -53,10 +53,20 @@
             $i = 0;
             while ($i < $num) { // Formats and displays the filter boxes
                 $row = $filterBoxFormat;
+
+                // Ensures any URL encoding is decoded properley to human reading
                 $id = str_replace("-", " ", $items[$i][0]);
+                $id = str_replace("_", " ", $id);
+                $id = str_replace("+", " ", $id);
                 $row = str_replace("ITEM", $id, $row);
+
                 $row = str_replace("COMPARATOR", $items[$i][1], $row);
-                $row = str_replace("VALUE", $items[$i][2], $row);
+
+                $val = str_replace("-", " ", $items[$i][2]);
+                $val = str_replace("_", " ", $val);
+                $val = str_replace("+", " ", $val);
+                $row = str_replace("VALUE", $val, $row);
+
                 echo $row;
                 $i++;
             }
@@ -66,7 +76,7 @@
         <br> <br> 
 
         <form>
-            <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult" placeholder="Name or ID Number">
+            <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult" placeholder="Name or ID Number" value="<?php echo $userQuery; ?>">
             <input type="hidden" id="searchFilters" name="searchFilters" value="">
             <span style="text-align:center;">
                 <input type="submit" class="searchButtonResult" onClick="addSearchFilters()" value="Search"></input>
@@ -90,7 +100,7 @@
                 $searchFilters = str_replace("-", " ", $searchFilters);
 
                 $searchFilters = formatSearchFilters($searchFilters);
-                $results = retrieveSearchQueryResults($userQuery, $searchFilters);
+                $results = getSearchQueryResults($userQuery, $searchFilters);
 
                 $i = $results->num_rows;
                 if ($i <= 0) {
@@ -107,36 +117,28 @@
 
         </table>
         <script>
-            bar = document.getElementById("searchQuery");
-            URL = window.location.href;
-
-            pos1 = URL.indexOf("searchQuery=");
-            pos2 = URL.indexOf("&searchFilters=");
-
-            query = URL.slice(pos1+12, pos2);
-            query = decodeURIComponent(query);
-            query = query.replace(/\+/g, " ");
-
-            if (isNaN(query.trim())) {
-                bar.value = query.trim();
-            }
-
             function removeFilter(filter) {
                 URL = window.location.href;
+
                 filter = filter.replace(/ /g, "-");
                 filter = encodeURIComponent(filter);
                 URL = URL.replace(filter, "");
+                //alert(filter);
+
                 filter = filter.replace(/!/g, "%21");
                 URL = URL.replace(filter, "");
+
                 encodedSymbol = encodeURIComponent("|");
                 URL = URL.replace(encodedSymbol+encodedSymbol, encodedSymbol);
                 URL = URL.replace("=" + encodedSymbol, "=");
+
                 if (URL.slice(-3) == encodedSymbol) {
                     URL = URL.slice(0, -3)
                 }
+
                 window.location.href = URL;
             }
-            function addSearchFilters() { 
+            function addSearchFilters() {
                 input = document.getElementById("searchFilters");
                 URL = window.location.href;
                 pos = URL.indexOf("searchFilters=");

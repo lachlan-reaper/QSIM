@@ -17,6 +17,13 @@
 <body>
     <?php 
         displayHeader();
+
+        // Makes sure that the searchQuery parameter is set for the rest of the function. This stops warning messages from popping up and confusing the user.
+        if (isset($_GET["searchQuery"])) {
+            $userQuery = $_GET["searchQuery"];
+        } else {
+            $userQuery = "";
+        }
     ?>
 
     <script>
@@ -26,28 +33,12 @@
     <maincontents>
 
         <form action="selectUser.php" method="GET">
-            <input type="hidden" id="function" name="function" value="<?php echo $_GET["function"] ?>">
-            <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult">
+            <input type="hidden" id="function" name="function" value="<?php echo $_GET["function"]; ?>">
+            <input type="text" id="searchQuery" name="searchQuery" class="searchBarResult" placeholder="Name or ID Number" value="<?php echo $userQuery; ?>">
             <span style="text-align:center;">
                 <input type="submit" class="searchButtonResult" value="Search"></input>
             </span>
         </form> <br> <br> <br>
-
-        <script>
-        bar = document.getElementById("searchQuery");
-        URL = window.location.href;
-        pos1 = URL.indexOf("searchQuery=");
-        if (pos1 == -1) {
-            query = "";
-        } else {
-            query = URL.slice(pos1+12);
-            query = decodeURIComponent(query);
-            query = query.replace(/\+/g, " ");
-            if (isNaN(query.trim())) {
-                bar.value = query.trim();
-            }
-        }
-        </script>
 
         <table id="tableSearch" style="width: 85%; margin-left: 7.5%;">
             <tr>
@@ -59,19 +50,8 @@
             </tr>
 
             <?php
-                // Makes sure that the searchQuery parameter is set for the rest of the function. This stops warning messages from popping up and confusing the user.
-                if (!isset($_GET["searchQuery"])) {
-                    $userQuery = "";
-                } else {
-                    $userQuery = $_GET["searchQuery"];
-                }
-
-                if ($userQuery == NULL) {
-                    $userQuery = "";
-                }
-
                 $searchFilters = formatSearchFilters(""); // To use a prefined function, this is necessary
-                $results = retrieveSearchQueryResults($userQuery, $searchFilters);
+                $results = getSearchQueryResults($userQuery, $searchFilters);
 
                 $i = $results->num_rows;
                 if ($i === 0) {
@@ -134,7 +114,6 @@
     </maincontents>
 
     <script>
-
         function confirmForm () {
             return confirm('Do you really want to submit the form?'); 
         }

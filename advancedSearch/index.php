@@ -205,7 +205,7 @@
             for (i = 0; i < rankEls.length; i++) {
                 el = rankEls[i];
                 if (el.checked == true) {
-                    filters += "|rank_=_" + el.id;
+                    filters += "|rank_=_" + el.id.replace(/ /g, "-");
                 }
             }
 
@@ -213,7 +213,7 @@
             for (i = 0; i < yearEls.length; i++) {
                 el = yearEls[i];
                 if (el.checked == true) {
-                    filters += "|year_=_" + el.id;
+                    filters += "|year_=_" + el.id.replace(/ /g, "-");
                 }
             }
 
@@ -221,7 +221,7 @@
             for (i = 0; i < coyEls.length; i++) {
                 el = coyEls[i];
                 if (el.checked == true) {
-                    filters += "|company_=_" + el.id;
+                    filters += "|company_=_" + el.id.replace(/ /g, "-");
                 }
             }
 
@@ -229,7 +229,7 @@
             for (i = 0; i < plEls.length; i++) {
                 el = plEls[i];
                 if (el.checked == true) {
-                    filters += "|platoon_=_" + el.id;
+                    filters += "|platoon_=_" + el.id.replace(/ /g, "-");
                 }
             }
 

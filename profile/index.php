@@ -36,6 +36,12 @@
 <body>
     <?php 
         displayHeader();
+
+        if ($id == $_SESSION["currentUserId"]) {
+            echo "<script> document.getElementById('profileTab').className = 'activetab'; </script>";
+		} else {
+            echo "<script> document.getElementById('searchTab').className = 'activetab'; </script>";
+		}
     ?>
 
     <maincontents>
@@ -63,16 +69,27 @@
                         <b>Identification</b> <br>
                         <?php
                             // Display profile pic
-                            $rowFormat = "<img src='../photo/IDNUM.jpg' style='object-fit:cover;float:left;margin:10px' height='250px' width='250px'>";
-                            $rowFormat = str_replace("IDNUM", $id, $rowFormat);
+                            $rowFormat = "<img src='FILE' style='object-fit:cover;float:left;margin:10px' height='250px' width='250px'>";
+                            $fileName = getProfilePicture($id);
+                            $rowFormat = str_replace("FILE", $fileName, $rowFormat);
                             echo $rowFormat;
 
                             // Display profile information
-                            $rowFormat = "<br> <b>LASTNAME</b><br> <b>FIRSTNAME</b><br> RANK<br> APPOINTMENT<br><br><br><br><br><br>";
+                            $rowFormat = "<br> <b>LASTNAME</b><br> <b>FIRSTNAME</b><br> RANK<br> APPOINTMENT<br><br>COY: COMP<br>PL: PLAT<br>Section: SECT<br><br>";
+                            $rowFormat = "<br> <b>LASTNAME</b><br> <b>FIRSTNAME</b><br> RANK<br> APPOINTMENT<br><br><table class='identification'><tr><td>Company:</td> <td>COMP</td></tr><tr><td>Platoon:</td> <td>PLAT</td></tr><tr><td>Section:</td> <td>SECT</td></tr></table><br>";
                             $rowFormat = str_replace("LASTNAME",    $firstname, $rowFormat);
                             $rowFormat = str_replace("FIRSTNAME",   $lastname, $rowFormat);
                             $rowFormat = str_replace("RANK",        $rank, $rowFormat);
                             $rowFormat = str_replace("APPOINTMENT", strtoupper($appointment), $rowFormat);
+
+                            $arr = getUserValues($id, ["company", "platoon", "section"], "users");
+                            $company = $arr["company"];
+                            $platoon = $arr["platoon"];
+                            $section = $arr["section"];
+
+                            $rowFormat = str_replace("COMP", $company, $rowFormat);
+                            $rowFormat = str_replace("PLAT", $platoon, $rowFormat);
+                            $rowFormat = str_replace("SECT", $section, $rowFormat);
                             echo $rowFormat;
 
                             if ($id == $_SESSION["currentUserId"]) { // If this is the current user than they can reset or change the passowrd, they decide
@@ -90,7 +107,7 @@
                         <table style="border-width:0px;min-width:0px;max-width:90%;margin-left:20px;width:auto;">
                             <?php
                                 $rowFormat = "<tr> <td>NUMx</td> <td>ITEM</td> </tr>";
-                                $results = retrieveIssuedItems($id);
+                                $results = getIssuedItems($id);
                                 $items = retrieveAllIssuedItemsOnStock();
 
                                 $i = $items->num_rows;
@@ -113,11 +130,21 @@
                         <b>Current Concerns</b>
                         <table style="border-width:0px;min-width:0px;max-width:90%;margin-left:20px;width:auto;">
                             <?php
-                                $rowFormatMissing = "<tr style='color:red'> <td>Missing:</td> <td>NUMx</td> <td>ITEM</td> </tr>";
-                                $rowFormatExcess = "<tr> <td>Excess Of:</td><td>NUMx</td> <td>ITEM</td> </tr>";
+                                $helpIcon = "<span class='dropdown'>
+                                    <img src='../images/questionMark.png' height='20px' width='20px'>
+                                    <div class='dropdown_content_overlay'>
+                                        TEXT
+                                    </div>
+                                </span>";
 
-                                $resultsExp = retrieveIssuedItems("stdIssue"); // The expected issue has a constant id
-                                $resultsId = retrieveIssuedItems($id);
+                                $helpTextMissing = "Please check that you do not have this equipment on you or at home. If this is the case you may want to visit the Quartermaster's Clothing Store (QCS) behind the library at lunch or on the designated opening afternoon.";
+                                $helpTextExcess = "Please check to see if you have this equipment on you or at home. If you do not have the equipment please immediately contact someone from Q Store. If you do have the excess equipment please consider returning the excess.";
+
+                                $rowFormatMissing = "<tr style='color:red'> <td>Missing:</td> <td>NUMx</td> <td>ITEM</td> <td>HELP</td> </tr>";
+                                $rowFormatExcess = "<tr> <td>Excess Of:</td><td>NUMx</td> <td>ITEM</td> <td>HELP</td> </tr>";
+
+                                $resultsExp = getIssuedItems("stdIssue"); // The expected issue has a constant id
+                                $resultsId = getIssuedItems($id);
                                 $items = retrieveAllIssuedItemsOnStock();
 
                                 $i = $items->num_rows;
@@ -128,17 +155,24 @@
                                     $name = $item["item"];
                                     $expected = $numExp[$name];
                                     $current = $numId[$name];
+
+                                    $help = $helpIcon;
+
                                     if ($current < $expected) { // If there is not enough items issued
                                         $row = $rowFormatMissing;
                                         $row = str_replace("NUM", $expected-$current, $row);
-                                        $row = str_replace("ITEM", $name, $row);
+                                        $help = str_replace("TEXT", $helpTextMissing, $help);
                                     } else if ($current > ($expected * 2) and $current > ($expected + 1)) { // If the item is in excess
                                         $row = $rowFormatExcess;
                                         $row = str_replace("NUM", $current-($expected*2), $row);
-                                        $row = str_replace("ITEM", $name, $row);
+                                        $help = str_replace("TEXT", $helpTextExcess, $help);
                                     } else { // Else no need to display anything
                                         $row = "";
                                     }
+
+                                    $row = str_replace("ITEM", $name, $row);
+                                    $row = str_replace("HELP", $help, $row);
+
                                     echo $row;
                                     $i--;
                                 }
@@ -166,6 +200,29 @@
             </tr>
         </table>
         <div style="text-align:center;">
+            <profilePageBox style="width:60%;height:auto;text-align:justify;">
+                <div style="text-align:center;">
+                    <b>Notes</b>
+                </div>
+                <span style="float:right;margin-top:-19px;">
+                    <button id="editNotes" onClick="editNotes();">Edit Notes</button>
+                </span>
+                <br>
+                <span id="notesDisp">
+                    <?php
+                        $arr = getUserValues($id, ["notes"], "users");
+                        $notes = $arr["notes"];
+                        echo str_replace("\n", "<br>", $notes);
+                    ?>
+                </span>
+                <form id="notesForm" style="text-align:right;display:none;" method="POST" action="changeNotes.php">
+                    <input type="hidden" name="id" value="<?php echo $id; ?>">
+                    <textarea id="notesInp" name="notes" form="notesForm" style="width:100%;min-height:100px;resize:vertical;"><?php echo $notes; ?></textarea> <br> <br>
+                    <input id="notesSub" type="submit">
+                </form>
+            </profilePageBox>
+        </div>
+        <div style="text-align:center;">
             <profilePageBox style="width:60%;height:auto;">
                 <b>History of Issuing</b> <br> <br>
                 <table style="border-width:0px;min-width:0px">
@@ -179,7 +236,7 @@
                         $rowFormatReturnShort = "<tr style='color:darkgoldenrod'> <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
                         $rowFormatLostShort =   "<tr style='color:red'>    <td></td><td></td>   <td>NUMx</td> <td>ITEM</td> </tr>";
 
-                        $results = retrieveIssueHistory($id);
+                        $results = getIssueHistory($id);
 
                         if (isset($_GET["maxRows"])) {
                             $max_rows = $_GET['maxRows'];
@@ -278,6 +335,16 @@
                 } else {
                     window.location.href = URL;
                 }
+            }
+            function editNotes () {
+                editBtn = document.getElementById("editNotes");
+                disp = document.getElementById("notesDisp");
+                form = document.getElementById("notesForm");
+                sub = document.getElementById("notesSub");
+
+                editBtn.style.display = "none";
+                disp.style.display = "none";
+                form.style.display = "block";
             }
         </script>
     </maincontents>
