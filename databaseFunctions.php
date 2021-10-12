@@ -634,15 +634,26 @@ function getIssueHistory (string $id) {
     return $result;
 }
 
-function retrieveStockHistory () {
+function retrieveStockHistory (string $filter) {
     // Retrieves a MySQLi object of the history of all item issuements and returns it.
     establishConnection();
-    $sql = "SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC";
+    if ($filter === 'all') {
+        $sql = 'SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC';
+    } else if ($filter === 'issue') {
+        $sql = 'SELECT * FROM `equipmentReceipts` WHERE `changeInNum` > 0 AND `lostOrDamaged` = 0 ORDER BY `receiptNum` DESC';
+    } else if ($filter === 'return') {
+        $sql = 'SELECT * FROM `equipmentReceipts` WHERE `changeInNum` < 0 AND `lostOrDamaged` = 0 ORDER BY `receiptNum` DESC';
+    } else if ($filter === 'lost') {
+        $sql = 'SELECT * FROM `equipmentReceipts` WHERE `changeInNum` < 0 AND `lostOrDamaged` = 1 ORDER BY `receiptNum` DESC';
+    } else {
+        $sql = 'SELECT * FROM `equipmentReceipts` ORDER BY `receiptNum` DESC';
+    }
+
     $result = $_SESSION['conn'] -> query($sql);
     return $result;
 }
 
-// OLD - Only used for Setup
+// OLD - Only used for Setup NEED TO UPDATE FOR EMAILS
 function addUser(string $firstName, string $lastName, string $id, string $username, string $userpass, string $rank, string $appointment, string $company, string $platoon, string $section, int $yearLevel) {
     // Adds a user to the database as well as encrypt the password.
     establishConnection();

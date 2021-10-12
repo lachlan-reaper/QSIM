@@ -30,9 +30,14 @@ function convertDBToCsvFile ($dbname) {
         } else {
             $key = "";
         }
+        if (isset($item["Extra"])) {
+            $extra = strToCsv($item["Extra"]);
+        } else {
+            $extra = "";
+        }
 
         $name = strToCsv($name);
-        $colInfo = "$name,$type,$null,$default,$key";
+        $colInfo = "$name,$type,$null,$default,$key,$extra";
         $row = $row . "," . strToCsv($colInfo);
         $i--;
     }

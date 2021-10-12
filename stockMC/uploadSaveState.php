@@ -44,8 +44,10 @@ function convertCsvToDBSave($dbname) {
             $keySql = ', PRIMARY KEY (`' . $name . '`)';
         }
         
+        $extra = $col[5];
+        
         $colsStr[$i] = '`' . $name . '`';
-        $colInfo[$i] = '`' . $name . '` ' . $type . ' ' . $null . ' ' . $default;
+        $colInfo[$i] = '`' . $name . '` ' . $type . ' ' . $null . ' ' . $default . ' ' . $extra;
 
         $i++;
     }

@@ -14,15 +14,8 @@ while ($i < $max) {
     $id = formatVarToSQL($id);
 
     // Remove from the database
-    $sqlUser = "DELETE FROM `users` WHERE `id` = $id;";
-    $sqlInventory = "DELETE FROM `inventory` WHERE `id` = $id;";
-    $sqlHistory = "DELETE FROM `equipmentreceipts` WHERE `id` = $id;";
-    $result = $_SESSION['conn'] -> query($sqlUser);
-    $result = $_SESSION['conn'] -> query($sqlInventory);
-    $result = $_SESSION['conn'] -> query($sqlHistory);
-
-    // Delete profile picture
-    unlink("../photo/$unfId.jpg");
+    $sql = "DELETE FROM `users` WHERE `id` = $id; DELETE FROM `inventory` WHERE `id` = $id; DELETE FROM `equipmentreceipts` WHERE `id` = $id;";
+    $result = $_SESSION['conn'] -> multi_query($sql);
     
     $i++;
 }
