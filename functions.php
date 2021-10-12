@@ -143,6 +143,9 @@ function formatNavbarToUserAccess (string $strHTMLFile, string $accessLevel) : s
     if (! validUser("stock", $accessLevel)) {
         $strHTMLFile = preg_replace('#<li id="stockTabList">(.*?)</li>#', '', $strHTMLFile);
     }
+    if (! validUser("unit", $accessLevel)) {
+        $strHTMLFile = preg_replace('#<li id="unitTabList">(.*?)</li>#', '', $strHTMLFile);
+    }
     return $strHTMLFile;
 }
 

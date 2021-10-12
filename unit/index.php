@@ -1,7 +1,7 @@
 <?php 
     require "../databaseFunctions.php";
     session_start();
-    redirectingUnauthUsers("home");
+    redirectingUnauthUsers("unit");
 ?>
 
 <html lang="en-us">
@@ -20,15 +20,56 @@
     ?>
 
     <script>
-        document.getElementById("homeTab").className = "activetab";
+        document.getElementById("unitTab").className = "activetab";
     </script>
 
     <maincontents>
         <table class="profilePage">
             <tr style="vertical-align:top;">
-                <td style="width:50%">
+                <td colspan=4 style="text-align:center;">
+                    <profilePageBox style="min-width:0;width:auto;text-align:left;">
+                        <?php
+                            echo formatCoyStructure('RHQ', false);
+                        ?>
+                    </profilePageBox>
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td style="width:25%;">
                     <profilePageBox>
-                        hi
+                        <?php
+                            echo formatCoyStructure('A');
+                        ?>
+                    </profilePageBox>
+                </td>
+                <td style="width:25%;">
+                    <profilePageBox>
+                        <?php
+                            echo formatCoyStructure('B');
+                        ?>
+                    </profilePageBox>
+                </td>
+                <td style="width:25%;">
+                    <profilePageBox>
+                        <?php
+                            echo formatCoyStructure('C');
+                        ?>
+                    </profilePageBox>
+                </td>
+                <td style="width:25%;">
+                    <profilePageBox>
+                        <?php
+                            echo formatCoyStructure('D');
+                        ?>
+                    </profilePageBox>
+                </td>
+            </tr>
+            <tr style="vertical-align:top;">
+                <td colspan=4 style="text-align:center;">
+                    <profilePageBox style="min-width:0;width:auto;text-align:left;">
+                        <?php
+                            echo formatCoyStructure('SPT', false);
+                        ?>
                     </profilePageBox>
                 </td>
             </tr>

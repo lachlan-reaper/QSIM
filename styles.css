@@ -113,6 +113,29 @@ headeraccountbox main {
     display: block;
 }
 
+.dropdown:hover .dropdown_image {
+    display: block;
+    position: absolute;
+    top: auto;
+    left: auto;
+}
+
+.dropdown_image {
+    display: none;
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+
+    z-index: 2;
+
+    color: rgb(185, 185, 185);
+    background-color: rgb(54, 54, 54);
+    border-radius: 5px;
+
+    margin-top: -240px;
+    padding: 5px;
+}
+
 navbar {
     display: block;
     position: fixed;
@@ -310,6 +333,47 @@ maincontents profilePageBox td {
     background-color: white;
     border: 0 solid white;
 }
+
+
+table.unitStructureTable {
+    min-width: 0;
+    border: none;
+}
+table.unitStructureTable tr:nth-child(odd) {
+    background-color: whitesmoke;
+}
+table.unitStructureTable tr:nth-child(even) {
+    background-color: white;
+}
+table.unitStructureTable td {
+    background-color: inherit;
+    border: 1px solid rgb(185, 185, 185);
+    vertical-align: top;
+}
+table.unitStructureTable td:nth-child(odd) {
+    width: 40%;
+}
+table.unitStructureTable td:nth-child(even) {
+    width: 60%;
+}
+
+
+table.unitStructureTableVert {
+    min-width: 0;
+    border: none;
+}
+table.unitStructureTableVert td {
+    width: 200px;
+    border: 1px solid rgb(185, 185, 185);
+    vertical-align: top;
+}
+table.unitStructureTableVert td:nth-child(odd) {
+    background-color: whitesmoke;
+}
+table.unitStructureTableVert td:nth-child(even) {
+    background-color: white;
+}
+
 
 maincontents table#tableSearch td a {
     text-decoration: none currentcolor solid;

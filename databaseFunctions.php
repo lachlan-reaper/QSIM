@@ -5,12 +5,12 @@ require 'functions.php';
 // NEW
 function formatVarToSQL ($variable) : string {
     // Formats the inputted string so it can be directly placed into a SQL query string without extra formatting.
-    if ($variable === "" or $variable === "NULL" or $variable === null) {
-        return "NULL";
+    if ($variable === '' or $variable === 'NULL' or $variable === null) {
+        return 'NULL';
     }
-    if (gettype($variable) === "string") {
+    if (gettype($variable) === 'string') {
         return "'" . $variable . "'";
-    } else if (substr($variable, 0, 1) == "0") {
+    } else if (substr($variable, 0, 1) == '0') {
         return "'" . $variable . "'";
     }
     return $variable;
@@ -24,15 +24,15 @@ function getUserValues (string $id, array $uservalues, string $table) : array {
 
     // Formats and adds the values to a SQL query
     $i = count($uservalues);
-    $values = "";
+    $values = '';
     while ($i > 0) {
         $i--;
         $x = $uservalues[$i];
-        $values = $values . ", `$x`";
+        $values = $values . ', `' . $x . '`';
     }
     $values = substr($values, 2);
 
-    $sql = "SELECT $values FROM `$table` WHERE `id` LIKE $id";
+    $sql = 'SELECT ' . $values . ' FROM `' . $table . '` WHERE `id` = ' . $id;
     $result = $_SESSION['conn'] -> query($sql);
 
     if ($result->num_rows > 1) {
@@ -49,6 +49,35 @@ function getUserValues (string $id, array $uservalues, string $table) : array {
         echo 'alert("No user by the id of: ' . $id . '")';
         echo '</script>';
         return NULL;
+    }
+}
+
+function getUsersByAppt (string $appointment, string $company=null, string $platoon=null, string $section=null) : array|bool {
+    establishConnection();
+
+    $appointment = formatVarToSQL($appointment);
+    
+    $sql = 'SELECT `firstName`, `lastName` FROM `users` WHERE `appointment` = ' . $appointment;
+    
+    if ($company !== null) {
+        $company = formatVarToSQL($company);
+        $sql = $sql . ' AND `company` = ' . $company;
+    }
+    if ($platoon !== null) {
+        $platoon = formatVarToSQL($platoon);
+        $sql = $sql . ' AND `platoon` = ' . $platoon;
+    }
+    if ($section !== null) {
+        $section = formatVarToSQL($section);
+        $sql = $sql . ' AND `section` = ' . $section;
+    }
+
+    $result = $_SESSION['conn'] -> query($sql);
+
+    if ($result->num_rows >= 1) {
+        return $result->fetch_all();
+    } else {
+        return false;
     }
 }
 
@@ -105,7 +134,7 @@ function getSearchQueryResults (string $userQuery, array $parameters) {
     // If the query is numeric, then it is an ID num.
     if (is_numeric($userQuery)) {
         $userQuery = formatVarToSQL($userQuery);
-        $sql = "SELECT `firstName`, `lastName`, `platoon`, `rank`, `appointment`, `id` FROM `users` WHERE `id` LIKE $userQuery";
+        $sql = 'SELECT `firstName`, `lastName`, `platoon`, `rank`, `appointment`, `id` FROM `users` WHERE `id` LIKE ' . $userQuery;
         $result = $_SESSION['conn'] -> query($sql);
         return $result;
     } else {
@@ -120,60 +149,60 @@ function getSearchQueryResults (string $userQuery, array $parameters) {
         $userQueryArr = explode(" ", $userQuery);
 
         // This ginormous collection of statements is used to try all possible permutations of the input as either part of the last name or first name, as seperated by ' ', '-' or '.'.
-        if (count($userQueryArr) == 1) {
-            $sql = "SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
-            users.`firstName` LIKE '%" . $userQueryArr[0] . "%' OR users.`lastName` LIKE '%" . $userQueryArr[0] . "%')";
-        } else if (count($userQueryArr) == 2) {
-            $sql = "SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
-            (users.`firstName` LIKE '%" . implode('% %', $userQueryArr) . "%') OR
-            (users.`firstName` LIKE '%" . implode('%-%', $userQueryArr) . "%') OR
-            (users.`lastName`  LIKE '%" . implode('% %', $userQueryArr) . "%') OR
-            (users.`lastName`  LIKE '%" . implode('%-%', $userQueryArr) . "%') OR
+        if (count($userQueryArr) === 1) {
+            $sql = 'SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
+            users.`firstName` LIKE "%' . $userQueryArr[0] . '%" OR users.`lastName` LIKE "%' . $userQueryArr[0] . '%")';
+        } else if (count($userQueryArr) === 2) {
+            $sql = 'SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
+            (users.`firstName` LIKE "%' . implode('% %', $userQueryArr) . '%") OR
+            (users.`firstName` LIKE "%' . implode('%-%', $userQueryArr) . '%") OR
+            (users.`lastName`  LIKE "%' . implode('% %', $userQueryArr) . '%") OR
+            (users.`lastName`  LIKE "%' . implode('%-%', $userQueryArr) . '%") OR
 
-            (users.`firstName` LIKE '%" . $userQueryArr[0] . "%' AND users.`lastName` LIKE '%" . $userQueryArr[1] . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[1] . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%'))";
-        } else if (count($userQueryArr) == 3) {
-            $sql = "SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
-            (users.`firstName` LIKE '%" . implode('% %', $userQueryArr) . "%') OR
-            (users.`firstName` LIKE '%" . implode('%-%', $userQueryArr) . "%') OR
-            (users.`lastName`  LIKE '%" . implode('% %', $userQueryArr) . "%') OR
-            (users.`lastName`  LIKE '%" . implode('%-%', $userQueryArr) . "%') OR
+            (users.`firstName` LIKE "%' . $userQueryArr[0] . '%" AND users.`lastName` LIKE "%' . $userQueryArr[1] . '%") OR 
+            (users.`firstName` LIKE "%' . $userQueryArr[1] . '%" AND users.`lastName` LIKE "%' . $userQueryArr[0] . '%"))';
+        } else if (count($userQueryArr) === 3) {
+            $sql = 'SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
+            (users.`firstName` LIKE "%' . implode('% %', $userQueryArr) . '%") OR
+            (users.`firstName` LIKE "%' . implode('%-%', $userQueryArr) . '%") OR
+            (users.`lastName`  LIKE "%' . implode('% %', $userQueryArr) . '%") OR
+            (users.`lastName`  LIKE "%' . implode('%-%', $userQueryArr) . '%") OR
 
-            (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
-            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE "%' . $userQueryArr[0]  . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 1)) . '%") OR 
+            (users.`firstName` LIKE "%' . $userQueryArr[0]  . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 1)) . '%") OR 
+            (users.`firstName` LIKE "%' . end($userQueryArr) . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, -1)) . '%") OR 
+            (users.`firstName` LIKE "%' . end($userQueryArr) . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, -1)) . '%") OR 
 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%'))";
-        } else if (count($userQueryArr) == 4) {
-            $sql = "SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
-            (users.`firstName` LIKE '%" . implode('% %', $userQueryArr) . "%') OR
-            (users.`firstName` LIKE '%" . implode('%-%', $userQueryArr) . "%') OR
-            (users.`lastName`  LIKE '%" . implode('% %', $userQueryArr) . "%') OR
-            (users.`lastName`  LIKE '%" . implode('%-%', $userQueryArr) . "%') OR
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 1)) . '%" AND users.`lastName` LIKE "%' . $userQueryArr[0] . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 1)) . '%" AND users.`lastName` LIKE "%' . $userQueryArr[0] . '%") OR 
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, -1)) . '%" AND users.`lastName` LIKE "%' . end($userQueryArr) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, -1)) . '%" AND users.`lastName` LIKE "%' . end($userQueryArr) . '%"))';
+        } else if (count($userQueryArr) === 4) {
+            $sql = 'SELECT users.`firstName`, users.`lastName`, users.`platoon`, users.`rank`, users.`appointment`, users.`id` FROM `users` INNER JOIN `inventory` WHERE (
+            (users.`firstName` LIKE "%' . implode('% %', $userQueryArr) . '%") OR
+            (users.`firstName` LIKE "%' . implode('%-%', $userQueryArr) . '%") OR
+            (users.`lastName`  LIKE "%' . implode('% %', $userQueryArr) . '%") OR
+            (users.`lastName`  LIKE "%' . implode('%-%', $userQueryArr) . '%") OR
 
-            (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . $userQueryArr[0]  . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%') OR 
-            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%') OR 
-            (users.`firstName` LIKE '%" . end($userQueryArr) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%') OR 
+            (users.`firstName` LIKE "%' . $userQueryArr[0]  . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 1)) . '%") OR 
+            (users.`firstName` LIKE "%' . $userQueryArr[0]  . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 1)) . '%") OR 
+            (users.`firstName` LIKE "%' . end($userQueryArr) . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, -1)) . '%") OR 
+            (users.`firstName` LIKE "%' . end($userQueryArr) . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, -1)) . '%") OR 
 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 1)) . "%' AND users.`lastName` LIKE '%" . $userQueryArr[0] . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, -1)) . "%' AND users.`lastName` LIKE '%" . end($userQueryArr) . "%') OR
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 1)) . '%" AND users.`lastName` LIKE "%' . $userQueryArr[0] . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 1)) . '%" AND users.`lastName` LIKE "%' . $userQueryArr[0] . '%") OR 
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, -1)) . '%" AND users.`lastName` LIKE "%' . end($userQueryArr) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, -1)) . '%" AND users.`lastName` LIKE "%' . end($userQueryArr) . '%") OR
 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 2)) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 2)) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 2)) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, 2)) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 2)) . "%') OR 
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, 2)) . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 2)) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, 2)) . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 2)) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, 2)) . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 2)) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, 2)) . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 2)) . '%") OR 
 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 2)) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('% %', array_slice($userQueryArr, 2)) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, 2)) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 2)) . "%' AND users.`lastName` LIKE '%" . implode('% %', array_slice($userQueryArr, 0, 2)) . "%') OR 
-            (users.`firstName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 2)) . "%' AND users.`lastName` LIKE '%" . implode('%-%', array_slice($userQueryArr, 0, 2)) . "%'))";
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 2)) . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, 2)) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('% %', array_slice($userQueryArr, 2)) . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, 2)) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 2)) . '%" AND users.`lastName` LIKE "%' . implode('% %', array_slice($userQueryArr, 0, 2)) . '%") OR 
+            (users.`firstName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 2)) . '%" AND users.`lastName` LIKE "%' . implode('%-%', array_slice($userQueryArr, 0, 2)) . '%"))';
         } else {
             // Since very few people will ever require more than 5 words, there is little need to further define the possibilities. Especially since they can search for a person with their ID num.
             echo '<script language="javascript">';
@@ -182,11 +211,11 @@ function getSearchQueryResults (string $userQuery, array $parameters) {
         }
 
         // Each item of $parameters is an array in the format of [(item / 'rank'), comparator, value]
-        if ($parameters[0][0] != "") {
-            $rankSql = "";
-            $yearSql = "";
-            $coySql = "";
-            $plSql = "";
+        if ($parameters[0][0] != '') {
+            $rankSql = '';
+            $yearSql = '';
+            $coySql = '';
+            $plSql = '';
 
             $i = count($parameters);
             while ($i > 0) {
@@ -195,33 +224,33 @@ function getSearchQueryResults (string $userQuery, array $parameters) {
                 $comparator = $parameters[$i][1];
                 $value = formatVarToSQL($parameters[$i][2]);
 
-                if ($comparator == "!=") {
-                    if ($value == "NULL") {
-                        $comparator = "IS NOT";
+                if ($comparator === '!=') {
+                    if ($value == 'NULL') {
+                        $comparator = 'IS NOT';
                     } else {
-                        $comparator = "<>";
+                        $comparator = '<>';
                     }
-                } else if ($value == "NULL") {
-                    $comparator = "IS";
+                } else if ($value == 'NULL') {
+                    $comparator = 'IS';
                 }
 
-                if ($parameter == "rank") {
+                if ($parameter === 'rank') {
                     if ($value == "'Officers'") {
-                        $rankSql = $rankSql . " OR users.`yearLevel` = 0"; // Officers don't go to school i.e. no yearLevel
+                        $rankSql = $rankSql . ' OR users.`yearLevel` = 0'; // Officers don't go to school i.e. no yearLevel
                     } else {
                         $rankSql = $rankSql . " OR users.`rank` $comparator $value";
                     }
-                } else if ($parameter == "year") {
+                } else if ($parameter === 'year') {
                     if ($value == "'Officers'") {
-                        $yearSql = $yearSql . " OR users.`yearLevel` = 0"; // Officers don't go to school i.e. no yearLevel
+                        $yearSql = $yearSql . ' OR users.`yearLevel` = 0'; // Officers don't go to school i.e. no yearLevel
                     } else if ($value == "'13'") {
-                        $yearSql = $yearSql . " OR users.`yearLevel` > 12";
+                        $yearSql = $yearSql . ' OR users.`yearLevel` > 12';
                     }else {
                         $yearSql = $yearSql . " OR users.`yearLevel` $comparator $value";
                     }
-                } else if ($parameter == "company") {
+                } else if ($parameter === 'company') {
                     $coySql = $coySql . " OR users.`company` $comparator $value";
-                } else if ($parameter == "platoon") {
+                } else if ($parameter === 'platoon') {
                     $plSql = $plSql . " OR users.`platoon` $comparator $value";
                 } else {
                     $sql = $sql . " AND inventory.`$parameter` $comparator $value";
@@ -230,26 +259,26 @@ function getSearchQueryResults (string $userQuery, array $parameters) {
 
             // Since the rank parameter is inclusive with other rank parameters it needs to be added last together.
             if (strlen($rankSql) > 0) {
-                $rankSql = " AND (" . substr($rankSql, 4) . ")";
+                $rankSql = ' AND (' . substr($rankSql, 4) . ')';
                 $sql = $sql . $rankSql;
             } 
             if (strlen($yearSql) > 0) {
-                $yearSql = " AND (" . substr($yearSql, 4) . ")";
+                $yearSql = ' AND (' . substr($yearSql, 4) . ')';
                 $sql = $sql . $yearSql;
             } 
             if (strlen($coySql) > 0) {
-                $coySql = " AND (" . substr($coySql, 4) . ")";
+                $coySql = ' AND (' . substr($coySql, 4) . ')';
                 $sql = $sql . $coySql;
             } 
             if (strlen($plSql) > 0) {
-                $plSql = " AND (" . substr($plSql, 4) . ")";
+                $plSql = ' AND (' . substr($plSql, 4) . ')';
                 $sql = $sql . $plSql;
             }
         }
 
         // Allows the query to search through two different tables but not double up on results after joining the table together
-        $sql = $sql . " AND users.`id` = inventory.`id`";
-        $sql = $sql . " ORDER BY users.`lastName` ASC, users.`firstName` ASC, users.`platoon` ASC";
+        $sql = $sql . ' AND users.`id` = inventory.`id`';
+        $sql = $sql . ' ORDER BY users.`lastName` ASC, users.`firstName` ASC, users.`platoon` ASC';
 
         $result = $_SESSION['conn'] -> query($sql);
 
@@ -276,8 +305,14 @@ function formatRowSearchResult (array $row) : string {
     <td>    <button type='button' onClick='redirect(\"../issue/?action=Issue&id=ID\", false)'>  Issue     </button> 
             <button type='button' onClick='redirect(\"../issue/?action=Return&id=ID\", false)'> Return    </button>
             <button type='button' onClick='redirect(\"../issue/?action=Lost&id=ID\", false)'>   Lost      </button>
-            <button type='button' onClick='redirect(\"../profile/?id=ID\", false)'>             Profile   </button> </td> </tr>";
-    
+            <button type='button' onClick='redirect(\"../profile/?id=ID\", false)'>             Profile   </button> 
+            <span class='dropdown'>
+                <img src='../images/defaultAvatar.png' height='20px' width='20px'>
+                <div class='dropdown_image'>
+                    <img src='FILE' loading='lazy' style='object-fit:cover;' height='200px' width='200px'>
+                </div>
+            </span> </td> </tr>";
+
     $firstname = $row['firstName'];
     $rowFormat = str_replace('FIRSTNAME', $firstname, $rowFormat);
 
@@ -295,6 +330,9 @@ function formatRowSearchResult (array $row) : string {
 
     $id = $row['id'];
     $rowFormat = str_replace('ID', $id, $rowFormat);
+
+    $fileName = getProfilePicture($id);
+    $rowFormat = str_replace('FILE', $fileName, $rowFormat);
 
     return $rowFormat;
 }
@@ -455,6 +493,102 @@ function setIssue (string $id, array $listOfItems) {
     $sql = "UPDATE inventory SET " . $formattedMods . " WHERE `id` = $id";
     $result = $_SESSION['conn'] -> query($sql);
 
+}
+
+// Unit
+function formatCoyStructure (string $coy, bool $vertical=true) : string {
+    $html = '<div style="text-align:center;"><b>' . $coy . ' COY<b></div>';
+
+    if ($vertical) {
+        $pls = getPlatoons($coy);
+    
+        $max = count($pls);
+        $x = 0;
+        while ($max > $x) {
+            $pl = $pls[$x];
+    
+            $appts = getPlatoonStructure($pl);
+    
+            $html = $html . '<br><b>' . $pl . '</b><br><table class="unitStructureTable">';
+            
+            $num = count($appts);
+            $i = 0;
+            while ($num > $i) {
+                $appt = $appts[$i];
+                $result = getUsersByAppt($appt, $coy, $pl);
+                if ($result) {
+                    $names = '';
+                    $users = count($result);
+                    $z = 0;
+
+                    while ($users > $z) {
+                        $name = $result[$z];
+                        $names = $names . strtoupper($name[1]) . ', ' . $name[0] . '<br>';
+                        $z++;
+                    }
+                    $names = substr($names, 0, -4);
+
+                    $html = $html . '<tr><td>' . $appt . ':</td><td>' . $names . '</td></tr>';
+                } else {
+                    $html = $html . '<tr><td>' . $appt . ':</td><td></td></tr>';
+                }
+                
+                $i++;
+            }
+            $html = $html . '</table>';
+            
+            $x++;
+        }
+    } else {
+        $pls = getPlatoons($coy);
+    
+        $max = count($pls);
+        $x = 0;
+        while ($max > $x) {
+            $pl = $pls[$x];
+    
+            $appts = getPlatoonStructure($pl);
+            $num = count($appts);
+    
+            $html = $html . '<br><b>' . $pl . '</b><br><table class="unitStructureTableVert" style="width:' . ($num*200) . 'px">';
+            $topRow = '<tr>';
+            $bottomRow = '<tr>';
+            
+            $i = 0;
+            while ($num > $i) {
+                $appt = $appts[$i];
+                $result = getUsersByAppt($appt, $coy, $pl);
+                if ($result) {
+                    $names = '';
+                    $users = count($result);
+                    $z = 0;
+
+                    while ($users > $z) {
+                        $name = $result[$z];
+                        $names = $names . strtoupper($name[1]) . ', ' . $name[0] . '<br>';
+                        $z++;
+                    }
+                    $names = substr($names, 0, -4);
+
+                    $topRow = $topRow . '<td>' . $appt . '</td>';
+                    $bottomRow = $bottomRow . '<td>' . $names . '</td>';
+                } else {
+                    $topRow = $topRow . '<td>' . $appt . '</td>';
+                    $bottomRow = $bottomRow . '<td></td>';
+                }
+                
+                $i++;
+            }
+            $topRow = $topRow . '</tr>';
+            $bottomRow = $bottomRow . '</tr>';
+
+            $html = $html . $topRow . $bottomRow . '</table>';
+            
+            $x++;
+        }
+    }
+    
+    return $html;
 }
 
 // SQL collection
